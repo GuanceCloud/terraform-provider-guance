@@ -1,0 +1,1 @@
+Guance Cloud Function is a function development, management and execution platform. It is simple and easy to use, without the need to build Web services from scratch, without managing servers and other infrastructure, just write code and publish, and simply configure to generate HTTP API interfaces for functions.
