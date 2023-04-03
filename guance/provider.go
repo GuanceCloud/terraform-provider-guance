@@ -6,7 +6,7 @@ import (
 
 	"github.com/GuanceCloud/terraform-provider-guance/internal/sdk"
 
-	ccv1 "github.com/GuanceCloud/openapi/api/cloudcontrol/v1"
+	ccv1 "github.com/GuanceCloud/terraform-provider-guance/internal/sdk/api/v1"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"

@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 
-	ccv1 "github.com/GuanceCloud/openapi/api/cloudcontrol/v1"
+	ccv1 "github.com/GuanceCloud/terraform-provider-guance/internal/sdk/api/v1"
 	"github.com/hashicorp/go-multierror"
 )
 
