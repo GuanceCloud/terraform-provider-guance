@@ -17,4 +17,5 @@ Interact with Guance Cloud.
 
 ### Optional
 
-- `endpoint` (String) URI for Guance Cloud API. May also be provided via GUANCE_ENDPOINT environment variable.
+- `region` (String) Region for Guance Cloud API. May also be provided via GUANCE_REGION environment variable.
+- `token` (String, Sensitive) Access token for Guance Cloud API. May also be provided via GUANCE_TOKEN environment variable.

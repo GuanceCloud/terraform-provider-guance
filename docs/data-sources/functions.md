@@ -17,13 +17,22 @@ Guance Cloud Function is a function development, management and execution platfo
 
 ### Optional
 
+- `filter` (Attributes List) The list of the resource (see [below for nested schema](#nestedatt--filter))
 - `max_results` (Number) The max results count of the resource will be returned.
-- `type_name` (String) The type name of the resource be queried
 
 ### Read-Only
 
 - `id` (String) Identifier of the resource.
 - `items` (Attributes List) The list of the resource (see [below for nested schema](#nestedatt--items))
+
+<a id="nestedatt--filter"></a>
+### Nested Schema for `filter`
+
+Required:
+
+- `name` (String) The filter path, represent as json path.
+- `values` (List of String) The filter values
+
 
 <a id="nestedatt--items"></a>
 ### Nested Schema for `items`
@@ -33,5 +42,10 @@ Optional:
 - `description` (String) Description
 - `func_id` (String) Function ID
 - `title` (String) Title
+
+Read-Only:
+
+- `created_at` (String) Timestamp of the last Terraform update of the order.
+- `id` (String) Numeric identifier of the order.
 
 

@@ -41,37 +41,43 @@ Notes:
 ### Required
 
 - `name` (String) Alert Policy Name
+- `statuses` (List of String) The status value of the event to be sent
 
 ### Optional
 
-- `alert_target` (Attributes List) Alert Action (see [below for nested schema](#nestedatt--alert_target))
+- `alert_targets` (Attributes List) Alert Action (see [below for nested schema](#nestedatt--alert_targets))
 - `silent_timeout` (Number) Silent timeout timestamp
-- `type` (String) Trigger rule type, default is custom
 
 ### Read-Only
 
 - `created_at` (String) Timestamp of the last Terraform update of the order.
 - `id` (String) Numeric identifier of the order.
 
-<a id="nestedatt--alert_target"></a>
-### Nested Schema for `alert_target`
+<a id="nestedatt--alert_targets"></a>
+### Nested Schema for `alert_targets`
 
 Required:
 
-- `status` (List of String) The status value of the event to be sent
 - `type` (String) Alert type
 
 Optional:
 
-- `allow_week_days` (List of Number) Allowed to send alerts on weekdays
-- `min_interval` (Number) The minimum alert interval, in seconds. 0 / null means always send an alert
-- `notification` (Attributes) Notification (see [below for nested schema](#nestedatt--alert_target--notification))
+- `member_group` (Attributes) Member Group (see [below for nested schema](#nestedatt--alert_targets--member_group))
+- `notification` (Attributes) Notification (see [below for nested schema](#nestedatt--alert_targets--notification))
 
-<a id="nestedatt--alert_target--notification"></a>
-### Nested Schema for `alert_target.notification`
+<a id="nestedatt--alert_targets--member_group"></a>
+### Nested Schema for `alert_targets.member_group`
 
 Required:
 
-- `to` (List of String) Notification
+- `id` (String) Member Group
+
+
+<a id="nestedatt--alert_targets--notification"></a>
+### Nested Schema for `alert_targets.notification`
+
+Required:
+
+- `id` (String) Notification
 
 

@@ -31,35 +31,91 @@ graph LR
 
 ### Optional
 
-- `end` (Number) End
-- `mute_ranges` (List of String) Mute Ranges
+- `mute_ranges` (Attributes List) Mute Ranges (see [below for nested schema](#nestedatt--mute_ranges))
 - `notify` (Attributes) Notify Options (see [below for nested schema](#nestedatt--notify))
+- `notify_targets` (Attributes List) Notify targets (see [below for nested schema](#nestedatt--notify_targets))
+- `onetime` (Attributes) Onetime (see [below for nested schema](#nestedatt--onetime))
 - `repeat` (Attributes) Repeat (see [below for nested schema](#nestedatt--repeat))
-- `start` (Number) Start
-- `tags` (Attributes) Tags (see [below for nested schema](#nestedatt--tags))
 
 ### Read-Only
 
 - `created_at` (String) Timestamp of the last Terraform update of the order.
 - `id` (String) Numeric identifier of the order.
 
+<a id="nestedatt--mute_ranges"></a>
+### Nested Schema for `mute_ranges`
+
+Required:
+
+- `type` (String) Mute Range Type
+
+Optional:
+
+- `alert_policy` (Attributes) Alert Policy configuration (see [below for nested schema](#nestedatt--mute_ranges--alert_policy))
+- `monitor` (Attributes) Monitor configuration (see [below for nested schema](#nestedatt--mute_ranges--monitor))
+
+<a id="nestedatt--mute_ranges--alert_policy"></a>
+### Nested Schema for `mute_ranges.alert_policy`
+
+Required:
+
+- `id` (String) Alert Policy ID
+
+
+<a id="nestedatt--mute_ranges--monitor"></a>
+### Nested Schema for `mute_ranges.monitor`
+
+Required:
+
+- `id` (String) Monitor ID
+
+
+
 <a id="nestedatt--notify"></a>
 ### Nested Schema for `notify`
 
 Optional:
 
+- `before_time` (String) Notify Time
 - `message` (String) Notify Message
-- `targets` (Attributes List) Notify Targets (see [below for nested schema](#nestedatt--notify--targets))
-- `time` (Number) Notify Time
 
-<a id="nestedatt--notify--targets"></a>
-### Nested Schema for `notify.targets`
+
+<a id="nestedatt--notify_targets"></a>
+### Nested Schema for `notify_targets`
 
 Required:
 
-- `to` (String) Notify Target
 - `type` (String) Notify Type
 
+Optional:
+
+- `member_group` (Attributes) MemberGroup (see [below for nested schema](#nestedatt--notify_targets--member_group))
+- `notification` (Attributes) Notification (see [below for nested schema](#nestedatt--notify_targets--notification))
+
+<a id="nestedatt--notify_targets--member_group"></a>
+### Nested Schema for `notify_targets.member_group`
+
+Required:
+
+- `id` (String) MemberGroup ID
+
+
+<a id="nestedatt--notify_targets--notification"></a>
+### Nested Schema for `notify_targets.notification`
+
+Required:
+
+- `id` (String) Notification ID
+
+
+
+<a id="nestedatt--onetime"></a>
+### Nested Schema for `onetime`
+
+Optional:
+
+- `end` (String) End
+- `start` (String) Start
 
 
 <a id="nestedatt--repeat"></a>
@@ -68,9 +124,10 @@ Required:
 Optional:
 
 - `crontab` (Attributes) Repeat Crontab Set (see [below for nested schema](#nestedatt--repeat--crontab))
-- `crontab_duration` (Number) Crontab Duration
-- `expire` (Number) Repeat Expire
-- `time` (Number) Repeat Time Set
+- `crontab_duration` (String) Crontab Duration
+- `end` (String) End
+- `expire` (String) Repeat Expire
+- `start` (String) Start
 
 <a id="nestedatt--repeat--crontab"></a>
 ### Nested Schema for `repeat.crontab`
@@ -82,15 +139,5 @@ Optional:
 - `min` (String) Min
 - `month` (String) Month
 - `week` (String) Week
-
-
-
-<a id="nestedatt--tags"></a>
-### Nested Schema for `tags`
-
-Required:
-
-- `key` (String) <no value>
-- `value` (String) <no value>
 
 
