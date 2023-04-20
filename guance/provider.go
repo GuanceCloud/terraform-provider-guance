@@ -2,16 +2,18 @@ package guance
 
 import (
 	"context"
+	"fmt"
 	"os"
+	"strings"
 
-	"github.com/GuanceCloud/terraform-provider-guance/internal/sdk"
-
-	ccv1 "github.com/GuanceCloud/terraform-provider-guance/internal/sdk/api/v1"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
+
+	"github.com/GuanceCloud/terraform-provider-guance/internal/sdk"
+	ccv1 "github.com/GuanceCloud/terraform-provider-guance/internal/sdk/api/cloudcontrol/v1"
 )
 
 // Ensure the implementation satisfies the expected interfaces
@@ -29,7 +31,8 @@ type guanceProvider struct{}
 
 // guanceProviderModel maps provider schema data to a Go type.
 type guanceProviderModel struct {
-	Endpoint types.String `tfsdk:"endpoint"`
+	Region types.String `tfsdk:"region"`
+	Token  types.String `tfsdk:"token"`
 }
 
 // Metadata returns the provider type name.
@@ -42,11 +45,15 @@ func (p *guanceProvider) Schema(_ context.Context, _ provider.SchemaRequest, res
 	resp.Schema = schema.Schema{
 		Description: "Interact with Guance Cloud.",
 		Attributes: map[string]schema.Attribute{
-			"endpoint": schema.StringAttribute{
-				Description: "URI for Guance Cloud API. May also be provided via GUANCE_ENDPOINT environment variable.",
+			"region": schema.StringAttribute{
+				Description: "Region for Guance Cloud API. May also be provided via GUANCE_REGION environment variable.",
 				Optional:    true,
 			},
-			// TODO: add credential provider
+			"token": schema.StringAttribute{
+				Description: "Access token for Guance Cloud API. May also be provided via GUANCE_TOKEN environment variable.",
+				Optional:    true,
+				Sensitive:   true,
+			},
 		},
 	}
 }
@@ -63,54 +70,28 @@ func (p *guanceProvider) Configure(ctx context.Context, req provider.ConfigureRe
 		return
 	}
 
-	// If practitioner provided a configuration value for any of the
-	// attributes, it must be a known value.
-
-	if config.Endpoint.IsUnknown() {
-		resp.Diagnostics.AddAttributeError(
-			path.Root("endpoint"),
-			"Unknown Guance Cloud API endpoint",
-			"The provider cannot create the Guance Cloud API client as there is an unknown configuration value for the Guance Cloud API endpoint. "+
-				"Either target apply the source of the value first, set the value statically in the configuration, or use the GUANCE_ENDPOINT environment variable.",
-		)
-	}
-
+	region := getConfigField("region", config.Region, resp)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	// Default values to environment variables, but override
-	// with Terraform configuration value if set.
-
-	endpoint := os.Getenv("GUANCE_ENDPOINT")
-
-	if !config.Endpoint.IsNull() {
-		endpoint = config.Endpoint.ValueString()
-	}
-
-	// If any of the expected configurations are missing, return
-	// errors with provider-specific guidance.
-
-	if endpoint == "" {
-		resp.Diagnostics.AddAttributeError(
-			path.Root("host"),
-			"Missing Guance Cloud API Host",
-			"The provider cannot create the Guance Cloud API client as there is a missing or empty value for the Guance Cloud API host. "+
-				"Set the host value in the configuration or use the GUANCE_ENDPOINT environment variable. "+
-				"If either is already set, ensure the value is not empty.",
-		)
-	}
-
+	accessToken := getConfigField("token", config.Token, resp)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	ctx = tflog.SetField(ctx, "guance_endpoint", endpoint)
+	ctx = tflog.SetField(ctx, "guance_region", region)
+	ctx = tflog.SetField(ctx, "guance_token", accessToken)
+	ctx = tflog.MaskFieldValuesWithFieldKeys(ctx, "guance_token")
 
 	tflog.Debug(ctx, "Creating Guance Cloud client")
 
 	// Create a new Guance Cloud client using the configuration values
-	client, err := ccv1.NewClient(ccv1.WithEndpoint(endpoint))
+	client, err := ccv1.NewClient(
+		ccv1.WithRegion(region),
+		ccv1.WithWait(true),
+		ccv1.WithAccessToken(accessToken),
+	)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to Create Guance Cloud API Client",
@@ -127,4 +108,47 @@ func (p *guanceProvider) Configure(ctx context.Context, req provider.ConfigureRe
 	resp.ResourceData = &sdk.Client[sdk.Resource]{Client: client}
 
 	tflog.Info(ctx, "Configured Guance Cloud client", map[string]any{"success": true})
+}
+
+func getConfigField(name string, value types.String, resp *provider.ConfigureResponse) string {
+	// If practitioner provided a configuration value for any of the
+	// attributes, it must be a known value.
+
+	envName := fmt.Sprintf("GUANCE_%s", strings.ToUpper(name))
+
+	if value.IsUnknown() {
+		resp.Diagnostics.AddAttributeError(
+			path.Root(name),
+			fmt.Sprintf("Unknown Guance Cloud API %s", strings.ToTitle(name)),
+			"The provider cannot create the Guance Cloud API client as there is an unknown configuration value for the Guance Cloud API endpoint. "+
+				"Either target apply the source of the value first, set the value statically in the configuration, or use the "+envName+" environment variable.",
+		)
+	}
+
+	if resp.Diagnostics.HasError() {
+		return ""
+	}
+
+	// Default values to environment variables, but override
+	// with Terraform configuration value if set.
+
+	valueString := os.Getenv(envName)
+	if !value.IsNull() {
+		valueString = value.ValueString()
+	}
+
+	// If any of the expected configurations are missing, return
+	// errors with provider-specific guidance.
+
+	if valueString == "" {
+		resp.Diagnostics.AddAttributeError(
+			path.Root(name),
+			fmt.Sprintf("Missing Guance Cloud API %s", strings.ToTitle(name)),
+			"The provider cannot create the Guance Cloud API client as there is a missing or empty value for the Guance Cloud API "+name+". "+
+				"Set the host value in the configuration or use the "+envName+" environment variable. "+
+				"If either is already set, ensure the value is not empty.",
+		)
+	}
+
+	return valueString
 }

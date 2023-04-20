@@ -2,11 +2,26 @@
 
 The Guance Provider provides resources to manage [Guance Cloud](https://en.guance.com/) resources.
 
+![cover](./cover.png)
+
 ## Documentation, questions, and discussions
 
 Official documentation on how to use this provider can be found on the [Terraform Registry](https://registry.terraform.io/providers/guance/guance/latest/docs).
 
 The remainder of this document will focus on the development aspects of the provider.
+
+The resource supports as follows:
+
+* [x] notification
+* [x] pipeline
+* [x] members
+* [x] member group
+* [x] alert policy
+* [ ] mute
+* [ ] monitor, see built-in modules at [terraform-guance-monitor](https://github.com/GuanceCloud/terraform-guance-monitor)
+* [ ] dashboard, see built-in modules at [terraform-guance-dashboard](https://github.com/GuanceCloud/terraform-guance-dashboard)
+
+If there are more resources you need, create an [issue]() for free.
 
 ## Compatibility
 
@@ -30,14 +45,7 @@ that return all the details about which versions are currently available for a p
 
 ### Testing
 
-In order to test the provider, you can run
-
-* `./hack/make -v test:unit` to run provider tests
-* `./hack/make -v test:acc` to run provider acceptance tests
-
-Acceptance tests (`testacc`) will spawn
-`terraform` and the provider. Read more about their work on the
-[official page](https://www.terraform.io/plugin/sdkv2/testing/acceptance-tests).
+Guance Cloud Code Generation Pipeline generates this repository. So don't need to test. Please create issues for free.
 
 ### Generating documentation
 
