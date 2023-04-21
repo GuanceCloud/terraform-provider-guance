@@ -31,7 +31,7 @@ var resourceSchema = schema.Schema{
 			Required:    true,
 		},
 
-		"silent_timeout": schema.Int64Attribute{
+		"silent_timeout": schema.StringAttribute{
 			Description: "Silent timeout timestamp",
 
 			Optional: true,

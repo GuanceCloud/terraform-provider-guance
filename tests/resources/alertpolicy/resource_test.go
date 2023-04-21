@@ -52,7 +52,7 @@ resource "guance_notification" "demo" {
 
 resource "guance_alertpolicy" "demo" {
   name           = "oac-demo"
-  silent_timeout = 3600
+  silent_timeout = "1h"
 
   statuses = [
     "critical",

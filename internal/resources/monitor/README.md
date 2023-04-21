@@ -1,4 +1,6 @@
-**WORKING IN PROGRESS!**
+# Monitor
+
+**WORKING IN PROGRESS**
 
 A monitor is a set of checks that you can run against your data. A monitor watches your data over time and alerts you when certain conditions are met. For example, you can create a monitor that watches the average response time of your website and alerts you when the response time is greater than 1 second.
 
@@ -12,4 +14,14 @@ Relationships:
 graph LR
 
 A[Monitor] --> B[Alert Policy] --> C[Notification]
+```
+
+## Create
+
+The first let me create a resource. We will send the create operation to the resource management service
+
+```terraform
+resource "guance_monitor" "demo" {
+	name        = "oac-demo"
+}
 ```
