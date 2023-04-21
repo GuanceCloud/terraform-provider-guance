@@ -1,6 +1,6 @@
 # Dashboard
 
-**WORKING IN PROGRESS!**
+**WORKING IN PROGRESS**
 
 A dashboard is a collection of visualizations that you can use to monitor the health of your systems and applications. Dashboards are made up of one or more panels, which are the visualizations themselves. Each panel displays a single metric or a single aggregation of metrics.
 

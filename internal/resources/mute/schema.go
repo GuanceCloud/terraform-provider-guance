@@ -63,6 +63,15 @@ var resourceSchema = schema.Schema{
 			Optional:   true,
 			Attributes: schemaRepeatOptions,
 		},
+
+		"mute_tags": schema.ListNestedAttribute{
+			Description: "Tags",
+
+			Optional: true,
+			NestedObject: schema.NestedAttributeObject{
+				Attributes: schemaTag,
+			},
+		},
 	},
 }
 
@@ -232,9 +241,22 @@ var schemaRepeatOptions = map[string]schema.Attribute{
 	},
 
 	"crontab": schema.SingleNestedAttribute{
-		Description: "Repeat Crontab Set",
+		Description: "Crontab configuration",
 
 		Optional:   true,
 		Attributes: schemaRepeatCrontabSet,
+	},
+}
+
+// schemaTag maps the resource schema data.
+var schemaTag = map[string]schema.Attribute{
+	"key": schema.StringAttribute{
+		Description: "Tag",
+		Required:    true,
+	},
+
+	"value": schema.StringAttribute{
+		Description: "Tag Value",
+		Required:    true,
 	},
 }

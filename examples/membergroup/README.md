@@ -37,5 +37,4 @@ resource "guance_membergroup" "demo" {
   name       = "oac-demo"
   member_ids = data.guance_members.demo.items[*].id
 }
-
 ```
