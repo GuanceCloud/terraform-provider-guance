@@ -3,9 +3,9 @@ package main
 import (
 	"context"
 
-	"github.com/GuanceCloud/terraform-provider-guance/guance"
-
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
+
+	"github.com/GuanceCloud/terraform-provider-guance/guance"
 )
 
 func main() {

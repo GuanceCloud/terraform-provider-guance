@@ -37,3 +37,6 @@ provider "guance" {
 ```
 
 ## More Examples
+
+* [Example Source Code](https://github.com/GuanceCloud/terraform-provider-guance/tree/main/examples)
+* [Interactive Guidelines](https://github.com/GuanceCloud/guance-scenarios)

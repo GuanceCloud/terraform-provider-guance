@@ -42,7 +42,7 @@ version it implements, and Terraform:
 
 | Guance Provider | Terraform Plugin Protocol | Terraform |
 |:---------------:|:-------------------------:|:---------:|
-|    `>= 0.x`     |            `5`            | `>= 0.12` |
+|    `>= 0.x`     |            `6`            | `>= 1.0`  |
 
 Details can be found by querying the [Registry API](https://www.terraform.io/internals/provider-registry-protocol#list-available-versions)
 that return all the details about which versions are currently available for a particular provider.
