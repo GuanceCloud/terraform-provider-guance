@@ -4,9 +4,10 @@
 package main
 
 import (
+	"os"
+
 	"github.com/magefile/mage/mg"
 	"github.com/magefile/mage/sh"
-	"os"
 )
 
 type Test mg.Namespace
