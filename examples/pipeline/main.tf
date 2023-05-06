@@ -1,11 +1,11 @@
 resource "guance_pipeline" "demo" {
-  name = "oac-demo"
+  name     = "oac-demo"
   category = "logging"
-  source = [
+  source   = [
     "nginx"
   ]
   is_default = false
-  is_force = false
+  is_force   = false
 
   content = <<EOF
     add_pattern("date2", "%%{YEAR}[./]%%{MONTHNUM}[./]%%{MONTHDAY} %%{TIME}")
@@ -40,7 +40,7 @@ resource "guance_pipeline" "demo" {
     nullif(upstream, "")
     default_time(time)
     EOF
-  
+
   test_data = <<EOF
     127.0.0.1 - - [24/Mar/2021:13:54:19 +0800] "GET /basic_status HTTP/1.1" 200 97 "-" "Mozilla/5.0 (Macintosh; Intel Mac OS X 11_1_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.72 Safari/537.36"
     EOF

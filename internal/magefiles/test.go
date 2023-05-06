@@ -4,21 +4,21 @@
 package main
 
 import (
-	"fmt"
-
 	"github.com/magefile/mage/mg"
 	"github.com/magefile/mage/sh"
+	"os"
 )
 
 type Test mg.Namespace
 
-// AccOne run acceptance test for specified resource
-func (ns Test) AccOne(name string) error {
-	return sh.RunWithV(
-		map[string]string{
-			"TF_ACC": "1",
-			"TF_LOG": "INFO",
-		},
-		"go", "test", "-v", "-count", "1", "-run", fmt.Sprintf("^TestAcc%s$", name), "./tests/...",
-	)
+// Acc run acceptance test for specified resource
+func (ns Test) Acc() error {
+	envKeys := []string{"GUANCE_ACCESS_TOKEN", "GUANCE_REGION"}
+	envVars := map[string]string{}
+	for _, k := range envKeys {
+		envVars[k] = os.Getenv(k)
+	}
+	os.Chdir("examples")
+	defer os.Chdir("..")
+	return sh.RunWithV(envVars, "go", "test", "-v", "./...")
 }

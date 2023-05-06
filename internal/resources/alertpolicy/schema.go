@@ -3,9 +3,12 @@
 package alertpolicy
 
 import (
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
@@ -14,7 +17,7 @@ var resourceSchema = schema.Schema{
 	MarkdownDescription: resourceDocument,
 	Attributes: map[string]schema.Attribute{
 		"id": schema.StringAttribute{
-			Description: "Numeric identifier of the order.",
+			Description: "The Guance Resource Name (GRN) of cloud resource.",
 			Computed:    true,
 			PlanModifiers: []planmodifier.String{
 				stringplanmodifier.UseStateForUnknown(),
@@ -22,25 +25,36 @@ var resourceSchema = schema.Schema{
 		},
 
 		"created_at": schema.StringAttribute{
-			Description: "Timestamp of the last Terraform update of the order.",
+			Description: "The RFC3339/ISO8601 time string of resource created at.",
 			Computed:    true,
 		},
 
 		"name": schema.StringAttribute{
 			Description: "Alert Policy Name",
-			Required:    true,
+
+			Required: true,
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.RequiresReplace(),
+			},
 		},
 
-		"silent_timeout": schema.Int64Attribute{
+		"silent_timeout": schema.StringAttribute{
 			Description: "Silent timeout timestamp",
 
 			Optional: true,
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.RequiresReplace(),
+			},
 		},
 
 		"statuses": schema.ListAttribute{
 			Description: "The status value of the event to be sent",
+
 			Required:    true,
 			ElementType: types.StringType,
+			PlanModifiers: []planmodifier.List{
+				listplanmodifier.RequiresReplace(),
+			},
 		},
 
 		"alert_targets": schema.ListNestedAttribute{
@@ -58,7 +72,17 @@ var resourceSchema = schema.Schema{
 var schemaAlertTarget = map[string]schema.Attribute{
 	"type": schema.StringAttribute{
 		Description: "Alert type",
-		Required:    true,
+
+		MarkdownDescription: `
+		Alert type, value must be one of: *member_group*, *notification*, other value will be ignored.
+		`,
+		Required: true,
+		PlanModifiers: []planmodifier.String{
+			stringplanmodifier.RequiresReplace(),
+		},
+		Validators: []validator.String{
+			stringvalidator.OneOf("member_group", "notification"),
+		},
 	},
 
 	"notification": schema.SingleNestedAttribute{
@@ -80,7 +104,11 @@ var schemaAlertTarget = map[string]schema.Attribute{
 var schemaTargetMemberGroup = map[string]schema.Attribute{
 	"id": schema.StringAttribute{
 		Description: "Member Group",
-		Required:    true,
+
+		Required: true,
+		PlanModifiers: []planmodifier.String{
+			stringplanmodifier.RequiresReplace(),
+		},
 	},
 }
 
@@ -88,6 +116,10 @@ var schemaTargetMemberGroup = map[string]schema.Attribute{
 var schemaTargetNotification = map[string]schema.Attribute{
 	"id": schema.StringAttribute{
 		Description: "Notification",
-		Required:    true,
+
+		Required: true,
+		PlanModifiers: []planmodifier.String{
+			stringplanmodifier.RequiresReplace(),
+		},
 	},
 }

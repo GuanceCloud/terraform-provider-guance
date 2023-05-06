@@ -11,8 +11,11 @@ variable "email" {
 }
 
 data "guance_members" "demo" {
-  emails = [
-    "liyufei906@guance.com"
+  filters = [
+    {
+      name   = "email"
+      values = [var.email]
+    }
   ]
 }
 
@@ -21,28 +24,60 @@ resource "guance_membergroup" "demo" {
   member_ids = data.guance_members.demo.items[*].id
 }
 
+resource "guance_notification" "demo" {
+  name            = "oac-demo"
+  type            = "ding_talk_robot"
+  ding_talk_robot = {
+    webhook = var.ding_talk_webhook
+    secret  = var.ding_talk_secret
+  }
+}
+
+resource "guance_alertpolicy" "demo" {
+  name           = "oac-demo"
+  silent_timeout = "1h"
+
+  statuses = [
+    "critical",
+    "error",
+    "warning",
+    "info",
+    "ok",
+    "nodata",
+    "nodata_ok",
+    "nodata_as_ok",
+  ]
+
+  alert_targets = [
+    {
+      type         = "member_group"
+      member_group = {
+        id = guance_membergroup.demo.id
+      }
+    },
+    {
+      type         = "notification"
+      notification = {
+        id = guance_notification.demo.id
+      }
+    }
+  ]
+}
+
 resource "guance_mute" "demo" {
-  name = "oac-demo"
-
   // mute ranges
-  mute_ranges {
-    type = "monitor"
+  mute_ranges = [
+    {
+      type = "alert_policy"
 
-    monitor {
-      id = ""
+      alert_policy = {
+        id = guance_alertpolicy.demo.id
+      }
     }
-  }
-
-  mute_ranges {
-    type = "alert_policy"
-
-    alert_policy {
-      id = ""
-    }
-  }
+  ]
 
   // notify options
-  notify {
+  notify = {
     message = <<EOF
       Muted
     EOF
@@ -50,35 +85,36 @@ resource "guance_mute" "demo" {
     before_time = "15m"
   }
 
-  notify_targets {
-    type = "member_group"
+  notify_targets = [
+    {
+      type = "member_group"
 
-    member_group {
-      id = guance_membergroup.demo.id
+      member_group = {
+        id = guance_membergroup.demo.id
+      }
+    },
+    {
+      type = "notification"
+
+      notification = {
+        id = guance_notification.demo.id
+      }
     }
-  }
-
-  notify_targets {
-    type = "notification"
-
-    notification {
-      id = ""
-    }
-  }
+  ]
 
   // ont-time options
-  onetime {
+  onetime = {
     start = "2022-08-04T12:00:00Z"
     end   = "2023-12-31T12:00:00Z"
   }
 
   // cron options
-  repeat {
-    crontab_duration = 30 // 30s
-    start            = "05:00:00Z"
-    end              = "10:00:00Z"
+  repeat = {
+    crontab_duration = "30s"
+    start            = "05:00:00"
+    end              = "10:00:00"
     expire           = "2023-12-31T12:00:00Z"
-    crontab {
+    crontab          = {
       min   = "0"
       hour  = "0"
       day   = "*"
@@ -86,4 +122,11 @@ resource "guance_mute" "demo" {
       week  = "*"
     }
   }
+
+  mute_tags = [
+    {
+      key   = "host"
+      value = "*"
+    }
+  ]
 }

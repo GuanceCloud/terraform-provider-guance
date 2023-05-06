@@ -4,8 +4,8 @@ package consts
 
 const (
 	TypeNameAlertPolicy  = "AlertPolicy"
+	TypeNameBlackList    = "BlackList"
 	TypeNameDashboard    = "Dashboard"
-	TypeNameFunction     = "Function"
 	TypeNameMember       = "Member"
 	TypeNameMemberGroup  = "MemberGroup"
 	TypeNameMonitor      = "Monitor"

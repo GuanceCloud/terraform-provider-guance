@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 
 	"github.com/GuanceCloud/terraform-provider-guance/internal/resources/alertpolicy"
+	"github.com/GuanceCloud/terraform-provider-guance/internal/resources/blacklist"
 	"github.com/GuanceCloud/terraform-provider-guance/internal/resources/dashboard"
 	"github.com/GuanceCloud/terraform-provider-guance/internal/resources/membergroup"
 	"github.com/GuanceCloud/terraform-provider-guance/internal/resources/monitor"
@@ -20,6 +21,7 @@ import (
 func (p *guanceProvider) Resources(_ context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
 		alertpolicy.NewAlertPolicyResource,
+		blacklist.NewBlackListResource,
 		dashboard.NewDashboardResource,
 		membergroup.NewMemberGroupResource,
 		monitor.NewMonitorResource,

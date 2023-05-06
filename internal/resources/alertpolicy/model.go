@@ -13,7 +13,7 @@ type alertPolicyResourceModel struct {
 	ID            types.String   `tfsdk:"id"`
 	CreatedAt     types.String   `tfsdk:"created_at"`
 	Name          types.String   `tfsdk:"name"`
-	SilentTimeout types.Int64    `tfsdk:"silent_timeout"`
+	SilentTimeout types.String   `tfsdk:"silent_timeout"`
 	Statuses      []types.String `tfsdk:"statuses"`
 	AlertTargets  []*AlertTarget `tfsdk:"alert_targets"`
 }

@@ -17,6 +17,7 @@ type muteResourceModel struct {
 	NotifyTargets []*NotifyTarget `tfsdk:"notify_targets"`
 	Onetime       *OnetimeOptions `tfsdk:"onetime"`
 	Repeat        *RepeatOptions  `tfsdk:"repeat"`
+	MuteTags      []*Tag          `tfsdk:"mute_tags"`
 }
 
 // GetId returns the ID of the resource.
@@ -101,4 +102,10 @@ type RepeatOptions struct {
 	CrontabDuration types.String      `tfsdk:"crontab_duration"`
 	Expire          types.String      `tfsdk:"expire"`
 	Crontab         *RepeatCrontabSet `tfsdk:"crontab"`
+}
+
+// Tag maps the resource schema data.
+type Tag struct {
+	Key   types.String `tfsdk:"key"`
+	Value types.String `tfsdk:"value"`
 }

@@ -20,7 +20,7 @@ variable "email" {
 }
 
 data "guance_members" "demo" {
-  filter = [
+  filters = [
     {
       name   = "email"
       values = [var.email]
@@ -32,7 +32,6 @@ resource "guance_membergroup" "demo" {
   name       = "oac-demo"
   member_ids = data.guance_members.demo.items[*].id
 }
-
 `,
 				Check: resource.ComposeAggregateTestCheckFunc(),
 			},

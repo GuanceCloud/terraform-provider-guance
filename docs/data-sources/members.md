@@ -31,16 +31,16 @@ graph LR
 
 ### Optional
 
-- `filter` (Attributes List) The list of the resource (see [below for nested schema](#nestedatt--filter))
+- `filters` (Attributes List) The list of the resource (see [below for nested schema](#nestedatt--filters))
 - `max_results` (Number) The max results count of the resource will be returned.
 
 ### Read-Only
 
-- `id` (String) Identifier of the resource.
+- `id` (String) The hasd id of the resource.
 - `items` (Attributes List) The list of the resource (see [below for nested schema](#nestedatt--items))
 
-<a id="nestedatt--filter"></a>
-### Nested Schema for `filter`
+<a id="nestedatt--filters"></a>
+### Nested Schema for `filters`
 
 Required:
 
@@ -54,11 +54,11 @@ Required:
 Optional:
 
 - `email` (String) Email
-- `role` (String) Role
+- `role` (String) Role, value must be one of: *owner*, *wsAdmin*, *general*, *readOnly*, other value will be ignored.
 
 Read-Only:
 
-- `created_at` (String) Timestamp of the last Terraform update of the order.
-- `id` (String) Numeric identifier of the order.
+- `created_at` (String) The RFC3339/ISO8601 time string of resource created at.
+- `id` (String) The Guance Resource Name (GRN) of cloud resource.
 
 
