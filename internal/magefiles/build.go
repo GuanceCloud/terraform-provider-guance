@@ -10,7 +10,7 @@ import (
 
 type Build mg.Namespace
 
-// Install execute install the provider to local
+// Install run installation on the provider to local
 func (ns Build) Install() error {
 	return sh.Run("go", "install", ".")
 }

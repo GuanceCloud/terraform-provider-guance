@@ -12,12 +12,13 @@ import (
 
 type Dev mg.Namespace
 
+// All run all dev tasks
 func (ns Dev) All() error {
 	mg.Deps(ns.Fmt, ns.Lint)
 	return nil
 }
 
-// Fmt format the code
+// Fmt run format for all the code
 func (ns Dev) Fmt() error {
 	err := sh.Run("goimports", "-w", ".")
 	if err != nil {
@@ -35,7 +36,7 @@ func (ns Dev) Fmt() error {
 	return nil
 }
 
-// Lint execute lint the code
+// Lint run lint for all the code
 func (ns Dev) Lint() error {
 	mg.Deps(ns.Fmt)
 	return sh.Run("golangci-lint", "run", "--fix", "--allow-parallel-runners")

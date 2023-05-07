@@ -28,7 +28,7 @@ description: |-
     type = string
   }
   data "guance_members" "demo" {
-    filter = [
+    filters = [
       {
         name   = "email"
         values = [var.email]
@@ -131,7 +131,7 @@ description: |-
     }
   mute_tags = [
       {
-        key = "host"
+        key   = "host"
         value = "*"
       }
     ]
@@ -176,7 +176,7 @@ variable "email" {
 }
 
 data "guance_members" "demo" {
-  filter = [
+  filters = [
     {
       name   = "email"
       values = [var.email]
@@ -287,10 +287,10 @@ resource "guance_mute" "demo" {
       week  = "*"
     }
   }
-  
+
   mute_tags = [
     {
-      key = "host"
+      key   = "host"
       value = "*"
     }
   ]
@@ -313,15 +313,15 @@ resource "guance_mute" "demo" {
 
 ### Read-Only
 
-- `created_at` (String) Timestamp of the last Terraform update of the order.
-- `id` (String) Numeric identifier of the order.
+- `created_at` (String) The RFC3339/ISO8601 time string of resource created at.
+- `id` (String) The Guance Resource Name (GRN) of cloud resource.
 
 <a id="nestedatt--mute_ranges"></a>
 ### Nested Schema for `mute_ranges`
 
 Required:
 
-- `type` (String) Mute Range Type
+- `type` (String) Mute Range Type, value must be one of: *monitor*, *alert_policy*, other value will be ignored.
 
 Optional:
 
@@ -368,7 +368,7 @@ Optional:
 
 Required:
 
-- `type` (String) Notify Type
+- `type` (String) Notify Type, value must be one of: *member_group*, *notification*, other value will be ignored.
 
 Optional:
 

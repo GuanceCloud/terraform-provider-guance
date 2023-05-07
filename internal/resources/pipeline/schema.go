@@ -3,9 +3,13 @@
 package pipeline
 
 import (
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
@@ -14,7 +18,7 @@ var resourceSchema = schema.Schema{
 	MarkdownDescription: resourceDocument,
 	Attributes: map[string]schema.Attribute{
 		"id": schema.StringAttribute{
-			Description: "Numeric identifier of the order.",
+			Description: "The Guance Resource Name (GRN) of cloud resource.",
 			Computed:    true,
 			PlanModifiers: []planmodifier.String{
 				stringplanmodifier.UseStateForUnknown(),
@@ -22,13 +26,17 @@ var resourceSchema = schema.Schema{
 		},
 
 		"created_at": schema.StringAttribute{
-			Description: "Timestamp of the last Terraform update of the order.",
+			Description: "The RFC3339/ISO8601 time string of resource created at.",
 			Computed:    true,
 		},
 
 		"name": schema.StringAttribute{
 			Description: "Name",
-			Required:    true,
+
+			Required: true,
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.RequiresReplace(),
+			},
 		},
 
 		"source": schema.ListAttribute{
@@ -36,34 +44,60 @@ var resourceSchema = schema.Schema{
 
 			Optional:    true,
 			ElementType: types.StringType,
+			PlanModifiers: []planmodifier.List{
+				listplanmodifier.RequiresReplace(),
+			},
 		},
 
 		"content": schema.StringAttribute{
 			Description: "Pipeline file content",
-			Required:    true,
+
+			Required: true,
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.RequiresReplace(),
+			},
 		},
 
 		"test_data": schema.StringAttribute{
 			Description: "Test data",
 
 			Optional: true,
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.RequiresReplace(),
+			},
 		},
 
 		"is_force": schema.BoolAttribute{
 			Description: "Is Force Overwrite",
 
 			Optional: true,
+			PlanModifiers: []planmodifier.Bool{
+				boolplanmodifier.RequiresReplace(),
+			},
 		},
 
 		"category": schema.StringAttribute{
 			Description: "Category",
-			Required:    true,
+
+			MarkdownDescription: `
+		Category, value must be one of: *logging*, *object*, *custom_object*, *network*, *tracing*, *rum*, *security*, *keyevent*, *metric*, other value will be ignored.
+		`,
+			Required: true,
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.RequiresReplace(),
+			},
+			Validators: []validator.String{
+				stringvalidator.OneOf("logging", "object", "custom_object", "network", "tracing", "rum", "security", "keyevent", "metric"),
+			},
 		},
 
 		"is_default": schema.BoolAttribute{
 			Description: "Is Default Pipeline",
 
 			Optional: true,
+			PlanModifiers: []planmodifier.Bool{
+				boolplanmodifier.RequiresReplace(),
+			},
 		},
 	},
 }

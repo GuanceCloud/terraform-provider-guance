@@ -4,20 +4,22 @@ page_title: "guance_pipeline Resource - guance"
 subcategory: ""
 description: |-
   Pipeline
-  Pipeline is a data processing language that Observability Cloud provides. Pipeline supports text parsing of different formats of log data.
+  Pipeline is a data processing language that Observability Cloud provides. Pipeline supports text parsing of different
+  formats of log data.
   By writing a pipeline script, you can customize the structure of the log and use the cut fields as attributes.
-  By cutting out the attribute fields, we can quickly filter the relevant logs and perform data association analysis to help us quickly locate and solve problems.
+  By cutting out the attribute fields, we can quickly filter the relevant logs and perform data association analysis to
+  help us quickly locate and solve problems.
   Create
   The first let me create a resource. We will send the create operation to the resource management service
   ```terraform
   resource "guancepipeline" "demo" {
-    name = "oac-demo"
+    name     = "oac-demo"
     category = "logging"
-    source = [
+    source   = [
       "nginx"
     ]
     isdefault = false
-    is_force = false
+    is_force   = false
   content = <<EOF
       add_pattern("date2", "%%{YEAR}[./]%%{MONTHNUM}[./]%%{MONTHDAY} %%{TIME}")
   # access log
@@ -62,11 +64,13 @@ description: |-
 
 # Pipeline
 
-Pipeline is a data processing language that Observability Cloud provides. Pipeline supports text parsing of different formats of log data.
+Pipeline is a data processing language that Observability Cloud provides. Pipeline supports text parsing of different
+formats of log data.
 
 By writing a pipeline script, you can customize the structure of the log and use the cut fields as attributes.
 
-By cutting out the attribute fields, we can quickly filter the relevant logs and perform data association analysis to help us quickly locate and solve problems.
+By cutting out the attribute fields, we can quickly filter the relevant logs and perform data association analysis to
+help us quickly locate and solve problems.
 
 ## Create
 
@@ -74,13 +78,13 @@ The first let me create a resource. We will send the create operation to the res
 
 ```terraform
 resource "guance_pipeline" "demo" {
-  name = "oac-demo"
+  name     = "oac-demo"
   category = "logging"
-  source = [
+  source   = [
     "nginx"
   ]
   is_default = false
-  is_force = false
+  is_force   = false
 
   content = <<EOF
     add_pattern("date2", "%%{YEAR}[./]%%{MONTHNUM}[./]%%{MONTHDAY} %%{TIME}")
@@ -115,7 +119,7 @@ resource "guance_pipeline" "demo" {
     nullif(upstream, "")
     default_time(time)
     EOF
-  
+
   test_data = <<EOF
     127.0.0.1 - - [24/Mar/2021:13:54:19 +0800] "GET /basic_status HTTP/1.1" 200 97 "-" "Mozilla/5.0 (Macintosh; Intel Mac OS X 11_1_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.72 Safari/537.36"
     EOF
@@ -129,7 +133,7 @@ resource "guance_pipeline" "demo" {
 
 ### Required
 
-- `category` (String) Category
+- `category` (String) Category, value must be one of: *logging*, *object*, *custom_object*, *network*, *tracing*, *rum*, *security*, *keyevent*, *metric*, other value will be ignored.
 - `content` (String) Pipeline file content
 - `name` (String) Name
 
@@ -142,7 +146,7 @@ resource "guance_pipeline" "demo" {
 
 ### Read-Only
 
-- `created_at` (String) Timestamp of the last Terraform update of the order.
-- `id` (String) Numeric identifier of the order.
+- `created_at` (String) The RFC3339/ISO8601 time string of resource created at.
+- `id` (String) The Guance Resource Name (GRN) of cloud resource.
 
 

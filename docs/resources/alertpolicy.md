@@ -30,7 +30,7 @@ description: |-
     type = string
   }
   data "guance_members" "demo" {
-    filter = [
+    filters = [
       {
         name   = "email"
         values = [var.email]
@@ -123,7 +123,7 @@ variable "email" {
 }
 
 data "guance_members" "demo" {
-  filter = [
+  filters = [
     {
       name   = "email"
       values = [var.email]
@@ -194,15 +194,15 @@ resource "guance_alertpolicy" "demo" {
 
 ### Read-Only
 
-- `created_at` (String) Timestamp of the last Terraform update of the order.
-- `id` (String) Numeric identifier of the order.
+- `created_at` (String) The RFC3339/ISO8601 time string of resource created at.
+- `id` (String) The Guance Resource Name (GRN) of cloud resource.
 
 <a id="nestedatt--alert_targets"></a>
 ### Nested Schema for `alert_targets`
 
 Required:
 
-- `type` (String) Alert type
+- `type` (String) Alert type, value must be one of: *member_group*, *notification*, other value will be ignored.
 
 Optional:
 

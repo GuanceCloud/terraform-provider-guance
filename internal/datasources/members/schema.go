@@ -3,7 +3,9 @@
 package members
 
 import (
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
@@ -12,7 +14,7 @@ var dataSourceSchema = schema.Schema{
 	MarkdownDescription: resourceDocument,
 	Attributes: map[string]schema.Attribute{
 		"id": schema.StringAttribute{
-			Description: "Identifier of the resource.",
+			Description: "The hasd id of the resource.",
 			Computed:    true,
 		},
 
@@ -21,7 +23,7 @@ var dataSourceSchema = schema.Schema{
 			Optional:    true,
 		},
 
-		"filter": schema.ListNestedAttribute{
+		"filters": schema.ListNestedAttribute{
 			Description: "The list of the resource",
 			Optional:    true,
 			NestedObject: schema.NestedAttributeObject{
@@ -46,12 +48,12 @@ var dataSourceSchema = schema.Schema{
 			NestedObject: schema.NestedAttributeObject{
 				Attributes: map[string]schema.Attribute{
 					"id": schema.StringAttribute{
-						Description: "Numeric identifier of the order.",
+						Description: "The Guance Resource Name (GRN) of cloud resource.",
 						Computed:    true,
 					},
 
 					"created_at": schema.StringAttribute{
-						Description: "Timestamp of the last Terraform update of the order.",
+						Description: "The RFC3339/ISO8601 time string of resource created at.",
 						Computed:    true,
 					},
 
@@ -64,7 +66,15 @@ var dataSourceSchema = schema.Schema{
 					"role": schema.StringAttribute{
 						Description: "Role",
 
+						MarkdownDescription: `
+		Role, value must be one of: *owner*, *wsAdmin*, *general*, *readOnly*, other value will be ignored.
+		`,
+
 						Optional: true,
+
+						Validators: []validator.String{
+							stringvalidator.OneOf("owner", "wsAdmin", "general", "readOnly"),
+						},
 					},
 				},
 			},

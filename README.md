@@ -6,7 +6,7 @@ The Guance Provider provides resources to manage [Guance Cloud](https://en.guanc
 
 ## Documentation, questions, and discussions
 
-Official documentation on how to use this provider can be found on the [Terraform Registry](https://registry.terraform.io/providers/guance/guance/latest/docs).
+Official documentation on how to use this provider can be found on the [Terraform Registry](https://registry.terraform.io/providers/GuanceCloud/guance/latest/docs).
 
 The remainder of this document will focus on the development aspects of the provider.
 
@@ -14,14 +14,26 @@ The resource supports as follows:
 
 * [x] notification
 * [x] pipeline
-* [x] members
 * [x] member group
 * [x] alert policy
-* [ ] mute
-* [ ] monitor, see built-in modules at [terraform-guance-monitor](https://github.com/GuanceCloud/terraform-guance-monitor)
-* [ ] dashboard, see built-in modules at [terraform-guance-dashboard](https://github.com/GuanceCloud/terraform-guance-dashboard)
+* [x] mute
+* [x] black list
+* [x] monitor, see built-in modules at [terraform-guance-monitor](https://github.com/GuanceCloud/terraform-guance-monitor)
+* [x] dashboard, see built-in modules at [terraform-guance-dashboard](https://github.com/GuanceCloud/terraform-guance-dashboard)
 
-If there are more resources you need, create an [issue]() for free.
+The data source supports as follows:
+
+* [x] members
+
+The region supports as follows:
+
+* [x] hangzhou
+* [x] ningxia
+* [x] zhangjiakou
+* [x] guangzhou
+* [x] oregon
+
+If there are more resources you need, create an [issue](https://github.com/GuanceCloud/terraform-provider-guance/issues) for free.
 
 ## Compatibility
 
@@ -30,11 +42,11 @@ version it implements, and Terraform:
 
 | Guance Provider | Terraform Plugin Protocol | Terraform |
 |:---------------:|:-------------------------:|:---------:|
-|    `>= 0.x`     |        `5` and `6`        | `>= 0.12` |
+|    `>= 0.x`     |            `6`            | `>= 1.0`  |
 
 Details can be found by querying the [Registry API](https://www.terraform.io/internals/provider-registry-protocol#list-available-versions)
 that return all the details about which versions are currently available for a particular provider.
-[Here](https://registry.terraform.io/v1/providers/guance/guance/versions) are the details.
+[Here](https://registry.terraform.io/v1/providers/GuanceCloud/guance/versions) are the details.
 
 ## Requirements
 

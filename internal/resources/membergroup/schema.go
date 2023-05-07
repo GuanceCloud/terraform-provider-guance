@@ -4,6 +4,7 @@ package membergroup
 
 import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -14,7 +15,7 @@ var resourceSchema = schema.Schema{
 	MarkdownDescription: resourceDocument,
 	Attributes: map[string]schema.Attribute{
 		"id": schema.StringAttribute{
-			Description: "Numeric identifier of the order.",
+			Description: "The Guance Resource Name (GRN) of cloud resource.",
 			Computed:    true,
 			PlanModifiers: []planmodifier.String{
 				stringplanmodifier.UseStateForUnknown(),
@@ -22,13 +23,17 @@ var resourceSchema = schema.Schema{
 		},
 
 		"created_at": schema.StringAttribute{
-			Description: "Timestamp of the last Terraform update of the order.",
+			Description: "The RFC3339/ISO8601 time string of resource created at.",
 			Computed:    true,
 		},
 
 		"name": schema.StringAttribute{
 			Description: "Name",
-			Required:    true,
+
+			Required: true,
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.RequiresReplace(),
+			},
 		},
 
 		"member_ids": schema.ListAttribute{
@@ -36,6 +41,9 @@ var resourceSchema = schema.Schema{
 
 			Optional:    true,
 			ElementType: types.StringType,
+			PlanModifiers: []planmodifier.List{
+				listplanmodifier.RequiresReplace(),
+			},
 		},
 	},
 }

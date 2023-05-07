@@ -83,7 +83,7 @@ resource "guance_notification" "demo" {
 ### Required
 
 - `name` (String) Notification object name
-- `type` (String) Trigger rule type
+- `type` (String) Trigger rule type, value must be one of: *ding_talk_robot*, *http_request*, *wechat_robot*, *mail_group*, *feishu_robot*, *sms*, other value will be ignored.
 
 ### Optional
 
@@ -96,8 +96,8 @@ resource "guance_notification" "demo" {
 
 ### Read-Only
 
-- `created_at` (String) Timestamp of the last Terraform update of the order.
-- `id` (String) Numeric identifier of the order.
+- `created_at` (String) The RFC3339/ISO8601 time string of resource created at.
+- `id` (String) The Guance Resource Name (GRN) of cloud resource.
 
 <a id="nestedatt--ding_talk_robot"></a>
 ### Nested Schema for `ding_talk_robot`

@@ -38,7 +38,7 @@ func (m *memberResourceModel) SetCreatedAt(t string) {
 } // memberDataSourceModel maps the resource schema data.
 type memberDataSourceModel struct {
 	Items      []*memberResourceModel `tfsdk:"items"`
-	Filters    []*sdk.Filter          `tfsdk:"filter"`
+	Filters    []*sdk.Filter          `tfsdk:"filters"`
 	MaxResults types.Int64            `tfsdk:"max_results"`
 	ID         types.String           `tfsdk:"id"`
 }

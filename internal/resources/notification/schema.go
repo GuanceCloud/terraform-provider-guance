@@ -3,9 +3,12 @@
 package notification
 
 import (
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
@@ -14,7 +17,7 @@ var resourceSchema = schema.Schema{
 	MarkdownDescription: resourceDocument,
 	Attributes: map[string]schema.Attribute{
 		"id": schema.StringAttribute{
-			Description: "Numeric identifier of the order.",
+			Description: "The Guance Resource Name (GRN) of cloud resource.",
 			Computed:    true,
 			PlanModifiers: []planmodifier.String{
 				stringplanmodifier.UseStateForUnknown(),
@@ -22,18 +25,32 @@ var resourceSchema = schema.Schema{
 		},
 
 		"created_at": schema.StringAttribute{
-			Description: "Timestamp of the last Terraform update of the order.",
+			Description: "The RFC3339/ISO8601 time string of resource created at.",
 			Computed:    true,
 		},
 
 		"name": schema.StringAttribute{
 			Description: "Notification object name",
-			Required:    true,
+
+			Required: true,
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.RequiresReplace(),
+			},
 		},
 
 		"type": schema.StringAttribute{
 			Description: "Trigger rule type",
-			Required:    true,
+
+			MarkdownDescription: `
+		Trigger rule type, value must be one of: *ding_talk_robot*, *http_request*, *wechat_robot*, *mail_group*, *feishu_robot*, *sms*, other value will be ignored.
+		`,
+			Required: true,
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.RequiresReplace(),
+			},
+			Validators: []validator.String{
+				stringvalidator.OneOf("ding_talk_robot", "http_request", "wechat_robot", "mail_group", "feishu_robot", "sms"),
+			},
 		},
 
 		"ding_talk_robot": schema.SingleNestedAttribute{
@@ -84,12 +101,20 @@ var resourceSchema = schema.Schema{
 var schemaDingTalkRobot = map[string]schema.Attribute{
 	"webhook": schema.StringAttribute{
 		Description: "DingTalk Robot Call Address",
-		Required:    true,
+
+		Required: true,
+		PlanModifiers: []planmodifier.String{
+			stringplanmodifier.RequiresReplace(),
+		},
 	},
 
 	"secret": schema.StringAttribute{
 		Description: "DingTalk Robot Call Secret",
-		Required:    true,
+
+		Required: true,
+		PlanModifiers: []planmodifier.String{
+			stringplanmodifier.RequiresReplace(),
+		},
 	},
 }
 
@@ -97,12 +122,20 @@ var schemaDingTalkRobot = map[string]schema.Attribute{
 var schemaFeishuRobot = map[string]schema.Attribute{
 	"webhook": schema.StringAttribute{
 		Description: "Feishu Robot Call Address",
-		Required:    true,
+
+		Required: true,
+		PlanModifiers: []planmodifier.String{
+			stringplanmodifier.RequiresReplace(),
+		},
 	},
 
 	"secret": schema.StringAttribute{
 		Description: "Feishu Robot Call Secret",
-		Required:    true,
+
+		Required: true,
+		PlanModifiers: []planmodifier.String{
+			stringplanmodifier.RequiresReplace(),
+		},
 	},
 }
 
@@ -110,7 +143,11 @@ var schemaFeishuRobot = map[string]schema.Attribute{
 var schemaHTTPRequest = map[string]schema.Attribute{
 	"url": schema.StringAttribute{
 		Description: "HTTP Call Address",
-		Required:    true,
+
+		Required: true,
+		PlanModifiers: []planmodifier.String{
+			stringplanmodifier.RequiresReplace(),
+		},
 	},
 }
 
@@ -118,8 +155,12 @@ var schemaHTTPRequest = map[string]schema.Attribute{
 var schemaMailGroup = map[string]schema.Attribute{
 	"to": schema.ListAttribute{
 		Description: "Member Account List",
+
 		Required:    true,
 		ElementType: types.StringType,
+		PlanModifiers: []planmodifier.List{
+			listplanmodifier.RequiresReplace(),
+		},
 	},
 }
 
@@ -127,8 +168,12 @@ var schemaMailGroup = map[string]schema.Attribute{
 var schemaSMS = map[string]schema.Attribute{
 	"to": schema.ListAttribute{
 		Description: "Phone Number List",
+
 		Required:    true,
 		ElementType: types.StringType,
+		PlanModifiers: []planmodifier.List{
+			listplanmodifier.RequiresReplace(),
+		},
 	},
 }
 
@@ -136,6 +181,10 @@ var schemaSMS = map[string]schema.Attribute{
 var schemaWeChatRobot = map[string]schema.Attribute{
 	"webhook": schema.StringAttribute{
 		Description: "Robot Call Address",
-		Required:    true,
+
+		Required: true,
+		PlanModifiers: []planmodifier.String{
+			stringplanmodifier.RequiresReplace(),
+		},
 	},
 }

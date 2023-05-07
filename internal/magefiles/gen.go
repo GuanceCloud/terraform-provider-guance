@@ -10,7 +10,13 @@ import (
 
 type Gen mg.Namespace
 
-// Doc generate the documentation
+// Doc run generator over the documentation
 func (ns Gen) Doc() error {
-	return sh.Run("go", "generate", "./...")
+	return sh.Run(
+		"go", "run",
+		"github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs",
+		"generate",
+		"--provider-name", "guance",
+		"--examples-dir", "examples",
+	)
 }

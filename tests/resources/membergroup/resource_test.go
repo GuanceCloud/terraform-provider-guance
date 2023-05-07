@@ -20,7 +20,7 @@ variable "email" {
 }
 
 data "guance_members" "demo" {
-  filter = [
+  filters = [
     {
       name   = "email"
       values = [var.email]

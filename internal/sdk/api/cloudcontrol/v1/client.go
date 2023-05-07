@@ -70,7 +70,7 @@ func WithRegion(region string) Option {
 	return func(c Client) error {
 		c.(*client).region = region
 		c.(*client).endpoint = "https://api.guance.io"
-		//c.(*client).endpoint = "http://localhost:8000"
+		// c.(*client).endpoint = "http://localhost:8000"
 		return nil
 	}
 }

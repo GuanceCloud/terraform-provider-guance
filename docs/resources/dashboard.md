@@ -4,15 +4,20 @@ page_title: "guance_dashboard Resource - guance"
 subcategory: ""
 description: |-
   Dashboard
-  WORKING IN PROGRESS
-  A dashboard is a collection of visualizations that you can use to monitor the health of your systems and applications. Dashboards are made up of one or more panels, which are the visualizations themselves. Each panel displays a single metric or a single aggregation of metrics.
-  Dashboards are a great way to visualize your data and monitor your systems. You can use them to track metrics over time, and to quickly see how your systems are performing. You can also use them to compare metrics from different systems and applications.
-  Guance Cloud's dashboard is used to clearly show the range in which the metric data values are located. It is suitable for slicing messy data into points.
+  A dashboard is a collection of visualizations that you can use to monitor the health of your systems and applications.
+  Dashboards are made up of one or more panels, which are the visualizations themselves. Each panel displays a single
+  metric or a single aggregation of metrics.
+  Dashboards are a great way to visualize your data and monitor your systems. You can use them to track metrics over time,
+  and to quickly see how your systems are performing. You can also use them to compare metrics from different systems and
+  applications.
+  Guance Cloud's dashboard is used to clearly show the range in which the metric data values are located. It is suitable
+  for slicing messy data into points.
   Create
   The first let me create a resource. We will send the create operation to the resource management service
   terraform
   resource "guance_dashboard" "demo" {
-      name        = "oac-demo"
+    name     = "oac-demo"
+    manifest = file("${path.module}/dashboard.json")
   }
 ---
 
@@ -20,13 +25,16 @@ description: |-
 
 # Dashboard
 
-**WORKING IN PROGRESS**
+A dashboard is a collection of visualizations that you can use to monitor the health of your systems and applications.
+Dashboards are made up of one or more panels, which are the visualizations themselves. Each panel displays a single
+metric or a single aggregation of metrics.
 
-A dashboard is a collection of visualizations that you can use to monitor the health of your systems and applications. Dashboards are made up of one or more panels, which are the visualizations themselves. Each panel displays a single metric or a single aggregation of metrics.
+Dashboards are a great way to visualize your data and monitor your systems. You can use them to track metrics over time,
+and to quickly see how your systems are performing. You can also use them to compare metrics from different systems and
+applications.
 
-Dashboards are a great way to visualize your data and monitor your systems. You can use them to track metrics over time, and to quickly see how your systems are performing. You can also use them to compare metrics from different systems and applications.
-
-Guance Cloud's dashboard is used to clearly show the range in which the metric data values are located. It is suitable for slicing messy data into points.
+Guance Cloud's dashboard is used to clearly show the range in which the metric data values are located. It is suitable
+for slicing messy data into points.
 
 ## Create
 
@@ -34,7 +42,8 @@ The first let me create a resource. We will send the create operation to the res
 
 ```terraform
 resource "guance_dashboard" "demo" {
-	name        = "oac-demo"
+  name     = "oac-demo"
+  manifest = file("${path.module}/dashboard.json")
 }
 ```
 
@@ -45,163 +54,12 @@ resource "guance_dashboard" "demo" {
 
 ### Required
 
+- `manifest` (String) Dashboard Manifest
 - `name` (String) Dashboard Name
-
-### Optional
-
-- `extend` (String) Dashboard Extend
-- `mapping` (Attributes List) Dashboard Mapping (see [below for nested schema](#nestedatt--mapping))
-- `tags` (List of String) Dashboard Tag Names
-- `template` (Attributes) Dashboard Template Info (see [below for nested schema](#nestedatt--template))
 
 ### Read-Only
 
-- `created_at` (String) Timestamp of the last Terraform update of the order.
-- `id` (String) Numeric identifier of the order.
-
-<a id="nestedatt--mapping"></a>
-### Nested Schema for `mapping`
-
-Required:
-
-- `class` (String) Class Name
-- `datasource` (String) Data Source
-- `field` (String) Field Name
-- `mapping` (String) Mapping Field Name
-
-
-<a id="nestedatt--template"></a>
-### Nested Schema for `template`
-
-Required:
-
-- `title` (String) Dashboard Title
-
-Optional:
-
-- `dashboard` (Attributes) Dashboard Info (see [below for nested schema](#nestedatt--template--dashboard))
-- `icon_set` (Attributes) Dashboard Icon Set (see [below for nested schema](#nestedatt--template--icon_set))
-- `main` (Attributes) Dashboard Main (see [below for nested schema](#nestedatt--template--main))
-- `summary` (String) Dashboard Summary
-
-<a id="nestedatt--template--dashboard"></a>
-### Nested Schema for `template.dashboard`
-
-Optional:
-
-- `extend` (String) Dashboard Extend
-- `mapping` (Attributes List) Dashboard Mapping (see [below for nested schema](#nestedatt--template--dashboard--mapping))
-
-<a id="nestedatt--template--dashboard--mapping"></a>
-### Nested Schema for `template.dashboard.mapping`
-
-Required:
-
-- `class` (String) Class Name
-- `datasource` (String) Data Source
-- `field` (String) Field Name
-- `mapping` (String) Mapping Field Name
-
-
-
-<a id="nestedatt--template--icon_set"></a>
-### Nested Schema for `template.icon_set`
-
-Optional:
-
-- `md` (String) Middle Icon
-- `sm` (String) Small Icon
-
-
-<a id="nestedatt--template--main"></a>
-### Nested Schema for `template.main`
-
-Required:
-
-- `type` (String) Dashboard Type
-
-Optional:
-
-- `charts` (Attributes List) Dashboard Charts (see [below for nested schema](#nestedatt--template--main--charts))
-- `groups` (List of String) Dashboard Groups
-- `vars` (Attributes List) Dashboard Vars (see [below for nested schema](#nestedatt--template--main--vars))
-
-<a id="nestedatt--template--main--charts"></a>
-### Nested Schema for `template.main.charts`
-
-Required:
-
-- `name` (String) Chart Name
-- `type` (String) Chart Type
-
-Optional:
-
-- `group` (String) Chart Group
-- `pos` (Attributes) Chart Position Info (see [below for nested schema](#nestedatt--template--main--charts--pos))
-- `queries` (Attributes List) Chart Query Info (see [below for nested schema](#nestedatt--template--main--charts--queries))
-
-<a id="nestedatt--template--main--charts--pos"></a>
-### Nested Schema for `template.main.charts.queries`
-
-Required:
-
-- `h` (Number) Chart Height
-- `i` (String) TODO: What is i?
-- `w` (Number) Chart Width
-- `x` (Number) Chart X
-- `y` (Number) Chart Y
-
-
-<a id="nestedatt--template--main--charts--queries"></a>
-### Nested Schema for `template.main.charts.queries`
-
-Required:
-
-- `checked` (Boolean) Checked
-- `datasource` (String) Datasource
-- `qtype` (String) Query Type
-- `query` (Attributes) Query (see [below for nested schema](#nestedatt--template--main--charts--queries--query))
-
-Optional:
-
-- `unit` (String) Unit
-
-<a id="nestedatt--template--main--charts--queries--query"></a>
-### Nested Schema for `template.main.charts.queries.query`
-
-Required:
-
-- `density` (String) Density
-- `filter` (Attributes List) Filter (see [below for nested schema](#nestedatt--template--main--charts--queries--query--filter))
-- `group_by` (String) Group By
-- `group_by_time` (String) Group By Time
-- `q` (String) Query
-
-<a id="nestedatt--template--main--charts--queries--query--filter"></a>
-### Nested Schema for `template.main.charts.queries.query.q`
-
-Required:
-
-- `logic` (String) Logic
-- `name` (String) Field Name
-- `op` (String) Operator
-- `value` (String) Value
-
-
-
-
-
-<a id="nestedatt--template--main--vars"></a>
-### Nested Schema for `template.main.vars`
-
-Required:
-
-- `name` (String) Var Name
-- `type` (String) Var Type
-- `value` (String) Var Value
-
-Optional:
-
-- `label` (String) Var Label
+- `created_at` (String) The RFC3339/ISO8601 time string of resource created at.
+- `id` (String) The Guance Resource Name (GRN) of cloud resource.
 
 

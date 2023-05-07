@@ -2,6 +2,7 @@ package guance
 
 import (
 	"context"
+	_ "embed"
 	"fmt"
 	"os"
 	"strings"
@@ -15,6 +16,9 @@ import (
 	"github.com/GuanceCloud/terraform-provider-guance/internal/sdk"
 	ccv1 "github.com/GuanceCloud/terraform-provider-guance/internal/sdk/api/cloudcontrol/v1"
 )
+
+//go:embed README.md
+var doc string
 
 // Ensure the implementation satisfies the expected interfaces
 var (
@@ -31,8 +35,8 @@ type guanceProvider struct{}
 
 // guanceProviderModel maps provider schema data to a Go type.
 type guanceProviderModel struct {
-	Region types.String `tfsdk:"region"`
-	Token  types.String `tfsdk:"token"`
+	Region      types.String `tfsdk:"region"`
+	AccessToken types.String `tfsdk:"access_token"`
 }
 
 // Metadata returns the provider type name.
@@ -43,16 +47,19 @@ func (p *guanceProvider) Metadata(_ context.Context, _ provider.MetadataRequest,
 // Schema defines the provider-level schema for configuration data.
 func (p *guanceProvider) Schema(_ context.Context, _ provider.SchemaRequest, resp *provider.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Description: "Interact with Guance Cloud.",
+		Description:         "Interact with Guance Cloud.",
+		MarkdownDescription: doc,
 		Attributes: map[string]schema.Attribute{
 			"region": schema.StringAttribute{
-				Description: "Region for Guance Cloud API. May also be provided via GUANCE_REGION environment variable.",
-				Optional:    true,
+				Description:         "Region for Guance Cloud API. May also be provided via GUANCE_REGION environment variable. See https://github.com/GuanceCloud/terraform-provider-guance for a list of available regions.",
+				MarkdownDescription: "Region for Guance Cloud API. May also be provided via GUANCE_REGION environment variable. See [GitHub](https://github.com/GuanceCloud/terraform-provider-guance) for a list of available regions.",
+				Optional:            true,
 			},
-			"token": schema.StringAttribute{
-				Description: "Access token for Guance Cloud API. May also be provided via GUANCE_TOKEN environment variable.",
-				Optional:    true,
-				Sensitive:   true,
+			"access_token": schema.StringAttribute{
+				Description:         "Access token for Guance Cloud API. May also be provided via GUANCE_ACCESS_TOKEN environment variable. Get an Key ID from https://console.guance.com/workspace/apiManage as access token.",
+				MarkdownDescription: "Access token for Guance Cloud API. May also be provided via GUANCE_ACCESS_TOKEN environment variable. Get an Key ID from [Guance Cloud](https://console.guance.com/workspace/apiManage) as access token.",
+				Optional:            true,
+				Sensitive:           true,
 			},
 		},
 	}
@@ -75,14 +82,14 @@ func (p *guanceProvider) Configure(ctx context.Context, req provider.ConfigureRe
 		return
 	}
 
-	accessToken := getConfigField("token", config.Token, resp)
+	accessToken := getConfigField("access_token", config.AccessToken, resp)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
 	ctx = tflog.SetField(ctx, "guance_region", region)
-	ctx = tflog.SetField(ctx, "guance_token", accessToken)
-	ctx = tflog.MaskFieldValuesWithFieldKeys(ctx, "guance_token")
+	ctx = tflog.SetField(ctx, "guance_access_token", accessToken)
+	ctx = tflog.MaskFieldValuesWithFieldKeys(ctx, "guance_access_token")
 
 	tflog.Debug(ctx, "Creating Guance Cloud client")
 
