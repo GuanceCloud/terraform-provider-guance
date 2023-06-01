@@ -5,9 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
-	"github.com/tidwall/gjson"
 
 	"github.com/GuanceCloud/terraform-provider-guance/internal/helpers/tfcodec"
 	ccv1 "github.com/GuanceCloud/terraform-provider-guance/internal/sdk/api/cloudcontrol/v1"
@@ -94,29 +92,6 @@ func (c *Client[T]) Read(ctx context.Context, out T) error {
 	out.SetId(rsResp.ResourceDescription.Identifier)
 	out.SetCreatedAt(rsResp.ResourceDescription.CreatedAt)
 	return nil
-}
-
-type Filter struct {
-	Name   types.String   `tfsdk:"name"`
-	Values []types.String `tfsdk:"values"`
-}
-
-func (f *Filter) IsOK(state string) bool {
-	for _, value := range f.Values {
-		if gjson.Get(state, f.Name.ValueString()).String() != value.ValueString() {
-			return false
-		}
-	}
-	return true
-}
-
-func FilterAllSuccess(state string, filters ...*Filter) bool {
-	for _, filter := range filters {
-		if !filter.IsOK(state) {
-			return false
-		}
-	}
-	return true
 }
 
 // List lists resources.
