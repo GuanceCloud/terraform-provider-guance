@@ -8,3 +8,19 @@ Relationships:
 graph LR
     A[Workspace] --> B[Member]
 ```
+
+## Example Usage
+
+```terraform
+variable "email" {
+  type = string
+}
+
+data "guance_members" "demo" {
+  search = var.email
+}
+
+output "member" {
+  value = data.guance_members.demo.members
+}
+```

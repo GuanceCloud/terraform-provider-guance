@@ -25,16 +25,16 @@ variable "email" {
 }
 
 data "guance_members" "demo" {
-  filters = [
-    {
-      name   = "email"
-      values = [var.email]
-    }
-  ]
+  search = var.email
 }
 
 resource "guance_membergroup" "demo" {
-  name       = "oac-demo"
-  member_ids = data.guance_members.demo.items[*].id
+  name          = "oac-demo2"
+  account_uuids = data.guance_members.demo.members[*].uuid
+}
+
+output "member" {
+  value = data.guance_members.demo.members
 }
 ```
+

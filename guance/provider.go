@@ -13,8 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 
-	"github.com/GuanceCloud/terraform-provider-guance/internal/sdk"
-	ccv1 "github.com/GuanceCloud/terraform-provider-guance/internal/sdk/api/cloudcontrol/v1"
+	"github.com/GuanceCloud/terraform-provider-guance/internal/api"
 )
 
 //go:embed README.md
@@ -35,8 +34,9 @@ type guanceProvider struct{}
 
 // guanceProviderModel maps provider schema data to a Go type.
 type guanceProviderModel struct {
-	Region      types.String `tfsdk:"region"`
 	AccessToken types.String `tfsdk:"access_token"`
+	EndPoint    types.String `tfsdk:"end_point"`
+	Region      types.String `tfsdk:"region"`
 }
 
 // Metadata returns the provider type name.
@@ -53,6 +53,11 @@ func (p *guanceProvider) Schema(_ context.Context, _ provider.SchemaRequest, res
 			"region": schema.StringAttribute{
 				Description:         "Region for Guance Cloud API. May also be provided via GUANCE_REGION environment variable. See https://github.com/GuanceCloud/terraform-provider-guance for a list of available regions.",
 				MarkdownDescription: "Region for Guance Cloud API. May also be provided via GUANCE_REGION environment variable. See [GitHub](https://github.com/GuanceCloud/terraform-provider-guance) for a list of available regions.",
+				Optional:            true,
+			},
+			"end_point": schema.StringAttribute{
+				Description:         "EndPoint for Guance Cloud API. May also be provided via GUANCE_END_POINT environment variable. See https://github.com/GuanceCloud/terraform-provider-guance for a list of available regions.",
+				MarkdownDescription: "EndPoint for Guance Cloud API. May also be provided via GUANCE_END_POINT environment variable. See [GitHub](https://github.com/GuanceCloud/terraform-provider-guance) for a list of available regions.",
 				Optional:            true,
 			},
 			"access_token": schema.StringAttribute{
@@ -77,28 +82,23 @@ func (p *guanceProvider) Configure(ctx context.Context, req provider.ConfigureRe
 		return
 	}
 
-	region := getConfigField("region", config.Region, resp)
+	accessToken := getConfigField("access_token", config.AccessToken, false, resp)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	accessToken := getConfigField("access_token", config.AccessToken, resp)
-	if resp.Diagnostics.HasError() {
-		return
-	}
+	region := getConfigField("region", config.Region, true, resp)
+	endPoint := getConfigField("end_point", config.EndPoint, true, resp)
 
 	ctx = tflog.SetField(ctx, "guance_region", region)
+	ctx = tflog.SetField(ctx, "guance_end_point", endPoint)
 	ctx = tflog.SetField(ctx, "guance_access_token", accessToken)
 	ctx = tflog.MaskFieldValuesWithFieldKeys(ctx, "guance_access_token")
 
 	tflog.Debug(ctx, "Creating Guance Cloud client")
 
 	// Create a new Guance Cloud client using the configuration values
-	client, err := ccv1.NewClient(
-		ccv1.WithRegion(region),
-		ccv1.WithWait(true),
-		ccv1.WithAccessToken(accessToken),
-	)
+	client, err := api.NewClient(region, accessToken, endPoint)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to Create Guance Cloud API Client",
@@ -111,13 +111,13 @@ func (p *guanceProvider) Configure(ctx context.Context, req provider.ConfigureRe
 
 	// Make the Guance Cloud client available during DataSource and Resource
 	// type Configure methods.
-	resp.DataSourceData = &sdk.Client[sdk.Resource]{Client: client}
-	resp.ResourceData = &sdk.Client[sdk.Resource]{Client: client}
+	resp.DataSourceData = client
+	resp.ResourceData = client
 
 	tflog.Info(ctx, "Configured Guance Cloud client", map[string]any{"success": true})
 }
 
-func getConfigField(name string, value types.String, resp *provider.ConfigureResponse) string {
+func getConfigField(name string, value types.String, allowEmpty bool, resp *provider.ConfigureResponse) string {
 	// If practitioner provided a configuration value for any of the
 	// attributes, it must be a known value.
 
@@ -147,7 +147,7 @@ func getConfigField(name string, value types.String, resp *provider.ConfigureRes
 	// If any of the expected configurations are missing, return
 	// errors with provider-specific guidance.
 
-	if valueString == "" {
+	if !allowEmpty && valueString == "" {
 		resp.Diagnostics.AddAttributeError(
 			path.Root(name),
 			fmt.Sprintf("Missing Guance Cloud API %s", strings.ToTitle(name)),

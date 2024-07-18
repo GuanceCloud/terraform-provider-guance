@@ -9,8 +9,7 @@ description: |-
   By writing a pipeline script, you can customize the structure of the log and use the cut fields as attributes.
   By cutting out the attribute fields, we can quickly filter the relevant logs and perform data association analysis to
   help us quickly locate and solve problems.
-  Create
-  The first let me create a resource. We will send the create operation to the resource management service
+  Example Usage
   ```terraform
   resource "guancepipeline" "demo" {
     name     = "oac-demo"
@@ -72,9 +71,7 @@ By writing a pipeline script, you can customize the structure of the log and use
 By cutting out the attribute fields, we can quickly filter the relevant logs and perform data association analysis to
 help us quickly locate and solve problems.
 
-## Create
-
-The first let me create a resource. We will send the create operation to the resource management service
+## Example Usage
 
 ```terraform
 resource "guance_pipeline" "demo" {
@@ -133,20 +130,30 @@ resource "guance_pipeline" "demo" {
 
 ### Required
 
-- `category` (String) Category, value must be one of: *logging*, *object*, *custom_object*, *network*, *tracing*, *rum*, *security*, *keyevent*, *metric*, other value will be ignored.
+- `as_default` (Number) Is Default Pipeline
+- `category` (String) Category, value must be one of: *logging*, *object*, *custom_object*, *network*, *tracing*, *rum*, *security*, *keyevent*, *metric*, *profiling*, other value will be ignored.
 - `content` (String) Pipeline file content
-- `name` (String) Name
+- `is_force` (Boolean) Is Force Overwrite. If the field `as_default` is true, `is_force` will be set to be true automatically.
+- `name` (String) The name of the pipeline.
+- `source` (List of String) Data source list
+- `test_data` (String) Test data
+- `type` (String) The type of the pipeline.Valid value: `local`, `central`
 
 ### Optional
 
-- `is_default` (Boolean) Is Default Pipeline
-- `is_force` (Boolean) Is Force Overwrite
-- `source` (List of String) Data source list
-- `test_data` (String) Test data
+- `extend` (Attributes) (see [below for nested schema](#nestedatt--extend))
 
 ### Read-Only
 
-- `created_at` (String) The RFC3339/ISO8601 time string of resource created at.
-- `id` (String) The Guance Resource Name (GRN) of cloud resource.
+- `create_at` (String) The creation time of the resource, in seconds as a timestamp.
+- `uuid` (String) The uuid of the pipeline.
+
+<a id="nestedatt--extend"></a>
+### Nested Schema for `extend`
+
+Optional:
+
+- `app_id` (List of String)
+- `measurement` (List of String)
 
 

@@ -1,4 +1,4 @@
-package membergroup
+package role
 
 import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -8,25 +8,30 @@ import (
 )
 
 var resourceSchema = schema.Schema{
-	Description:         "Member Group",
+	Description:         "Role is a set of permissions that can be assigned to a user or a group of users.",
 	MarkdownDescription: resourceDocument,
 	Attributes: map[string]schema.Attribute{
 		"uuid": schema.StringAttribute{
-			Description: "The UUID of resource.",
+			Description: "The UUID of the role.",
 			Computed:    true,
 			PlanModifiers: []planmodifier.String{
 				stringplanmodifier.UseStateForUnknown(),
 			},
 		},
-
 		"name": schema.StringAttribute{
-			Description: "The name of resource.",
+			Description: "The name of the role.",
 			Required:    true,
 		},
 
-		"account_uuids": schema.ListAttribute{
-			Description: "Member uuid list",
+		"desc": schema.StringAttribute{
+			Description: "The description of the role.",
+			Computed:    true,
 			Optional:    true,
+		},
+
+		"keys": schema.ListAttribute{
+			Description: "The permission keys.",
+			Required:    true,
 			ElementType: types.StringType,
 		},
 	},

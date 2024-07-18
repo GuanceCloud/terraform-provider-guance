@@ -12,26 +12,26 @@ The remainder of this document will focus on the development aspects of the prov
 
 The resource supports as follows:
 
-* [x] notification
 * [x] pipeline
 * [x] member group
-* [x] alert policy
-* [x] mute
 * [x] black list
-* [x] monitor, see built-in modules at [terraform-guance-monitor](https://github.com/GuanceCloud/terraform-guance-monitor)
-* [x] dashboard, see built-in modules at [terraform-guance-dashboard](https://github.com/GuanceCloud/terraform-guance-dashboard)
+* [x] role
 
 The data source supports as follows:
 
 * [x] members
+* [x] permissions
 
 The region supports as follows:
 
 * [x] hangzhou
 * [x] ningxia
-* [x] zhangjiakou
 * [x] guangzhou
+* [x] vnet
+* [x] hongkong
 * [x] oregon
+* [x] frankfurt
+* [x] singapore
 
 If there are more resources you need, create an [issue](https://github.com/GuanceCloud/terraform-provider-guance/issues) for free.
 
@@ -54,10 +54,6 @@ that return all the details about which versions are currently available for a p
 * [Go](https://go.dev/doc/install) (1.19)
 
 ## Development
-
-### Testing
-
-Guance Cloud Code Generation Pipeline generates this repository. So don't need to test. Please create issues for free.
 
 ### Generating documentation
 

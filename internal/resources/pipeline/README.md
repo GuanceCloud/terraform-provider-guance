@@ -8,9 +8,7 @@ By writing a pipeline script, you can customize the structure of the log and use
 By cutting out the attribute fields, we can quickly filter the relevant logs and perform data association analysis to
 help us quickly locate and solve problems.
 
-## Create
-
-The first let me create a resource. We will send the create operation to the resource management service
+## Example Usage
 
 ```terraform
 resource "guance_pipeline" "demo" {

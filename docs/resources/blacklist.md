@@ -7,17 +7,14 @@ description: |-
   Guance Cloud supports filtering data that meets the conditions by setting a blacklist.
   After configuring the blacklist, the data that meets the conditions will no longer be reported to the Guance Cloud
   workspace, helping you save data storage costs.
-  Create
-  The first let me create a resource. We will send the create operation to the resource management service
+  Example Usage
   ```terraform
   resource "guance_blacklist" "demo" {
-    source = {
-      type = "logging"
-      name = "nginx"
-    }
-  filter_rules = [
+    type   = "logging"
+    source = "mysql"
+  filters = [
       {
-        name      = "foo"
+        name      = "foo1"
         operation = "in"
         condition = "and"
         values    = ["oac-*"]
@@ -36,20 +33,16 @@ Guance Cloud supports filtering data that meets the conditions by setting a blac
 After configuring the blacklist, the data that meets the conditions will no longer be reported to the Guance Cloud
 workspace, helping you save data storage costs.
 
-## Create
-
-The first let me create a resource. We will send the create operation to the resource management service
+## Example Usage
 
 ```terraform
 resource "guance_blacklist" "demo" {
-  source = {
-    type = "logging"
-    name = "nginx"
-  }
+  type   = "logging"
+  source = "mysql"
 
-  filter_rules = [
+  filters = [
     {
-      name      = "foo"
+      name      = "foo1"
       operation = "in"
       condition = "and"
       values    = ["oac-*"]
@@ -65,40 +58,29 @@ resource "guance_blacklist" "demo" {
 
 ### Required
 
-- `source` (Attributes) Source (see [below for nested schema](#nestedatt--source))
+- `source` (String) The source of the resource.
+- `type` (String) The type of the resource.
 
 ### Optional
 
-- `filter_rules` (Attributes List) Filters (see [below for nested schema](#nestedatt--filter_rules))
+- `filters` (Attributes List) The filters of the resource. (see [below for nested schema](#nestedatt--filters))
 
 ### Read-Only
 
-- `created_at` (String) The RFC3339/ISO8601 time string of resource created at.
-- `id` (String) The Guance Resource Name (GRN) of cloud resource.
+- `created_at` (String) The timestamp seconds of the resource created at.
+- `uuid` (String) The uuid of resource.
 
-<a id="nestedatt--source"></a>
-### Nested Schema for `source`
-
-Required:
-
-- `type` (String) Source Type, value must be one of: *logging*, *object*, *custom_object*, *network*, *tracing*, *rum*, *security*, *keyevent*, *metric*, other value will be ignored.
-
-Optional:
-
-- `name` (String) Source
-
-
-<a id="nestedatt--filter_rules"></a>
-### Nested Schema for `filter_rules`
+<a id="nestedatt--filters"></a>
+### Nested Schema for `filters`
 
 Required:
 
-- `condition` (String) Condition, represented by DQL
-- `name` (String) Name
+- `condition` (String) The condition of the filter.
+- `name` (String) The name of the filter.
 - `operation` (String) Operation, value must be one of: *in*, *not in*, *match*, *not match*, other value will be ignored.
 
 Optional:
 
-- `values` (List of String) Values
+- `values` (List of String) The values of the filter.
 
 
