@@ -10,7 +10,7 @@ Interested in the provider's latest features, or want to make sure you're up to 
 
 Terraform supports a number of different methods for authenticating to Guance Cloud:
 
-* [Workspace Key ID](https://console.guance.com/workspace/apiManage)
+* [Workspace Key](https://console.guance.com/workspace/apiManage)
 
 ## Usage
 
@@ -23,7 +23,7 @@ terraform {
   required_providers {
     guance = {
       source = "GuanceCloud/guance"
-      version = "=0.0.4"
+      version = "=0.0.6"
     }
   }
 }
@@ -33,10 +33,10 @@ terraform {
 provider "guance" {
   # access_token = "your access token, recommend store in environment variable"
   region = "hangzhou"
+  # end_point = "https://openapi.guance.com"
 }
 ```
 
 ## More Examples
 
 * [Example Source Code](https://github.com/GuanceCloud/terraform-provider-guance/tree/main/examples)
-* [Interactive Guidelines](https://github.com/GuanceCloud/guance-scenarios)

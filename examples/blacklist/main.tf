@@ -1,12 +1,10 @@
 resource "guance_blacklist" "demo" {
-  source = {
-    type = "logging"
-    name = "nginx"
-  }
+  type   = "logging"
+  source = "mysql"
 
-  filter_rules = [
+  filters = [
     {
-      name      = "foo"
+      name      = "foo1"
       operation = "in"
       condition = "and"
       values    = ["oac-*"]
