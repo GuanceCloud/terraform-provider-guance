@@ -6,7 +6,6 @@ import (
 
 // memberResourceModel maps the resource schema data.
 type memberResourceModel struct {
-	ID       types.String `tfsdk:"id"`
 	UUID     types.String `tfsdk:"uuid"`
 	CreateAt types.String `tfsdk:"create_at"`
 	Email    types.String `tfsdk:"email"`
