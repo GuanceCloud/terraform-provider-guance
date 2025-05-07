@@ -91,11 +91,11 @@ var schemaFilter = map[string]schema.Attribute{
 	"operation": schema.StringAttribute{
 		Description: "The operation of the filter.",
 		MarkdownDescription: `
-		Operation, value must be one of: *in*, *not in*, *match*, *not match*, other value will be ignored.
+		Operation, value must be one of: *in*, *not_in*, *match*, *not_match*, other value will be ignored.
 		`,
 		Required: true,
 		Validators: []validator.String{
-			stringvalidator.OneOf("in", "not in", "match", "not match"),
+			stringvalidator.OneOf("in", "not_in", "match", "not_match"),
 		},
 	},
 
