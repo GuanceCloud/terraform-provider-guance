@@ -6,11 +6,16 @@ import (
 
 // blackListResourceModel maps the resource schema data.
 type blackListResourceModel struct {
-	UUID      types.String `tfsdk:"uuid"`
-	CreatedAt types.String `tfsdk:"created_at"`
-	Source    types.String `tfsdk:"source"`
-	Type      types.String `tfsdk:"type"`
-	Filters   []*filter    `tfsdk:"filters"`
+	UUID          types.String   `tfsdk:"uuid"`
+	Name          types.String   `tfsdk:"name"`
+	Desc          types.String   `tfsdk:"desc"`
+	CreateAt      types.String   `tfsdk:"create_at"`
+	UpdateAt      types.String   `tfsdk:"update_at"`
+	Source        types.String   `tfsdk:"source"`
+	Sources       []types.String `tfsdk:"sources"`
+	Type          types.String   `tfsdk:"type"`
+	Filters       []*filter      `tfsdk:"filters"`
+	WorkspaceUUID types.String   `tfsdk:"workspace_uuid"`
 }
 
 // filter maps the resource schema data.

@@ -14,11 +14,15 @@ description: |-
   resource "guancepipeline" "demo" {
     name     = "oac-demo"
     category = "logging"
-    source   = [
+    source = [
       "nginx"
     ]
-    isdefault = false
-    is_force   = false
+    asdefault           = 1
+    isforce             = false
+    type                 = "local"
+    isdisabled          = false
+    enablebylogbackup = 1
+    datatype            = "json"
   content = <<EOF
       add_pattern("date2", "%%{YEAR}[./]%%{MONTHNUM}[./]%%{MONTHDAY} %%{TIME}")
   # access log
@@ -55,6 +59,11 @@ description: |-
   testdata = <<EOF
       127.0.0.1 - - [24/Mar/2021:13:54:19 +0800] "GET /basicstatus HTTP/1.1" 200 97 "-" "Mozilla/5.0 (Macintosh; Intel Mac OS X 1110) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.72 Safari/537.36"
       EOF
+  extend = {
+      "appid"        = ["test", "test1"],
+      "measurement"   = ["nginxaccesslog"],
+      "loggingindex" = "xxxx"
+    }
   }
   ```
 ---
@@ -77,11 +86,15 @@ help us quickly locate and solve problems.
 resource "guance_pipeline" "demo" {
   name     = "oac-demo"
   category = "logging"
-  source   = [
+  source = [
     "nginx"
   ]
-  is_default = false
-  is_force   = false
+  as_default           = 1
+  is_force             = false
+  type                 = "local"
+  is_disabled          = false
+  enable_by_log_backup = 1
+  data_type            = "json"
 
   content = <<EOF
     add_pattern("date2", "%%{YEAR}[./]%%{MONTHNUM}[./]%%{MONTHDAY} %%{TIME}")
@@ -120,6 +133,12 @@ resource "guance_pipeline" "demo" {
   test_data = <<EOF
     127.0.0.1 - - [24/Mar/2021:13:54:19 +0800] "GET /basic_status HTTP/1.1" 200 97 "-" "Mozilla/5.0 (Macintosh; Intel Mac OS X 11_1_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.72 Safari/537.36"
     EOF
+
+  extend = {
+    "app_id"        = ["test", "test1"],
+    "measurement"   = ["nginx_access_log"],
+    "logging_index" = "xxxx"
+  }
 }
 ```
 
@@ -130,10 +149,8 @@ resource "guance_pipeline" "demo" {
 
 ### Required
 
-- `as_default` (Number) Is Default Pipeline
-- `category` (String) Category, value must be one of: *logging*, *object*, *custom_object*, *network*, *tracing*, *rum*, *security*, *keyevent*, *metric*, *profiling*, other value will be ignored.
+- `category` (String) Category, value must be one of: *logging*, *object*, *custom_object*, *network*, *tracing*, *rum*, *security*, *keyevent*, *metric*, *profiling*, *dialtesting*, *billing*, *keyevent*, other value will be ignored.
 - `content` (String) Pipeline file content
-- `is_force` (Boolean) Is Force Overwrite. If the field `as_default` is true, `is_force` will be set to be true automatically.
 - `name` (String) The name of the pipeline.
 - `source` (List of String) Data source list
 - `test_data` (String) Test data
@@ -141,12 +158,20 @@ resource "guance_pipeline" "demo" {
 
 ### Optional
 
+- `as_default` (Number) Is Default Pipeline
+- `data_type` (String) The type of the data. Valid value: `line_protocol`, `json`, `message`.
+- `enable_by_log_backup` (Number) Enable pipeline processing (1=enable, 0=disable) for forwarded data.
 - `extend` (Attributes) (see [below for nested schema](#nestedatt--extend))
+- `is_disabled` (Boolean) Is Disabled
+- `is_force` (Boolean) Is Force Overwrite. If the field `as_default` is true, `is_force` will be set to be true automatically.
 
 ### Read-Only
 
 - `create_at` (String) The creation time of the resource, in seconds as a timestamp.
+- `status` (Number) The status of the pipeline. Valid value: `0`, `2`.
+- `update_at` (String) The update time of the resource, in seconds as a timestamp.
 - `uuid` (String) The uuid of the pipeline.
+- `workspace_uuid` (String) The uuid of the workspace.
 
 <a id="nestedatt--extend"></a>
 ### Nested Schema for `extend`
@@ -154,6 +179,7 @@ resource "guance_pipeline" "demo" {
 Optional:
 
 - `app_id` (List of String)
+- `logging_index` (String)
 - `measurement` (List of String)
 
 
