@@ -74,8 +74,22 @@ func (r *pipelineResource) Create(ctx context.Context, req resource.CreateReques
 		return
 	}
 
+	isDisable := plan.IsDisabled.ValueBool()
+	if isDisable {
+		if err := r.disablePipeline([]string{content.UUID}, isDisable); err != nil {
+			resp.Diagnostics.AddError(
+				"Error updating pipeline",
+				"Could not create pipeline, unexpected error: "+err.Error(),
+			)
+			return
+		}
+	}
+
 	plan.UUID = types.StringValue(content.UUID)
+	plan.WorkspaceUUID = types.StringValue(content.WorkspaceUUID)
+	plan.Status = types.Int64Value(content.Status)
 	plan.CreateAt = types.StringValue(fmt.Sprintf("%d", content.CreateAt))
+	plan.UpdateAt = types.StringValue(fmt.Sprintf("%0.0f", content.UpdateAt))
 
 	// Set state to fully populated data
 	diags = resp.State.Set(ctx, plan)
@@ -110,10 +124,12 @@ func (r *pipelineResource) Read(ctx context.Context, req resource.ReadRequest, r
 	}
 
 	state.AsDefault = types.Int64Value(pl.AsDefault)
+	state.EnableByLogBackup = types.Int64Value(pl.EnableByLogBackup)
 	state.Category = types.StringValue(pl.Category)
 
 	// only set extend when it's not nil
-	if pl.Extend != nil && (pl.Extend.AppID != nil || pl.Extend.Measurement != nil) {
+	if pl.Extend != nil &&
+		(pl.Extend.AppID != nil || pl.Extend.Measurement != nil || pl.Extend.LoggingIndex != "") {
 		state.Extend = &pipelineExtend{}
 		for _, id := range pl.Extend.AppID {
 			state.Extend.AppID = append(state.Extend.AppID, types.StringValue(id))
@@ -121,6 +137,8 @@ func (r *pipelineResource) Read(ctx context.Context, req resource.ReadRequest, r
 		for _, m := range pl.Extend.Measurement {
 			state.Extend.Measurement = append(state.Extend.Measurement, types.StringValue(m))
 		}
+
+		state.Extend.LoggingIndex = types.StringValue(pl.Extend.LoggingIndex)
 	}
 
 	content, err := base64.StdEncoding.DecodeString(pl.Content)
@@ -133,8 +151,9 @@ func (r *pipelineResource) Read(ctx context.Context, req resource.ReadRequest, r
 	}
 
 	state.Content = types.StringValue(string(content))
-
+	state.WorkspaceUUID = types.StringValue(pl.WorkspaceUUID)
 	state.CreateAt = types.StringValue(fmt.Sprintf("%d", pl.CreateAt))
+	state.UpdateAt = types.StringValue(fmt.Sprintf("%d", int64(pl.UpdateAt)))
 	state.IsForce = types.BoolValue(pl.IsForce)
 
 	testData, err := base64.StdEncoding.DecodeString(pl.TestData)
@@ -154,6 +173,9 @@ func (r *pipelineResource) Read(ctx context.Context, req resource.ReadRequest, r
 	}
 
 	state.Type = types.StringValue(pl.Type)
+	state.Status = types.Int64Value(pl.Status)
+	state.IsDisabled = types.BoolValue(pl.Status != 0)
+	state.DataType = types.StringValue(pl.DataType)
 
 	// Set refreshed state
 	diags = resp.State.Set(ctx, &state)
@@ -166,17 +188,32 @@ func (r *pipelineResource) Read(ctx context.Context, req resource.ReadRequest, r
 // Update updates the resource and sets the updated Terraform state on success.
 func (r *pipelineResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	// Retrieve values from plan
-	var plan pipelineResourceModel
-	diags := req.Plan.Get(ctx, &plan)
-	resp.Diagnostics.Append(diags...)
+	var plan, state pipelineResourceModel
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
+	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	item := r.getPipelineFromPlan(&plan)
-	item.UUID = plan.UUID.ValueString()
 
+	item := r.getPipelineFromPlan(&plan)
+	// item.UUID = plan.UUID.ValueString()
+	itemID := plan.UUID.ValueString()
+
+	// disable or enable
+	if state.IsDisabled != plan.IsDisabled {
+		if err := r.disablePipeline([]string{itemID}, plan.IsDisabled.ValueBool()); err != nil {
+			resp.Diagnostics.AddError(
+				"Error updating pipeline",
+				"Could not update pipeline, unexpected error: "+err.Error(),
+			)
+			return
+		}
+	}
+
+	// update pipeline, omit uuid field
+	item.UUID = ""
 	content := &api.Pipeline{}
-	err := r.client.Update(consts.TypeNamePipeline, item.UUID, item, content)
+	err := r.client.Update(consts.TypeNamePipeline, itemID, item, content)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error updating pipeline",
@@ -185,8 +222,11 @@ func (r *pipelineResource) Update(ctx context.Context, req resource.UpdateReques
 		return
 	}
 
+	plan.Status = types.Int64Value(content.Status)
+	plan.UpdateAt = types.StringValue(fmt.Sprintf("%.0f", content.UpdateAt))
+
 	// Set state to fully populated data
-	diags = resp.State.Set(ctx, plan)
+	diags := resp.State.Set(ctx, plan)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -221,24 +261,24 @@ func (r *pipelineResource) ImportState(ctx context.Context, req resource.ImportS
 
 func (r *pipelineResource) getPipelineFromPlan(plan *pipelineResourceModel) *api.Pipeline {
 	item := &api.Pipeline{
-		Name:      plan.Name.ValueString(),
-		Category:  plan.Category.ValueString(),
-		Content:   base64.StdEncoding.EncodeToString([]byte(plan.Content.ValueString())),
-		TestData:  base64.StdEncoding.EncodeToString([]byte(plan.TestData.ValueString())),
-		Type:      plan.Type.ValueString(),
-		UUID:      plan.UUID.ValueString(),
-		AsDefault: plan.AsDefault.ValueInt64(),
-		IsForce:   plan.IsForce.ValueBool(),
+		Name:              plan.Name.ValueString(),
+		Category:          plan.Category.ValueString(),
+		Content:           base64.StdEncoding.EncodeToString([]byte(plan.Content.ValueString())),
+		TestData:          base64.StdEncoding.EncodeToString([]byte(plan.TestData.ValueString())),
+		Type:              plan.Type.ValueString(),
+		UUID:              plan.UUID.ValueString(),
+		AsDefault:         plan.AsDefault.ValueInt64(),
+		EnableByLogBackup: plan.EnableByLogBackup.ValueInt64(),
+		IsForce:           plan.IsForce.ValueBool(),
+		DataType:          plan.DataType.ValueString(),
 	}
 
-	if len(plan.Source) > 0 {
-		source := []string{}
-		for _, s := range plan.Source {
-			source = append(source, s.ValueString())
-		}
-
-		item.Source = source
+	source := []string{}
+	for _, s := range plan.Source {
+		source = append(source, s.ValueString())
 	}
+
+	item.Source = source
 
 	if plan.Extend != nil {
 		item.Extend = &api.PipelineExtend{}
@@ -257,6 +297,10 @@ func (r *pipelineResource) getPipelineFromPlan(plan *pipelineResourceModel) *api
 			}
 			item.Extend.Measurement = measurement
 		}
+
+		if plan.Extend.LoggingIndex.ValueString() != "" {
+			item.Extend.LoggingIndex = plan.Extend.LoggingIndex.ValueString()
+		}
 	}
 	// set is_force to true when as_default is set to 1
 	if item.AsDefault == 1 {
@@ -264,4 +308,16 @@ func (r *pipelineResource) getPipelineFromPlan(plan *pipelineResourceModel) *api
 	}
 
 	return item
+}
+
+func (r *pipelineResource) disablePipeline(itemIDs []string, isDisable bool) error {
+	isSuccess := false
+	if err := r.client.DisablePipeline(itemIDs, isDisable, &isSuccess); err != nil {
+		return fmt.Errorf("disable failed: %w", err)
+	}
+
+	if !isSuccess {
+		return fmt.Errorf("disabled failed")
+	}
+	return nil
 }

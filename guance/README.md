@@ -23,7 +23,7 @@ terraform {
   required_providers {
     guance = {
       source = "GuanceCloud/guance"
-      version = "=0.0.6"
+      version = "=0.0.7-alpha1"
     }
   }
 }
