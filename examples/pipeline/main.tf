@@ -1,13 +1,17 @@
 resource "guance_pipeline" "demo" {
-  name     = "terraform_test12"
+  name     = "oac-demo"
   category = "logging"
   source = [
     "nginx"
   ]
-  as_default = 1
-  is_force   = false
-  type       = "local"
-  content    = <<EOF
+  as_default           = 1
+  is_force             = false
+  type                 = "local"
+  is_disabled          = false
+  enable_by_log_backup = 1
+  data_type            = "json"
+
+  content = <<EOF
     add_pattern("date2", "%%{YEAR}[./]%%{MONTHNUM}[./]%%{MONTHDAY} %%{TIME}")
     
     # access log
@@ -46,7 +50,8 @@ resource "guance_pipeline" "demo" {
     EOF
 
   extend = {
-    "app_id"      = ["test"],
-    "measurement" = ["nginx_access_log"]
+    "app_id"        = ["test", "test1"],
+    "measurement"   = ["nginx_access_log"],
+    "logging_index" = "xxxx"
   }
 }

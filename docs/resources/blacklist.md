@@ -10,8 +10,10 @@ description: |-
   Example Usage
   ```terraform
   resource "guance_blacklist" "demo" {
+    name = "blacklist-demo"
     type   = "logging"
-    source = "mysql"
+    sources = ["mysql", "oracle"]
+    desc = "this is a demo"
   filters = [
       {
         name      = "foo1"
@@ -37,8 +39,10 @@ workspace, helping you save data storage costs.
 
 ```terraform
 resource "guance_blacklist" "demo" {
+  name = "blacklist-demo"
   type   = "logging"
-  source = "mysql"
+  sources = ["mysql", "oracle"]
+  desc = "this is a demo"
 
   filters = [
     {
@@ -49,6 +53,7 @@ resource "guance_blacklist" "demo" {
     }
   ]
 }
+
 ```
 
 
@@ -58,17 +63,22 @@ resource "guance_blacklist" "demo" {
 
 ### Required
 
-- `source` (String) The source of the resource.
+- `name` (String) The name of resource.
 - `type` (String) The type of the resource.
 
 ### Optional
 
+- `desc` (String) The description of resource.
 - `filters` (Attributes List) The filters of the resource. (see [below for nested schema](#nestedatt--filters))
+- `source` (String) The source of the resource.
+- `sources` (List of String) The source list of the resource.
 
 ### Read-Only
 
-- `created_at` (String) The timestamp seconds of the resource created at.
+- `create_at` (String) The timestamp seconds of the resource created at.
+- `update_at` (String) The timestamp seconds of the resource updated at.
 - `uuid` (String) The uuid of resource.
+- `workspace_uuid` (String) The uuid of the workspace.
 
 <a id="nestedatt--filters"></a>
 ### Nested Schema for `filters`
@@ -77,7 +87,7 @@ Required:
 
 - `condition` (String) The condition of the filter.
 - `name` (String) The name of the filter.
-- `operation` (String) Operation, value must be one of: *in*, *not in*, *match*, *not match*, other value will be ignored.
+- `operation` (String) Operation, value must be one of: *in*, *not_in*, *match*, *not_match*, other value will be ignored.
 
 Optional:
 

@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/GuanceCloud/terraform-provider-guance/internal/api"
 	"github.com/GuanceCloud/terraform-provider-guance/internal/consts"
@@ -73,7 +74,9 @@ func (r *blackListResource) Create(ctx context.Context, req resource.CreateReque
 	}
 
 	plan.UUID = types.StringValue(content.UUID)
-	plan.CreatedAt = types.StringValue(fmt.Sprintf("%d", content.CreateAt))
+	plan.CreateAt = types.StringValue(fmt.Sprintf("%d", content.CreateAt))
+	plan.UpdateAt = types.StringValue(fmt.Sprintf("%.0f", content.UpdateAt))
+	plan.WorkspaceUUID = types.StringValue(content.WorkspaceUUID)
 
 	// Set state to fully populated data
 	diags = resp.State.Set(ctx, plan)
@@ -107,9 +110,23 @@ func (r *blackListResource) Read(ctx context.Context, req resource.ReadRequest, 
 		return
 	}
 
-	state.CreatedAt = types.StringValue(fmt.Sprintf("%d", content.CreateAt))
+	state.CreateAt = types.StringValue(fmt.Sprintf("%d", content.CreateAt))
+	state.UpdateAt = types.StringValue(fmt.Sprintf("%.0f", content.UpdateAt))
+	state.WorkspaceUUID = types.StringValue(content.WorkspaceUUID)
 	state.UUID = types.StringValue(content.UUID)
-	state.Source = types.StringValue(content.Source)
+	state.Name = types.StringValue(content.Name)
+	state.Desc = types.StringValue(content.Desc)
+
+	// use sources if it's not empty, otherwise use source
+	if len(content.Sources) > 0 {
+		state.Sources = make([]basetypes.StringValue, len(content.Sources))
+		for i, s := range content.Sources {
+			state.Sources[i] = types.StringValue(s)
+		}
+	} else {
+		state.Source = types.StringValue(content.Source)
+	}
+
 	state.Type = types.StringValue(content.Type)
 	state.Filters = make([]*filter, 0)
 	for _, item := range content.Filters {
@@ -145,9 +162,8 @@ func (r *blackListResource) Update(ctx context.Context, req resource.UpdateReque
 	}
 
 	item := r.getBlacklistFromPlan(&plan)
-	item.UUID = plan.UUID.ValueString()
 	body := &api.Blacklist{}
-	err := r.client.Update(consts.TypeNameBlackList, item.UUID, item, body)
+	err := r.client.Update(consts.TypeNameBlackList, plan.UUID.ValueString(), item, body)
 
 	if err != nil {
 		resp.Diagnostics.AddError(
@@ -156,6 +172,8 @@ func (r *blackListResource) Update(ctx context.Context, req resource.UpdateReque
 		)
 		return
 	}
+
+	plan.UpdateAt = types.StringValue(fmt.Sprintf("%.0f", body.UpdateAt))
 
 	// Set state to fully populated data
 	diags = resp.State.Set(ctx, plan)
@@ -192,8 +210,18 @@ func (r *blackListResource) ImportState(ctx context.Context, req resource.Import
 
 func (r *blackListResource) getBlacklistFromPlan(plan *blackListResourceModel) *api.Blacklist {
 	item := &api.Blacklist{
-		Type:   plan.Type.ValueString(),
-		Source: plan.Source.ValueString(),
+		Type: plan.Type.ValueString(),
+		Name: plan.Name.ValueString(),
+		Desc: plan.Desc.ValueString(),
+	}
+
+	if len(plan.Sources) > 0 {
+		item.Sources = make([]string, len(plan.Sources))
+		for i, s := range plan.Sources {
+			item.Sources[i] = s.ValueString()
+		}
+	} else {
+		item.Source = plan.Source.ValueString()
 	}
 
 	if len(plan.Filters) > 0 {

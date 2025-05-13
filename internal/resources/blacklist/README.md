@@ -9,8 +9,10 @@ workspace, helping you save data storage costs.
 
 ```terraform
 resource "guance_blacklist" "demo" {
+  name = "blacklist-demo"
   type   = "logging"
-  source = "mysql"
+  sources = ["mysql", "oracle"]
+  desc = "this is a demo"
 
   filters = [
     {
@@ -21,4 +23,5 @@ resource "guance_blacklist" "demo" {
     }
   ]
 }
+
 ```
