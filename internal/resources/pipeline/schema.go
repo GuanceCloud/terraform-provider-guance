@@ -3,8 +3,6 @@ package pipeline
 import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
@@ -89,9 +87,6 @@ var resourceSchema = schema.Schema{
 		"is_force": schema.BoolAttribute{
 			MarkdownDescription: "Is Force Overwrite. If the field `as_default` is true, `is_force` will be set to be true automatically.",
 			Optional:            true,
-			PlanModifiers: []planmodifier.Bool{
-				boolplanmodifier.RequiresReplace(),
-			},
 		},
 		"is_disabled": schema.BoolAttribute{
 			Description: "Is Disabled",
@@ -114,9 +109,6 @@ var resourceSchema = schema.Schema{
 		"as_default": schema.Int64Attribute{
 			Description: "Is Default Pipeline",
 			Optional:    true,
-			PlanModifiers: []planmodifier.Int64{
-				int64planmodifier.RequiresReplace(),
-			},
 		},
 		"enable_by_log_backup": schema.Int64Attribute{
 			Description: "Enable pipeline processing (1=enable, 0=disable) for forwarded data.",
