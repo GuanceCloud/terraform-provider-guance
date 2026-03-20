@@ -7,7 +7,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-log/tflog"
 
 	"github.com/GuanceCloud/terraform-provider-guance/internal/api"
 )
@@ -85,7 +84,6 @@ func (d *membersDataSource) Read(ctx context.Context, req datasource.ReadRequest
 				UUID: types.StringValue(r.UUID),
 			})
 		}
-		tflog.Info(ctx, "member", map[string]interface{}{"member": member})
 		state.Members = append(state.Members, m)
 	}
 

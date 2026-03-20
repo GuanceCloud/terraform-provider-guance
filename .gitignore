@@ -3,6 +3,7 @@
 
 terraform-provider-guance
 bin
+.ignore*
 
 # Local .terraform directories
 **/.terraform/*
@@ -47,6 +48,7 @@ dist/
 *.swp
 .idea/
 .vscode/
+.trae/
 
 # Environment
 .env*

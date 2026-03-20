@@ -4,7 +4,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
 
-	"github.com/GuanceCloud/terraform-provider-guance/guance"
+	"github.com/GuanceCloud/terraform-provider-guance/provider"
 )
 
 const (
@@ -36,6 +36,6 @@ var (
 	// CLI command executed to create a provider server to which the CLI can
 	// reattach.
 	TestAccProtoV6ProviderFactories = map[string]func() (tfprotov6.ProviderServer, error){
-		"guance": providerserver.NewProtocol6WithError(guance.New()),
+		"guance": providerserver.NewProtocol6WithError(provider.New()),
 	}
 )

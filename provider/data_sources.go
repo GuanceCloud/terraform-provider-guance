@@ -1,4 +1,4 @@
-package guance
+package provider
 
 import (
 	"context"
@@ -13,5 +13,6 @@ func (p *guanceProvider) DataSources(_ context.Context) []func() datasource.Data
 	return []func() datasource.DataSource{
 		members.NewMembersDataSource,
 		permissions.NewPermissionsDataSource,
+		// default_region.NewDefaultRegionDataSource,
 	}
 }

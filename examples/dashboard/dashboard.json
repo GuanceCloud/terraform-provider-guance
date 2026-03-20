@@ -1,0 +1,310 @@
+{
+  "title": "TF-dashboard",
+  "summary": "An example dashboard created with Terraform",
+  "identifier": "identifier-example",
+  "dashboardOwnerType": "node",
+  "dashboardType": "CUSTOM",
+  "dashboardBindSet": [],
+  "dashboardExtend": {},
+  "dashboardMapping": [],
+  "iconSet": {},
+  "main": {
+    "chartGroupPos": [
+      "chtg_f3089d68cdc2404a8661090c33403695",
+      "chtg_951c1b070de54566ba111385feb38614",
+      "default"
+    ],
+    "charts": [
+      {
+        "chartGroupUUID": "chtg_f3089d68cdc2404a8661090c33403695",
+        "extend": {
+          "fixedTime": "",
+          "isRefresh": false,
+          "settings": {
+            "alias": [],
+            "changeWorkspace": false,
+            "chartType": "line",
+            "colors": [],
+            "compareType": [],
+            "connectNulls": true,
+            "currentChartType": "sequence",
+            "enablePreflightEstimate": false,
+            "fixedTime": "",
+            "globalUnit": [],
+            "isPercent": false,
+            "isSampling": true,
+            "isTimeInterval": true,
+            "legendPostion": "none",
+            "legendValues": "",
+            "levels": [],
+            "lineType": "linear",
+            "mainMeasurementQueryCode": "A",
+            "maxPointCount": null,
+            "onlyShowGroupName": false,
+            "openCompare": false,
+            "openRepeatChart": false,
+            "openStack": false,
+            "openThousandsSeparator": true,
+            "precision": "2",
+            "repeatChartRowLimit": 3,
+            "repeatChartVariable": "",
+            "scientificNotation": true,
+            "showFieldMapping": false,
+            "showLabel": false,
+            "showLine": false,
+            "showTitle": true,
+            "slimit": 20,
+            "sorderByOrder": "desc",
+            "stackType": "time",
+            "timeInterval": "auto",
+            "titleDesc": "Mem description",
+            "unitType": "global",
+            "units": [],
+            "xAxisShowType": "time",
+            "yAxixMaxVal": null,
+            "yAxixMinVal": null,
+            "yAxixOpenIncludeZero": true
+          }
+        },
+        "group": {
+          "name": "Group 2"
+        },
+        "name": "Mem test",
+        "pos": {
+          "h": 10,
+          "w": 8,
+          "x": 0,
+          "y": 0
+        },
+        "prevGroupName": "Group 2",
+        "queries": [
+          {
+            "datasource": "dataflux",
+            "qtype": "dql",
+            "query": {
+              "additionalFields": null,
+              "alias": "",
+              "appId": "",
+              "code": "A",
+              "dataSource": "mem",
+              "field": "active",
+              "fieldFunc": "avg",
+              "fieldType": "float",
+              "fill": "",
+              "fillNum": null,
+              "filters": [],
+              "funcList": [],
+              "groupBy": [
+                "host"
+              ],
+              "groupByTime": "",
+              "indexFilter": "",
+              "labelOp": "",
+              "limit": null,
+              "namespace": "metric",
+              "q": "M::mem:(avg(`active`)) BY `host`",
+              "queryFuncs": [],
+              "rollup": "",
+              "search": "",
+              "type": "simple",
+              "withLabels": []
+            },
+            "type": "sequence",
+            "unit": ""
+          }
+        ],
+        "type": "sequence",
+        "uuid": "chrt_01f7c51d41c340ecb3050bb5bfa6f51f"
+      },
+      {
+        "chartGroupUUID": "chtg_951c1b070de54566ba111385feb38614",
+        "extend": {
+          "fixedTime": "",
+          "links": [
+            {
+              "open": "newWin",
+              "show": true,
+              "showChanged": false,
+              "type": "logging",
+              "url": "/logIndi/log/all?time=#{TR}&query=#{T}"
+            },
+            {
+              "open": "newWin",
+              "show": true,
+              "showChanged": false,
+              "type": "container",
+              "url": "/objectadmin/docker_containers?routerTabActive=ObjectadminDocker&time=#{TR}&query=#{T}"
+            },
+            {
+              "open": "newWin",
+              "show": true,
+              "showChanged": false,
+              "type": "processes",
+              "url": "/objectadmin/host_processes?routerTabActive=ObjectadminProcesses&time=#{TR}&query=#{T}"
+            },
+            {
+              "open": "newWin",
+              "show": true,
+              "showChanged": false,
+              "type": "tracing",
+              "url": "/tracing/link/all?time=#{TR}&query=#{T}"
+            },
+            {
+              "open": "newWin",
+              "show": true,
+              "showChanged": false,
+              "type": "host",
+              "url": "/scene/builtinview/detail?time=#{TR}&query=#{T}"
+            }
+          ],
+          "settings": {
+            "alias": [],
+            "changeWorkspace": false,
+            "chartType": "bar",
+            "colors": [],
+            "compareType": [],
+            "connectNulls": true,
+            "currentChartType": "sequence",
+            "enablePreflightEstimate": false,
+            "fixedTime": "",
+            "globalUnit": [],
+            "isCombineChart": false,
+            "isPercent": false,
+            "isSampling": true,
+            "isTimeInterval": true,
+            "legendPostion": "none",
+            "legendValues": "",
+            "levels": [],
+            "lineType": "linear",
+            "mainMeasurementQueryCode": "A",
+            "maxPointCount": null,
+            "onlyShowGroupName": false,
+            "openCompare": false,
+            "openRepeatChart": false,
+            "openStack": false,
+            "openThousandsSeparator": true,
+            "precision": "2",
+            "repeatChartRowLimit": 3,
+            "repeatChartVariable": "",
+            "scientificNotation": true,
+            "showFieldMapping": false,
+            "showLabel": false,
+            "showLine": false,
+            "showTitle": true,
+            "slimit": 20,
+            "sorderByOrder": "desc",
+            "stackType": "time",
+            "timeInterval": "auto",
+            "titleDesc": "description",
+            "unitType": "global",
+            "units": [],
+            "xAxisShowType": "time",
+            "yAxixMaxVal": null,
+            "yAxixMinVal": null,
+            "yAxixOpenIncludeZero": true
+          }
+        },
+        "group": {
+          "name": "Group 1"
+        },
+        "name": "Mem test",
+        "pos": {
+          "h": 10,
+          "w": 8,
+          "x": 0,
+          "y": 0
+        },
+        "prevGroupName": "Group 1",
+        "queries": [
+          {
+            "color": "",
+            "datasource": "dataflux",
+            "disabled": false,
+            "name": "",
+            "qtype": "dql",
+            "query": {
+              "additionalFields": null,
+              "alias": "",
+              "code": "A",
+              "dataSource": "mem",
+              "field": "active",
+              "fieldFunc": "avg",
+              "fieldType": "float",
+              "fill": null,
+              "filters": [
+                {
+                  "id": "bc2a3f80-fc1a-11f0-9931-494f6198e1f1",
+                  "logic": "and",
+                  "name": "host",
+                  "op": "=",
+                  "type": "keyword",
+                  "value": "#{host}",
+                  "values": []
+                }
+              ],
+              "funcList": [],
+              "groupBy": [
+                "host"
+              ],
+              "groupByTime": "",
+              "indexFilter": "",
+              "namespace": "metric",
+              "q": "M::mem:(avg(`active`)) { `host` = '#{host}' } BY `host`",
+              "queryFuncs": [],
+              "type": "simple"
+            },
+            "type": "sequence",
+            "unit": ""
+          }
+        ],
+        "type": "sequence",
+        "uuid": "chrt_9a8022d1f82c48eb9f28ac237b7d4e85"
+      }
+    ],
+    "groups": [
+      {
+        "extend": {},
+        "name": "Group 2"
+      },
+      {
+        "extend": {},
+        "name": "Group 1"
+      }
+    ],
+    "type": "template",
+    "vars": [
+      {
+        "code": "host",
+        "datasource": "custom_object",
+        "definition": {
+          "defaultVal": {
+            "label": "",
+            "value": ""
+          },
+          "field": "host",
+          "metric": "",
+          "object": "database",
+          "tag": "",
+          "value": ""
+        },
+        "extend": {
+          "starMeaning": "*"
+        },
+        "hide": 0,
+        "includeStar": true,
+        "isHiddenAsterisk": 0,
+        "multiple": true,
+        "name": "host",
+        "seq": 0,
+        "type": "FIELD",
+        "valueSort": "asc"
+      }
+    ]
+  },
+  "tagInfo": [
+    {
+      "name": "terraform"
+    }
+  ],
+  "thumbnail": ""
+}

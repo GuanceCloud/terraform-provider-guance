@@ -2,12 +2,16 @@ package api
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 	"time"
+
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
 const DefaultEndPoint = "https://openapi.guance.com"
@@ -27,6 +31,9 @@ var EndPoints = map[string]string{
 
 const (
 	apiPrefix = "/api/v1"
+
+	MethodGet  = "get"
+	MethodPost = "post"
 
 	ResourceCreate = "create"
 	ResourceRead   = "read"
@@ -80,12 +87,16 @@ func (c *Client) doRequest(req *http.Request) ([]byte, error) {
 	}
 	defer res.Body.Close()
 
+	if res.StatusCode == 404 {
+		return nil, Error404
+	}
+
 	body, err := io.ReadAll(res.Body)
 	if err != nil {
 		return nil, err
 	}
 
-	if res.StatusCode != 200 && res.StatusCode != 404 {
+	if res.StatusCode != 200 {
 		return nil, fmt.Errorf("http status code: %d, body: %s, path: %s", res.StatusCode, body, req.URL.Path)
 	}
 
@@ -120,13 +131,23 @@ func (c *Client) post(path string, body any, content any) error {
 		return err
 	}
 
-	resp := Response{
-		Content: content,
-	}
-
+	// Check if the response is successful
+	var resp Response
 	err = json.Unmarshal(respbody, &resp)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to unmarshal response: %w, body: %s", err, respbody)
+	}
+
+	// Unmarshal the response content into the provided content struct
+	if content != nil {
+		contentJSON, err := json.Marshal(resp.Content)
+		if err != nil {
+			return fmt.Errorf("failed to marshal response content: %w", err)
+		}
+		err = json.Unmarshal(contentJSON, content)
+		if err != nil {
+			return fmt.Errorf("failed to unmarshal response content: %w, content: %s", err, contentJSON)
+		}
 	}
 
 	if !resp.Success {
@@ -147,18 +168,27 @@ func (c *Client) get(path string, content any) error {
 		return err
 	}
 
-	res := Response{Content: content}
-	err = json.Unmarshal(body, &res)
+	// Check if the response is successful
+	var resp Response
+	err = json.Unmarshal(body, &resp)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to unmarshal response: %w, body: %s", err, body)
 	}
 
-	if res.Code == 404 {
-		return Error404
+	// Unmarshal the response content into the provided content struct
+	if content != nil {
+		contentJSON, err := json.Marshal(resp.Content)
+		if err != nil {
+			return fmt.Errorf("failed to marshal response content: %w", err)
+		}
+		err = json.Unmarshal(contentJSON, content)
+		if err != nil {
+			return fmt.Errorf("failed to unmarshal response content: %w, content: %s", err, contentJSON)
+		}
 	}
 
-	if !res.Success {
-		return errors.New(res.Message)
+	if !resp.Success {
+		return errors.New(resp.Message)
 	}
 
 	return nil
@@ -177,8 +207,28 @@ func (c *Client) Delete(resource string, key string) error {
 	if err != nil {
 		return fmt.Errorf("api path for delete not found: %w", err)
 	}
-	path = fmt.Sprintf(path, key)
+	// Only format path if it contains %s placeholder
+	if strings.Contains(path, "%s") {
+		path = fmt.Sprintf(path, key)
+	}
 	err = c.get(path, nil)
+
+	// just ignore 404 error
+	if err == Error404 {
+		return nil
+	}
+	return err
+}
+
+func (c *Client) DeleteByPost(resource string, key string, body any, content any) error {
+	path, err := getResourcePath(resource, ResourceDelete)
+	if err != nil {
+		return fmt.Errorf("api path for delete not found: %w", err)
+	}
+	if key != "" {
+		path = fmt.Sprintf(path, key)
+	}
+	err = c.post(path, body, content)
 
 	// just ignore 404 error
 	if err == Error404 {
@@ -192,7 +242,10 @@ func (c *Client) Read(resource string, key string, resp any) error {
 	if err != nil {
 		return fmt.Errorf("api path for read not found: %w", err)
 	}
+	// Format the path with the key
+	tflog.Debug(context.Background(), fmt.Sprintf("Original path: %s, key: %s", path, key))
 	path = fmt.Sprintf(path, key)
+	tflog.Debug(context.Background(), fmt.Sprintf("Formatted path: %s", path))
 	return c.get(path, resp)
 }
 
@@ -202,6 +255,88 @@ func (c *Client) Update(resource, key string, item any, resp any) error {
 		return fmt.Errorf("api path for update not found: %w", err)
 	}
 	path = fmt.Sprintf(path, key)
+	return c.post(path, item, resp)
+}
+
+// MultiCreate creates a multi-step synthetics test
+func (c *Client) MultiCreate(resource string, item any, resp any) error {
+	path, err := getResourcePath(resource, "multi_create")
+	if err != nil {
+		return fmt.Errorf("api path for multi create not found: %w", err)
+	}
+	return c.post(path, item, resp)
+}
+
+// MultiUpdate updates a multi-step synthetics test
+func (c *Client) MultiUpdate(resource, key string, item any, resp any) error {
+	path, err := getResourcePath(resource, "multi_update")
+	if err != nil {
+		return fmt.Errorf("api path for multi update not found: %w", err)
+	}
+	path = fmt.Sprintf(path, key)
+	return c.post(path, item, resp)
+}
+
+// SetStatus updates the status of a synthetics test
+func (c *Client) SetStatus(resource string, taskUUIDs []string, isDisable bool) error {
+	path, err := getResourcePath(resource, "set_status")
+	if err != nil {
+		return fmt.Errorf("api path for set status not found: %w", err)
+	}
+
+	request := StatusUpdateRequest{
+		TaskUUIDs: taskUUIDs,
+		IsDisable: isDisable,
+	}
+
+	return c.post(path, request, nil)
+}
+
+// Export exports a dashboard to a template
+func (c *Client) Export(resource string, key string, resp any) error {
+	path, err := getResourcePath(resource, "export")
+	if err != nil {
+		return fmt.Errorf("api path for export not found: %w", err)
+	}
+	// Only format path if it contains %s placeholder
+	if strings.Contains(path, "%s") {
+		path = fmt.Sprintf(path, key)
+	}
+	return c.get(path, resp)
+}
+
+// ExportWithBody exports resources with a request body (e.g., checker export)
+func (c *Client) ExportWithBody(resource string, body any, resp any) error {
+	path, err := getResourcePath(resource, "export")
+	if err != nil {
+		return fmt.Errorf("api path for export not found: %w", err)
+	}
+	return c.post(path, body, resp)
+}
+
+// Import imports a dashboard from a template
+func (c *Client) Import(resource, key string, item any, resp any) error {
+	path, err := getResourcePath(resource, "import")
+	if err != nil {
+		return fmt.Errorf("api path for import not found: %w", err)
+	}
+	// Only format path if it contains %s placeholder
+	if strings.Contains(path, "%s") {
+		path = fmt.Sprintf(path, key)
+	}
+	return c.post(path, item, resp)
+}
+
+// Replace replaces a monitor configuration
+func (c *Client) Replace(resource, key string, item any, resp any) error {
+	path, err := getResourcePath(resource, "replace")
+	if err != nil {
+		return fmt.Errorf("api path for replace not found: %w", err)
+	}
+	// Only format path if it contains %s placeholder
+	if strings.Contains(path, "%s") {
+		path = fmt.Sprintf(path, key)
+	}
 	return c.post(path, item, resp)
 }
 

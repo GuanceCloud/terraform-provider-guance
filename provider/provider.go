@@ -1,4 +1,4 @@
-package guance
+package provider
 
 import (
 	"context"
@@ -72,8 +72,6 @@ func (p *guanceProvider) Schema(_ context.Context, _ provider.SchemaRequest, res
 
 // Configure prepares a Guance Cloud API client for data sources and resources.
 func (p *guanceProvider) Configure(ctx context.Context, req provider.ConfigureRequest, resp *provider.ConfigureResponse) {
-	tflog.Info(ctx, "Configuring Guance Cloud client")
-
 	// Retrieve provider data from configuration
 	var config guanceProviderModel
 	diags := req.Config.Get(ctx, &config)
@@ -113,8 +111,6 @@ func (p *guanceProvider) Configure(ctx context.Context, req provider.ConfigureRe
 	// type Configure methods.
 	resp.DataSourceData = client
 	resp.ResourceData = client
-
-	tflog.Info(ctx, "Configured Guance Cloud client", map[string]any{"success": true})
 }
 
 func getConfigField(name string, value types.String, allowEmpty bool, resp *provider.ConfigureResponse) string {
