@@ -16,12 +16,12 @@ func TestAccBlacklist(t *testing.T) {
 			{
 				Config: provider.Config + `
 resource "guance_blacklist" "demo" {
-  source = {
-    type = "logging"
-    name = "nginx"
-  }
+  name = "test-blacklist"
+  type = "logging"
+  desc = "Test blacklist"
+  source = "nginx"
 
-  filter_rules = [
+  filters = [
     {
       name      = "foo"
       operation = "in"
@@ -31,7 +31,12 @@ resource "guance_blacklist" "demo" {
   ]
 }
 `,
-				Check: resource.ComposeAggregateTestCheckFunc(),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("guance_blacklist.demo", "name", "test-blacklist"),
+					resource.TestCheckResourceAttr("guance_blacklist.demo", "type", "logging"),
+					resource.TestCheckResourceAttr("guance_blacklist.demo", "desc", "Test blacklist"),
+					resource.TestCheckResourceAttr("guance_blacklist.demo", "source", "nginx"),
+				),
 			},
 
 			// Delete testing automatically occurs in TestCase

@@ -1,0 +1,47 @@
+# Custom Region 示例
+resource "guance_custom_region" "example2" {
+  internal = false
+  isp      = "telecom"
+  country  = "Afghanistan"
+  city     = "Farah"
+  name     = "TF Custom Region"
+  keycode  = "afghanistan-farah-telecom-new-4"
+}
+
+# # 输出
+# output "http_test_uuid" {
+#   value       = guance_synthetics_test.http_test.uuid
+#   description = "The UUID of the created HTTP test"
+# }
+
+# output "tcp_test_uuid" {
+#   value       = guance_synthetics_test.tcp_test.uuid
+#   description = "The UUID of the created TCP test"
+# }
+
+# output "websocket_test_uuid" {
+#   value       = guance_synthetics_test.websocket_test.uuid
+#   description = "The UUID of the created WebSocket test"
+# }
+
+# output "icmp_test_uuid" {
+#   value       = guance_synthetics_test.icmp_test.uuid
+#   description = "The UUID of the created ICMP test"
+# }
+
+# Custom Region 输出
+output "custom_region_uuid" {
+  value       = guance_custom_region.example2.uuid
+  description = "The UUID of the created custom region"
+}
+
+output "custom_region_ak" {
+  value       = guance_custom_region.example2.ak.ak
+  description = "The AK of the created custom region"
+}
+
+output "custom_region_sk" {
+  value       = guance_custom_region.example2.ak.sk
+  description = "The SK of the created custom region"
+  sensitive   = true
+}

@@ -1,0 +1,20 @@
+# Example usage of the guance_default_region data source
+
+# Get all default regions
+data "guance_default_region" "all" {}
+
+# Output the list of regions
+output "regions" {
+  value = data.guance_default_region.all.regions
+}
+
+# Output specific region information
+output "region_count" {
+  value = length(data.guance_default_region.all.regions)
+}
+
+# Output the first region's details
+output "first_region" {
+  value = data.guance_default_region.all.regions[0]
+  sensitive = false
+}

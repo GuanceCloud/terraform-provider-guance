@@ -8,7 +8,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
-	"github.com/hashicorp/terraform-plugin-log/tflog"
 
 	"github.com/GuanceCloud/terraform-provider-guance/internal/api"
 	"github.com/GuanceCloud/terraform-provider-guance/internal/consts"
@@ -147,9 +146,6 @@ func (r *roleResource) Update(ctx context.Context, req resource.UpdateRequest, r
 	item.UUID = ""
 	content := false
 
-	tflog.Info(ctx, "Updating role", map[string]interface{}{
-		"item": item,
-	})
 	if err := r.client.Update(consts.TypeNameRole, plan.UUID.ValueString(), item, &content); err != nil {
 		resp.Diagnostics.AddError(
 			"Error updating role",

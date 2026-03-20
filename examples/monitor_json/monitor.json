@@ -1,0 +1,194 @@
+{
+  "jsonScript": {
+    "type": "simpleCheck",
+    "every": "15m",
+    "title": "TF-Test-Checker",
+    "groupBy": [
+      "host"
+    ],
+    "message": "test",
+    "targets": [
+      {
+        "dql": "M::dk:(avg(`datakit_cpu_cores`)) BY `host`",
+        "alias": "Result",
+        "qtype": "dql"
+      }
+    ],
+    "channels": [],
+    "interval": 300,
+    "atAccounts": [],
+    "checkerOpt": {
+      "rules": [
+        {
+          "status": "fatal",
+          "conditions": [
+            {
+              "alias": "Result",
+              "operands": [
+                "10"
+              ],
+              "operator": ">="
+            }
+          ],
+          "matchTimes": 1,
+          "conditionLogic": "and"
+        },
+        {
+          "status": "critical",
+          "conditions": [
+            {
+              "alias": "Result",
+              "operands": [
+                "5"
+              ],
+              "operator": ">="
+            }
+          ],
+          "matchTimes": 1,
+          "conditionLogic": "and"
+        },
+        {
+          "status": "error",
+          "conditions": [
+            {
+              "alias": "Result",
+              "operands": [
+                "3"
+              ],
+              "operator": ">="
+            }
+          ],
+          "matchTimes": 1,
+          "conditionLogic": "and"
+        },
+        {
+          "status": "warning",
+          "conditions": [
+            {
+              "alias": "Result",
+              "operands": [
+                "2"
+              ],
+              "operator": ">="
+            }
+          ],
+          "matchTimes": 1,
+          "conditionLogic": "and"
+        }
+      ],
+      "combineExpr": "A && B",
+      "openOkConditions": false,
+      "disableLargeScaleEventProtect": false
+    },
+    "eventCharts": [],
+    "noDataTitle": "",
+    "noDataMessage": "",
+    "atNoDataAccounts": [],
+    "eventChartEnable": false,
+    "disableCheckEndTime": false,
+    "notificationMessage": "",
+    "recoverNeedPeriodCount": 2,
+    "openNotificationMessage": false,
+    "noDataNotificationMessage": "",
+    "openNoDataNotificationMessage": false
+  },
+  "extend": {
+    "rules": [
+      {
+        "status": "fatal",
+        "conditions": [
+          {
+            "alias": "Result",
+            "operands": [
+              "10"
+            ],
+            "operator": ">="
+          }
+        ],
+        "matchTimes": 1,
+        "conditionLogic": "and"
+      },
+      {
+        "status": "critical",
+        "conditions": [
+          {
+            "alias": "Result",
+            "operands": [
+              "5"
+            ],
+            "operator": ">="
+          }
+        ],
+        "matchTimes": 1,
+        "conditionLogic": "and"
+      },
+      {
+        "status": "error",
+        "conditions": [
+          {
+            "alias": "Result",
+            "operands": [
+              "3"
+            ],
+            "operator": ">="
+          }
+        ],
+        "matchTimes": 1,
+        "conditionLogic": "and"
+      },
+      {
+        "status": "warning",
+        "conditions": [
+          {
+            "alias": "Result",
+            "operands": [
+              "2"
+            ],
+            "operator": ">="
+          }
+        ],
+        "matchTimes": 1,
+        "conditionLogic": "and"
+      }
+    ],
+    "manager": [],
+    "funcName": "",
+    "querylist": [
+      {
+        "uuid": "99acf0a7-4421-4fd5-b66f-cc769b0a4111",
+        "qtype": "dql",
+        "query": {
+          "q": "M::dk:(avg(`datakit_cpu_cores`)) BY `host`",
+          "code": "A",
+          "type": "simple",
+          "alias": "",
+          "field": "datakit_cpu_cores",
+          "groupBy": [
+            "host"
+          ],
+          "fieldFunc": "avg",
+          "fieldType": "float",
+          "namespace": "metric",
+          "dataSource": "dk",
+          "groupByTime": "",
+          "additionalFields": null
+        },
+        "datasource": "dataflux"
+      }
+    ],
+    "rulesExtend": [],
+    "incidentsTags": [],
+    "issueLevelUUID": "",
+    "needRecoverIssue": false,
+    "bindIncidentsInfo": [],
+    "isNeedCreateIssue": false,
+    "issueDfStatus": []
+  },
+  "is_disable": false,
+  "tagInfo": [],
+  "secret": "",
+  "type": "trigger",
+  "signId": "5d36565ae499a7b80d5a7880bf1a24b8",
+  "monitorName": "default",
+  "alertPolicyNames": []
+}
