@@ -2,8 +2,6 @@
 
 The Guance Provider provides resources to manage [Guance Cloud](https://en.guance.com/) resources.
 
-![cover](./cover.png)
-
 ## Documentation, questions, and discussions
 
 Official documentation on how to use this provider can be found on the [Terraform Registry](https://registry.terraform.io/providers/GuanceCloud/guance/latest/docs).
