@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
@@ -41,6 +42,12 @@ var resourceSchema = schema.Schema{
 					stringvalidator.RegexMatches(regexp.MustCompile(`^\d{4}/\d{2}/\d{2}$`), "must use YYYY/MM/DD format"),
 				),
 			},
+		},
+		"skip_ref_check_on_delete": schema.BoolAttribute{
+			Description: "Whether deletion bypasses backend reference checks. Defaults to true to preserve existing provider behavior; set false to let the backend reject deletion when this date is still referenced by an alert policy.",
+			Optional:    true,
+			Computed:    true,
+			Default:     booldefault.StaticBool(true),
 		},
 		"create_at": schema.Int64Attribute{
 			Description: "The timestamp seconds of the resource created at.",

@@ -66,3 +66,7 @@ Available alert resources:
 * `guance_mute` - manages mute rules for alert policies, checkers, tags, or custom ranges.
 
 Each alert resource also has a matching data source with the same Terraform type name. The data source supports lookup by either `uuid` or exact `name`, and fails if name lookup does not return exactly one object.
+
+See the `guance_alert_policy` resource documentation for a full chain example that connects notification objects, custom notice dates, alert policies, and mute rules.
+
+Note: the Forethought UI has an alert policy enable/disable route, but it is not exported in the Forethought OpenAPI alert policy module. The Terraform resource manages the exported v2 alert policy fields.

@@ -122,15 +122,19 @@ func (r *alertPolicyNoticeDateResource) Delete(ctx context.Context, req resource
 		return
 	}
 
-	body := map[string]any{
-		"noticeDatesUUIDs": []string{state.UUID.ValueString()},
-		"skipRefCheck":     true,
-	}
+	body := noticeDateDeleteBody(&state)
 	if err := r.client.DeleteByPost(consts.TypeNameAlertPolicyNoticeDate, "", body, nil); err != nil {
 		resp.Diagnostics.AddError(
 			"Error deleting alert policy notice date",
 			"Could not delete alert policy notice date, unexpected error: "+err.Error(),
 		)
+	}
+}
+
+func noticeDateDeleteBody(state *alertPolicyNoticeDateResourceModel) map[string]any {
+	return map[string]any{
+		"noticeDatesUUIDs": []string{state.UUID.ValueString()},
+		"skipRefCheck":     boolValueOrDefault(state.SkipRefCheckOnDelete, true),
 	}
 }
 
@@ -171,4 +175,11 @@ func typesFromStrings(values []string) []types.String {
 		result = append(result, types.StringValue(value))
 	}
 	return result
+}
+
+func boolValueOrDefault(value types.Bool, defaultValue bool) bool {
+	if value.IsNull() || value.IsUnknown() {
+		return defaultValue
+	}
+	return value.ValueBool()
 }

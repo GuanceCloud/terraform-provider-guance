@@ -8,7 +8,8 @@ description: |-
   Example Usage
   ```hcl
   resource "guancealertpolicynoticedate" "example" {
-    name = "Holiday notice dates"
+    name                     = "Holiday notice dates"
+    skiprefcheckondelete = false
   notice_dates = [
       "2026/01/01",
       "2026/05/01",
@@ -20,6 +21,7 @@ description: |-
   |------|------|----------|-------------|
   | name | string | Yes | The custom notice date name. The backend stores up to 64 characters. |
   | notice_dates | list(string) | Yes | Custom notice dates. Each value must use YYYY/MM/DD format. Up to 366 dates are allowed. |
+  | skip_ref_check_on_delete | bool | No | Whether deletion bypasses backend reference checks. Defaults to true for compatibility. Set to false to let Guance reject deletion while the date is referenced by an alert policy. |
   Attribute Reference
   | Name | Type | Description |
   |------|------|-------------|
@@ -73,7 +75,8 @@ The `guance_alert_policy_notice_date` resource manages custom notice dates for G
 
 ```hcl
 resource "guance_alert_policy_notice_date" "example" {
-  name = "Holiday notice dates"
+  name                     = "Holiday notice dates"
+  skip_ref_check_on_delete = false
 
   notice_dates = [
     "2026/01/01",
@@ -88,6 +91,7 @@ resource "guance_alert_policy_notice_date" "example" {
 |------|------|----------|-------------|
 | `name` | string | Yes | The custom notice date name. The backend stores up to 64 characters. |
 | `notice_dates` | list(string) | Yes | Custom notice dates. Each value must use `YYYY/MM/DD` format. Up to 366 dates are allowed. |
+| `skip_ref_check_on_delete` | bool | No | Whether deletion bypasses backend reference checks. Defaults to `true` for compatibility. Set to `false` to let Guance reject deletion while the date is referenced by an alert policy. |
 
 ## Attribute Reference
 
@@ -153,6 +157,10 @@ terraform import guance_alert_policy_notice_date.example ndate_xxx
 
 - `name` (String) The name of the notice date.
 - `notice_dates` (List of String) Custom notice dates. Each date must use YYYY/MM/DD format.
+
+### Optional
+
+- `skip_ref_check_on_delete` (Boolean) Whether deletion bypasses backend reference checks. Defaults to true to preserve existing provider behavior; set false to let the backend reject deletion when this date is still referenced by an alert policy.
 
 ### Read-Only
 

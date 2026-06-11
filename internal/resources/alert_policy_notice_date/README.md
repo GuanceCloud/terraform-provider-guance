@@ -6,7 +6,8 @@ The `guance_alert_policy_notice_date` resource manages custom notice dates for G
 
 ```hcl
 resource "guance_alert_policy_notice_date" "example" {
-  name = "Holiday notice dates"
+  name                     = "Holiday notice dates"
+  skip_ref_check_on_delete = false
 
   notice_dates = [
     "2026/01/01",
@@ -21,6 +22,7 @@ resource "guance_alert_policy_notice_date" "example" {
 |------|------|----------|-------------|
 | `name` | string | Yes | The custom notice date name. The backend stores up to 64 characters. |
 | `notice_dates` | list(string) | Yes | Custom notice dates. Each value must use `YYYY/MM/DD` format. Up to 366 dates are allowed. |
+| `skip_ref_check_on_delete` | bool | No | Whether deletion bypasses backend reference checks. Defaults to `true` for compatibility. Set to `false` to let Guance reject deletion while the date is referenced by an alert policy. |
 
 ## Attribute Reference
 

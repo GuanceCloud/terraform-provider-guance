@@ -62,7 +62,8 @@ resource "guance_alert_policy" "escalation_example" {
 
 ```hcl
 resource "guance_alert_policy_notice_date" "holiday" {
-  name = "Holiday notice dates"
+  name                     = "Holiday notice dates"
+  skip_ref_check_on_delete = false
 
   notice_dates = [
     "2026/01/01",
@@ -89,6 +90,80 @@ resource "guance_alert_policy" "custom_date_example" {
       }]
     }]
   }
+}
+```
+
+### Full Alert Chain
+
+```hcl
+resource "guance_notify_object" "ops" {
+  name                = "Ops Webhook"
+  type                = "http"
+  opt_set             = jsonencode({ url = "https://example.com/alert" })
+  open_permission_set = false
+}
+
+resource "guance_alert_policy_notice_date" "holiday" {
+  name                     = "Holiday notice dates"
+  skip_ref_check_on_delete = false
+
+  notice_dates = [
+    "2026/01/01",
+    "2026/05/01",
+  ]
+}
+
+resource "guance_alert_policy" "ops" {
+  name          = "Ops Alert Policy"
+  desc          = "Route severe production alerts"
+  rule_timezone = "Asia/Shanghai"
+
+  alert_opt = {
+    alert_type                      = "status"
+    agg_type                        = "byFields"
+    agg_interval                    = 120
+    agg_fields                      = ["df_monitor_checker_id", "df_label"]
+    agg_labels                      = ["service"]
+    agg_send_first                  = true
+    ignore_ok                       = true
+    silent_timeout                  = 300
+    silent_timeout_by_status_enable = true
+
+    silent_timeout_by_status = [{
+      status         = "critical,error"
+      silent_timeout = 600
+    }]
+
+    alert_target = [{
+      name              = "Business hours"
+      custom_date_uuids = [guance_alert_policy_notice_date.holiday.uuid]
+      custom_start_time = "09:00:00"
+      custom_duration   = 28800
+
+      targets = [{
+        to            = [guance_notify_object.ops.uuid]
+        status        = "critical,error"
+        filter_string = "`service` IN ['checkout']"
+
+        upgrade_targets = [{
+          to       = [guance_notify_object.ops.uuid]
+          duration = 900
+        }]
+      }]
+    }]
+  }
+}
+
+resource "guance_mute" "maintenance" {
+  name        = "Ops Alert Maintenance"
+  type        = "alertPolicy"
+  timezone    = "Asia/Shanghai"
+  start_time  = "2026/06/12 01:00:00"
+  end_time    = "2026/06/12 02:00:00"
+
+  mute_ranges = [{
+    alert_policy_uuid = guance_alert_policy.ops.uuid
+  }]
 }
 ```
 
@@ -156,6 +231,8 @@ resource "guance_alert_policy" "member_example" {
 
 For `alert_type = "status"`, configure notification recipients under `alert_target.targets`.
 For `alert_type = "member"`, configure member routing under `alert_target.alert_info`; each `alert_info.member_info` entry is a member UUID and its `targets` list defines recipients for that member route. In real OpenAPI validation, `agg_interval` is required for member mode.
+
+The Forethought UI exposes alert policy enable/disable through `/alert_policy/set_disable`, but that route is not exported in the OpenAPI alert policy module used by this provider. Terraform currently manages create/read/update/delete and the exported v2 alert option fields.
 
 ## Data Source
 

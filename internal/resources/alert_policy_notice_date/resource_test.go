@@ -27,7 +27,9 @@ func TestNoticeDateFromPlan(t *testing.T) {
 }
 
 func TestApplyContentToState(t *testing.T) {
-	state := &alertPolicyNoticeDateResourceModel{}
+	state := &alertPolicyNoticeDateResourceModel{
+		SkipRefCheckOnDelete: types.BoolValue(false),
+	}
 	content := &api.AlertPolicyNoticeDateContent{
 		UUID:          "ndate_xxx",
 		Name:          "codex-notice-date",
@@ -42,7 +44,33 @@ func TestApplyContentToState(t *testing.T) {
 	require.Equal(t, "ndate_xxx", state.UUID.ValueString())
 	require.Equal(t, "codex-notice-date", state.Name.ValueString())
 	require.Equal(t, []types.String{types.StringValue("2026/06/10"), types.StringValue("2026/06/11")}, state.NoticeDates)
+	require.False(t, state.SkipRefCheckOnDelete.ValueBool())
 	require.Equal(t, int64(1781165177), state.CreateAt.ValueInt64())
 	require.Equal(t, int64(1781165200), state.UpdateAt.ValueInt64())
 	require.Equal(t, "wksp_xxx", state.WorkspaceUUID.ValueString())
+}
+
+func TestNoticeDateDeleteBody(t *testing.T) {
+	tests := []struct {
+		name     string
+		value    types.Bool
+		expected bool
+	}{
+		{name: "explicit true", value: types.BoolValue(true), expected: true},
+		{name: "explicit false", value: types.BoolValue(false), expected: false},
+		{name: "null defaults true", value: types.BoolNull(), expected: true},
+		{name: "unknown defaults true", value: types.BoolUnknown(), expected: true},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := noticeDateDeleteBody(&alertPolicyNoticeDateResourceModel{
+				UUID:                 types.StringValue("ndate_xxx"),
+				SkipRefCheckOnDelete: tt.value,
+			})
+
+			require.Equal(t, []string{"ndate_xxx"}, got["noticeDatesUUIDs"])
+			require.Equal(t, tt.expected, got["skipRefCheck"])
+		})
+	}
 }
