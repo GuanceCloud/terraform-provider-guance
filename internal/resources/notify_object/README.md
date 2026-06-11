@@ -33,6 +33,7 @@ The following arguments are supported:
   * `slackIncomingWebhook`
   * `teamsWorkflowWebhook`
   * `googleChatWebhook`
+  * `telegramBot`
 
 * `name` - (Required) The name of the notify object.
 
@@ -48,6 +49,7 @@ The following arguments are supported:
   * For `slackIncomingWebhook`: `{"webhook": "string"}`
   * For `teamsWorkflowWebhook`: `{"webhook": "string"}`
   * For `googleChatWebhook`: `{"webhook": "string"}`
+  * For `telegramBot`: `{"token": "string", "chat_id": "string", "message_thread_id": "string"}`
 
 * `open_permission_set` - (Optional) Whether to enable custom permission settings. Defaults to `false`.
 
@@ -61,6 +63,32 @@ The following attributes are exported:
 * `workspace_uuid` - The UUID of the workspace containing the notify object.
 * `create_at` - The timestamp when the notify object was created.
 * `update_at` - The timestamp when the notify object was last updated.
+
+## Data Source
+
+The `guance_notify_object` data source reads an existing notify object by `uuid` or exact `name`.
+
+Lookup by name:
+
+```hcl
+data "guance_notify_object" "example" {
+  name = "Example DingTalk Robot"
+}
+
+output "notify_object_uuid" {
+  value = data.guance_notify_object.example.uuid
+}
+```
+
+Lookup by UUID:
+
+```hcl
+data "guance_notify_object" "example" {
+  uuid = "notify_xxx"
+}
+```
+
+Name lookup must match exactly one notify object. The data source exports `uuid`, `type`, `name`, `opt_set`, `open_permission_set`, `permission_set`, `create_at`, `update_at`, and `workspace_uuid`.
 
 ## Import
 

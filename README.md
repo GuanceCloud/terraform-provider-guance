@@ -14,11 +14,19 @@ The resource supports as follows:
 * [x] member group
 * [x] black list
 * [x] role
+* [x] notify object
+* [x] alert policy
+* [x] alert policy notice date
+* [x] mute
 
 The data source supports as follows:
 
 * [x] members
 * [x] permissions
+* [x] notify object
+* [x] alert policy
+* [x] alert policy notice date
+* [x] mute
 
 The region supports as follows:
 
@@ -49,7 +57,7 @@ that return all the details about which versions are currently available for a p
 ## Requirements
 
 * [Terraform](https://www.terraform.io/downloads)
-* [Go](https://go.dev/doc/install) (1.19)
+* [Go](https://go.dev/doc/install) (1.26.2)
 
 ## Development
 

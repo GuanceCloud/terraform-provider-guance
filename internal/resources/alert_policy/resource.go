@@ -132,7 +132,9 @@ func (r *alertPolicyResource) Read(ctx context.Context, req resource.ReadRequest
 		}
 	}
 	state.RuleTimezone = types.StringValue(content.RuleTimezone)
-	// TODO: Map alertOpt from content to state
+	if content.AlertOpt != nil {
+		state.AlertOpt = alertOptFromContent(content.AlertOpt, state.AlertOpt)
+	}
 	state.CreateAt = types.Int64Value(int64(content.CreateAt))
 	state.UpdateAt = types.Int64Value(int64(content.UpdateAt))
 	state.WorkspaceUUID = types.StringValue(content.WorkspaceUUID)
@@ -460,4 +462,154 @@ func (r *alertPolicyResource) getAlertPolicyFromPlan(plan *alertPolicyResourceMo
 	}
 
 	return ap
+}
+
+func alertOptFromContent(content *api.AlertOpt, prior *alertOptModel) *alertOptModel {
+	if content == nil {
+		return prior
+	}
+
+	model := &alertOptModel{}
+	if prior != nil {
+		*model = *prior
+	}
+
+	if content.AggType != "" {
+		model.AggType = types.StringValue(content.AggType)
+	}
+	if content.IgnoreOK {
+		model.IgnoreOK = types.BoolValue(content.IgnoreOK)
+	}
+	if content.AlertType != "" {
+		model.AlertType = types.StringValue(content.AlertType)
+	}
+	if content.SilentTimeout != 0 {
+		model.SilentTimeout = types.Int64Value(int64(content.SilentTimeout))
+	}
+	if content.SilentTimeoutByStatusEnable {
+		model.SilentTimeoutByStatusEnable = types.BoolValue(content.SilentTimeoutByStatusEnable)
+	}
+	if content.SilentTimeoutByStatus != nil {
+		model.SilentTimeoutByStatus = make([]silentTimeoutByStatus, len(content.SilentTimeoutByStatus))
+		for i, item := range content.SilentTimeoutByStatus {
+			model.SilentTimeoutByStatus[i] = silentTimeoutByStatus{
+				Status:        types.StringValue(item.Status),
+				SilentTimeout: types.Int64Value(int64(item.SilentTimeout)),
+			}
+		}
+	}
+	if content.AlertTarget != nil {
+		model.AlertTarget = alertTargetsFromContent(content.AlertTarget)
+	}
+	if content.AggInterval != 0 {
+		model.AggInterval = types.Int64Value(int64(content.AggInterval))
+	}
+	if content.AggFields != nil {
+		model.AggFields = stringsFromContent(content.AggFields)
+	}
+	if content.AggLabels != nil {
+		model.AggLabels = stringsFromContent(content.AggLabels)
+	}
+	if content.AggClusterFields != nil {
+		model.AggClusterFields = stringsFromContent(content.AggClusterFields)
+	}
+	if content.AggSendFirst {
+		model.AggSendFirst = types.BoolValue(content.AggSendFirst)
+	}
+
+	return model
+}
+
+func alertTargetsFromContent(items []api.AlertTarget) []alertTarget {
+	result := make([]alertTarget, len(items))
+	for i, item := range items {
+		result[i] = alertTarget{
+			Name:            stringValueOrNull(item.Name),
+			Targets:         targetsFromContent(item.Targets),
+			Crontab:         stringValueOrNull(item.Crontab),
+			CustomDateUUIDs: stringsFromContent(item.CustomDateUUIDs),
+			CustomStartTime: stringValueOrNull(item.CustomStartTime),
+			AlertInfo:       alertInfoFromContent(item.AlertInfo),
+		}
+		if item.CrontabDuration != 0 {
+			result[i].CrontabDuration = types.Int64Value(int64(item.CrontabDuration))
+		}
+		if item.CustomDuration != 0 {
+			result[i].CustomDuration = types.Int64Value(int64(item.CustomDuration))
+		}
+	}
+	return result
+}
+
+func targetsFromContent(items []api.Target) []target {
+	if items == nil {
+		return nil
+	}
+
+	result := make([]target, len(items))
+	for i, item := range items {
+		result[i] = target{
+			To:             stringsFromContent(item.To),
+			Status:         stringValueOrNull(item.Status),
+			DfSource:       stringValueOrNull(item.DfSource),
+			UpgradeTargets: upgradeTargetsFromContent(item.UpgradeTargets),
+			Tags:           item.Tags,
+			FilterString:   stringValueOrNull(item.FilterString),
+		}
+	}
+	return result
+}
+
+func upgradeTargetsFromContent(items []api.UpgradeTarget) []upgradeTarget {
+	if items == nil {
+		return nil
+	}
+
+	result := make([]upgradeTarget, len(items))
+	for i, item := range items {
+		result[i] = upgradeTarget{
+			To:    stringsFromContent(item.To),
+			ToWay: stringsFromContent(item.ToWay),
+		}
+		if item.Duration != 0 {
+			result[i].Duration = types.Int64Value(int64(item.Duration))
+		}
+	}
+	return result
+}
+
+func alertInfoFromContent(items []api.AlertInfo) []alertInfo {
+	if items == nil {
+		return nil
+	}
+
+	result := make([]alertInfo, len(items))
+	for i, item := range items {
+		result[i] = alertInfo{
+			Name:         stringValueOrNull(item.Name),
+			Targets:      targetsFromContent(item.Targets),
+			FilterString: stringValueOrNull(item.FilterString),
+			MemberInfo:   stringsFromContent(item.MemberInfo),
+		}
+	}
+	return result
+}
+
+func stringsFromContent(items []string) []types.String {
+	if items == nil {
+		return nil
+	}
+
+	result := make([]types.String, len(items))
+	for i, item := range items {
+		result[i] = types.StringValue(item)
+	}
+	return result
+}
+
+func stringValueOrNull(value string) types.String {
+	if value == "" {
+		return types.StringNull()
+	}
+	return types.StringValue(value)
 }

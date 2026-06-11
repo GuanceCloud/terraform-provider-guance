@@ -4,11 +4,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 )
 
 var resourceSchema = schema.Schema{
@@ -39,11 +42,15 @@ var resourceSchema = schema.Schema{
 		"open_permission_set": schema.BoolAttribute{
 			Description: "Whether to open custom permission configuration.",
 			Optional:    true,
+			Computed:    true,
+			Default:     booldefault.StaticBool(false),
 		},
 		"permission_set": schema.ListAttribute{
 			Description: "Operation permission configuration, can configure roles, member uuids, team uuids.",
 			Optional:    true,
+			Computed:    true,
 			ElementType: types.StringType,
+			Default:     listdefault.StaticValue(basetypes.NewListValueMust(types.StringType, nil)),
 		},
 		"checker_uuids": schema.ListAttribute{
 			Description: "Monitor/smart monitor/smart inspection/slo uuid.",
@@ -239,21 +246,21 @@ var resourceSchema = schema.Schema{
 																	ElementType: types.StringType,
 																},
 															},
-															},
-														},
-														"tags": schema.MapAttribute{
-															Description: "Filter conditions.",
-															Optional:    true,
-															ElementType: types.ListType{
-																ElemType: types.StringType,
-															},
-														},
-														"filter_string": schema.StringAttribute{
-															Description: "Filter condition original string, can replace tags, filterString use priority is greater than tags.",
-															Optional:    true,
 														},
 													},
+													"tags": schema.MapAttribute{
+														Description: "Filter conditions.",
+														Optional:    true,
+														ElementType: types.ListType{
+															ElemType: types.StringType,
+														},
+													},
+													"filter_string": schema.StringAttribute{
+														Description: "Filter condition original string, can replace tags, filterString use priority is greater than tags.",
+														Optional:    true,
+													},
 												},
+											},
 										},
 										"filter_string": schema.StringAttribute{
 											Description: "When alertType is member, use this field, filter condition original string.",

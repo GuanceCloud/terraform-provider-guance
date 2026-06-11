@@ -1,6 +1,6 @@
 module github.com/GuanceCloud/terraform-provider-guance
 
-go 1.25.0
+go 1.26.2
 
 require (
 	github.com/GuanceCloud/cliutils v1.1.22-0.20260306094254-d134bfada9ea

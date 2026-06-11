@@ -1,48 +1,6 @@
 # Alert Policy Resource
 
-## Overview
-
-The `guance_alert_policy` resource manages alert policies in Guance Cloud. Alert policies define how alerts are generated, aggregated, and delivered to notification targets.
-
-## Core Functionality
-
-- Create, read, update, and delete alert policies
-- Configure alert aggregation settings
-- Define notification targets and escalation rules
-- Associate with monitors and security rules
-- Support for both status-based and member-based alert types
-
-## Applicable Scenarios
-
-- Setting up monitoring and alerting for infrastructure
-- Configuring escalation paths for critical alerts
-- Managing alert policies across multiple environments
-- Integrating with existing monitoring resources
-
-## Configuration Parameters
-
-| Parameter | Type | Required | Default | Description |
-|-----------|------|----------|---------|-------------|
-| `name` | string | Yes | - | The name of the alert policy |
-| `desc` | string | No | "" | The description of the alert policy |
-| `open_permission_set` | bool | No | false | Whether to open custom permission configuration |
-| `permission_set` | list(string) | No | [] | Operation permission configuration |
-| `checker_uuids` | list(string) | No | [] | Monitor/smart monitor/smart inspection/slo uuid |
-| `security_rule_uuids` | list(string) | No | [] | Security monitoring (cspm, siem) uuid |
-| `rule_timezone` | string | Yes | - | Alert policy timezone |
-| `alert_opt` | block | No | - | Alert settings |
-| `alert_opt.agg_type` | string | No | null | Alert aggregation type |
-| `alert_opt.ignore_ok` | bool | No | false | Whether to ignore OK level alerts |
-| `alert_opt.alert_type` | string | No | "status" | Alert policy notification type |
-| `alert_opt.silent_timeout` | number | No | 0 | Minimum alert interval in seconds |
-| `alert_opt.silent_timeout_by_status_enable` | bool | No | false | Whether to enable status-based silent timeout |
-| `alert_opt.silent_timeout_by_status` | list(object) | No | [] | Status-based silent timeout configuration |
-| `alert_opt.alert_target` | list(object) | No | [] | Notification target configuration |
-| `alert_opt.agg_interval` | number | No | 0 | Alert aggregation interval in seconds |
-| `alert_opt.agg_fields` | list(string) | No | [] | Aggregation field list |
-| `alert_opt.agg_labels` | list(string) | No | [] | Label list for aggregation |
-| `alert_opt.agg_cluster_fields` | list(string) | No | [] | Field list for smart aggregation |
-| `alert_opt.agg_send_first` | bool | No | false | Whether to send first alert directly |
+The `guance_alert_policy` resource manages Guance alert policies. Alert policies control alert aggregation, silence behavior, and notification targets.
 
 ## Example Usage
 
@@ -54,15 +12,20 @@ resource "guance_alert_policy" "example" {
   desc          = "Alert when CPU usage exceeds threshold"
   rule_timezone = "Asia/Shanghai"
 
-  alert_opt {
-    agg_interval = 60
-    agg_fields   = ["df_monitor_checker_id"]
-    alert_target {
-      targets {
+  alert_opt = {
+    alert_type     = "status"
+    agg_interval   = 60
+    agg_fields     = ["df_monitor_checker_id"]
+    silent_timeout = 300
+
+    alert_target = [{
+      name = "Default notification"
+
+      targets = [{
         to     = ["notify_xxx"]
         status = "critical,error"
-      }
-    }
+      }]
+    }]
   }
 }
 ```
@@ -75,101 +38,137 @@ resource "guance_alert_policy" "escalation_example" {
   desc          = "Alert on database connectivity issues"
   rule_timezone = "Asia/Shanghai"
 
-  alert_opt {
+  alert_opt = {
     alert_type = "status"
-    alert_target {
+
+    alert_target = [{
       name = "Database Alert Target"
-      targets {
-        to       = ["acnt_xxx", "group_xxx"]
-        status   = "critical"
-        upgrade_targets {
-          to       = ["acnt_yyy"]
+
+      targets = [{
+        to     = ["notify_xxx"]
+        status = "critical"
+
+        upgrade_targets = [{
+          to       = ["notify_yyy"]
           duration = 300
-        }
-      }
-    }
+        }]
+      }]
+    }]
   }
 }
 ```
 
-## API Call Examples
+### Alert Policy with Custom Notice Dates
 
-### Create Alert Policy
+```hcl
+resource "guance_alert_policy_notice_date" "holiday" {
+  name = "Holiday notice dates"
 
-```bash
-curl 'https://openapi.example.com/api/v1/alert_policy/add_v2' \
-  -H 'DF-API-KEY: <DF-API-KEY>' \
-  -H 'Content-Type: application/json' \
-  --data-raw '{"name":"High CPU Alert","ruleTimezone":"Asia/Shanghai","alertOpt":{"aggInterval":60,"aggFields":["df_monitor_checker_id"],"alertTarget":[{"targets":[{"to":["notify_xxx"],"status":"critical,error"}]}]}}'
+  notice_dates = [
+    "2026/01/01",
+    "2026/05/01",
+  ]
+}
+
+resource "guance_alert_policy" "custom_date_example" {
+  name          = "Holiday Alert"
+  rule_timezone = "Asia/Shanghai"
+
+  alert_opt = {
+    alert_type = "status"
+
+    alert_target = [{
+      name              = "Holiday notification"
+      custom_date_uuids = [guance_alert_policy_notice_date.holiday.uuid]
+      custom_start_time = "09:30:00"
+      custom_duration   = 3600
+
+      targets = [{
+        to     = ["notify_xxx"]
+        status = "critical,error"
+      }]
+    }]
+  }
+}
 ```
 
-### Update Alert Policy
+## Argument Reference
 
-```bash
-curl 'https://openapi.example.com/api/v1/alert_policy/{uuid}/modify_v2' \
-  -H 'DF-API-KEY: <DF-API-KEY>' \
-  -H 'Content-Type: application/json' \
-  --data-raw '{"name":"Updated Alert","ruleTimezone":"Asia/Shanghai","alertOpt":{"aggInterval":30,"alertTarget":[{"targets":[{"to":["notify_xxx","group_xxx"],"status":"critical"}]}]}}'
+| Name | Type | Required | Default | Description |
+|------|------|----------|---------|-------------|
+| `name` | string | Yes | - | Alert policy name. |
+| `desc` | string | No | `null` | Alert policy description. |
+| `open_permission_set` | bool | No | `false` | Whether to enable custom operation permissions. |
+| `permission_set` | list(string) | No | `[]` | Role, member, or team UUIDs allowed to operate this policy. |
+| `checker_uuids` | list(string) | No | `null` | Monitor, smart monitor, smart inspection, or SLO UUIDs associated with this policy. |
+| `security_rule_uuids` | list(string) | No | `null` | Security rule UUIDs associated with this policy. |
+| `rule_timezone` | string | Yes | - | Timezone used by the alert policy, for example `Asia/Shanghai`. |
+| `alert_opt` | object | No | `null` | Alert delivery, aggregation, and silence settings. Use object assignment syntax: `alert_opt = { ... }`. |
+
+## `alert_opt` Object
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `agg_type` | string | No | Alert aggregation type: `byFields`, `byCluster`, `byAI`, or `byCustom`. |
+| `ignore_ok` | bool | No | Whether normal level only generates events and skips notifications. |
+| `alert_type` | string | No | Notification type: `status` or `member`. |
+| `silent_timeout` | number | No | Minimum repeated alert interval in seconds. |
+| `silent_timeout_by_status_enable` | bool | No | Whether to enable status-specific silence intervals. |
+| `silent_timeout_by_status` | list(object) | No | Status-specific silence interval list. |
+| `alert_target` | list(object) | No | Notification target groups. |
+| `agg_interval` | number | No | Alert aggregation interval in seconds. |
+| `agg_fields` | list(string) | No | Aggregation field list. |
+| `agg_labels` | list(string) | No | Aggregation labels. |
+| `agg_cluster_fields` | list(string) | No | Smart aggregation field list. |
+| `agg_send_first` | bool | No | Whether to send the first alert directly before aggregation. |
+
+## Data Source
+
+The `guance_alert_policy` data source reads an existing alert policy by `uuid` or exact `name`.
+
+Lookup by name:
+
+```hcl
+data "guance_alert_policy" "example" {
+  name = "High CPU Alert"
+}
+
+output "alert_policy_uuid" {
+  value = data.guance_alert_policy.example.uuid
+}
+
+output "first_notify_object" {
+  value = data.guance_alert_policy.example.alert_opt.alert_target[0].targets[0].to[0]
+}
 ```
 
-### Delete Alert Policy
+Lookup by UUID:
 
-```bash
-curl 'https://openapi.example.com/api/v1/alert_policy/delete' \
-  -H 'DF-API-KEY: <DF-API-KEY>' \
-  -H 'Content-Type: application/json' \
-  --data-raw '{"alertPolicyUUIDs":["altpl_xxx"]}'
+```hcl
+data "guance_alert_policy" "example" {
+  uuid = "altpl_xxx"
+}
 ```
 
-## Common Issues and Solutions
+Name lookup must match exactly one alert policy. The data source exports:
 
-### Resource Creation Failure
+| Name | Type | Description |
+|------|------|-------------|
+| `uuid` | string | Alert policy UUID. |
+| `name` | string | Alert policy name. |
+| `desc` | string | Alert policy description. |
+| `open_permission_set` | bool | Whether custom operation permissions are enabled. |
+| `permission_set` | list(string) | Role, member, or team UUIDs allowed to operate this policy. |
+| `checker_uuids` | list(string) | Monitor, smart monitor, smart inspection, or SLO UUIDs associated with this policy. |
+| `security_rule_uuids` | list(string) | Security rule UUIDs associated with this policy. |
+| `rule_timezone` | string | Timezone used by the alert policy. |
+| `alert_opt` | object | Alert delivery, aggregation, silence, and target settings. |
+| `create_at` | number | Created timestamp in seconds. |
+| `update_at` | number | Updated timestamp in seconds. |
+| `workspace_uuid` | string | Workspace UUID. |
 
-**Symptom**: Terraform apply fails with API error
-
-**Possible Causes**:
-- Invalid `rule_timezone` format
-- Missing required parameters
-- Permission denied for API key
-
-**Solution**:
-- Verify timezone format (e.g., "Asia/Shanghai")
-- Check all required parameters are provided
-- Ensure API key has sufficient permissions
-
-### Permission Issues
-
-**Symptom**: "Permission denied" errors
-
-**Solution**:
-- Enable `open_permission_set` and configure `permission_set`
-- Include necessary roles, teams, or members in permission set
-- Verify API key has appropriate workspace permissions
-
-### Aggregation Configuration
-
-**Symptom**: Alerts not aggregating as expected
-
-**Solution**:
-- Set `agg_interval` to a non-zero value
-- Ensure `agg_fields` includes relevant fields
-- For smart aggregation, include "CLUSTER" in `agg_fields`
-
-### Notification Delivery
-
-**Symptom**: Alerts not being delivered
-
-**Solution**:
-- Verify `alert_target` configuration
-- Check notification target UUIDs are correct
-- Ensure notification channels are properly configured in Guance Cloud
-
-## Importing Existing Alert Policies
-
-To import an existing alert policy into Terraform:
+## Import
 
 ```bash
 terraform import guance_alert_policy.example altpl_xxx
 ```
-
-Replace `altpl_xxx` with the actual UUID of the alert policy.

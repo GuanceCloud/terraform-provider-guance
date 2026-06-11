@@ -4,7 +4,6 @@ import (
 	"context"
 	_ "embed"
 	"encoding/json"
-	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -12,7 +11,6 @@ import (
 
 	"github.com/GuanceCloud/terraform-provider-guance/internal/api"
 	"github.com/GuanceCloud/terraform-provider-guance/internal/consts"
-	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
 //go:embed README.md
@@ -63,11 +61,17 @@ func (r *notifyObjectResource) Create(ctx context.Context, req resource.CreateRe
 		return
 	}
 
-	item := r.getNotifyObjectFromPlan(&plan)
-	rb, _ := json.Marshal(item)
-	tflog.Debug(ctx, fmt.Sprintf("============= body: %s", string(rb)))
+	item, err := r.getNotifyObjectFromPlan(&plan)
+	if err != nil {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("opt_set"),
+			"Invalid opt_set JSON",
+			"opt_set must be a valid JSON object string: "+err.Error(),
+		)
+		return
+	}
 	content := &api.NotifyObjectContent{}
-	err := r.client.Create(consts.TypeNameNotifyObject, item, content)
+	err = r.client.Create(consts.TypeNameNotifyObject, item, content)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error creating notify object",
@@ -149,18 +153,28 @@ func (r *notifyObjectResource) Update(ctx context.Context, req resource.UpdateRe
 		return
 	}
 
-	item := r.getNotifyObjectFromPlan(&plan)
+	item, err := r.getNotifyObjectFromPlan(&plan)
+	if err != nil {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("opt_set"),
+			"Invalid opt_set JSON",
+			"opt_set must be a valid JSON object string: "+err.Error(),
+		)
+		return
+	}
 	// For notify object, the UUID is in the body, not the path
 	itemWithUUID := map[string]interface{}{
 		"notifyObjectUUID":  plan.UUID.ValueString(),
 		"name":              item.Name,
 		"optSet":            item.OptSet,
 		"openPermissionSet": item.OpenPermissionSet,
-		"permissionSet":     item.PermissionSet,
+	}
+	if len(item.PermissionSet) > 0 {
+		itemWithUUID["permissionSet"] = item.PermissionSet
 	}
 
 	content := &api.NotifyObjectContent{}
-	err := r.client.UpdateNotifyObject(itemWithUUID, content)
+	err = r.client.UpdateNotifyObject(itemWithUUID, content)
 
 	if err != nil {
 		resp.Diagnostics.AddError(
@@ -204,7 +218,7 @@ func (r *notifyObjectResource) ImportState(ctx context.Context, req resource.Imp
 	resource.ImportStatePassthroughID(ctx, path.Root("uuid"), req, resp)
 }
 
-func (r *notifyObjectResource) getNotifyObjectFromPlan(plan *notifyObjectResourceModel) *api.NotifyObject {
+func (r *notifyObjectResource) getNotifyObjectFromPlan(plan *notifyObjectResourceModel) (*api.NotifyObject, error) {
 
 	n := &api.NotifyObject{
 		Type: plan.Type.ValueString(),
@@ -213,9 +227,10 @@ func (r *notifyObjectResource) getNotifyObjectFromPlan(plan *notifyObjectResourc
 
 	if !plan.OptSet.IsNull() {
 		var optSet interface{}
-		if err := json.Unmarshal([]byte(plan.OptSet.ValueString()), &optSet); err == nil {
-			n.OptSet = optSet
+		if err := json.Unmarshal([]byte(plan.OptSet.ValueString()), &optSet); err != nil {
+			return nil, err
 		}
+		n.OptSet = optSet
 	}
 
 	if !plan.OpenPermissionSet.IsNull() {
@@ -230,5 +245,5 @@ func (r *notifyObjectResource) getNotifyObjectFromPlan(plan *notifyObjectResourc
 		n.PermissionSet = permissionSet
 	}
 
-	return n
+	return n, nil
 }

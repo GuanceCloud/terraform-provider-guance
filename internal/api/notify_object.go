@@ -1,6 +1,8 @@
 package api
 
 import (
+	"net/url"
+
 	"github.com/GuanceCloud/terraform-provider-guance/internal/consts"
 )
 
@@ -26,6 +28,20 @@ type NotifyObjectContent struct {
 	WorkspaceUUID     string      `json:"workspaceUUID,omitempty"`
 }
 
+type NotifyObjectListContent struct {
+	Data []NotifyObjectContent `json:"data,omitempty"`
+}
+
+func (c *Client) ListNotifyObjects(search string, content *NotifyObjectListContent) error {
+	query := url.Values{}
+	query.Set("pageIndex", "1")
+	query.Set("pageSize", "100")
+	if search != "" {
+		query.Set("search", search)
+	}
+	return c.get("/notify_object/list?"+query.Encode(), content)
+}
+
 // UpdateNotifyObject updates a notify object
 func (c *Client) UpdateNotifyObject(body any, content any) error {
 	return c.post("/notify_object/modify", body, content)
@@ -36,12 +52,16 @@ func (c *Client) DeleteNotifyObject(uuid string) error {
 	body := map[string]string{
 		"notifyObjectUUID": uuid,
 	}
-	return c.post("/notify_object/delete", body, nil)
+	err := c.post("/notify_object/delete", body, nil)
+	if err == Error404 {
+		return nil
+	}
+	return err
 }
 
 // GetNotifyObject gets a notify object by UUID
 func (c *Client) GetNotifyObject(uuid string, content any) error {
-	path := "/notify_object/get?notifyObjectUUID=" + uuid
+	path := "/notify_object/get?notifyObjectUUID=" + url.QueryEscape(uuid)
 	return c.get(path, content)
 }
 
