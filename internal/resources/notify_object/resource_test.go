@@ -5,6 +5,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/stretchr/testify/require"
+
+	"github.com/GuanceCloud/terraform-provider-guance/internal/api"
 )
 
 func TestGetNotifyObjectFromPlan(t *testing.T) {
@@ -12,7 +14,7 @@ func TestGetNotifyObjectFromPlan(t *testing.T) {
 	plan := &notifyObjectResourceModel{
 		Type:              types.StringValue("simpleHTTPRequest"),
 		Name:              types.StringValue("codex-notify-object"),
-		OptSet:            types.StringValue(`{"url":"https://example.com/hook","headersConfig":{"isOpen":false,"items":[]}}`),
+		OptSet:            types.StringValue(`{ "url" : "https://example.com/hook", "headersConfig" : { "items" : [], "isOpen" : false } }`),
 		OpenPermissionSet: types.BoolValue(true),
 		PermissionSet: []types.String{
 			types.StringValue("wsAdmin"),
@@ -35,6 +37,7 @@ func TestGetNotifyObjectFromPlan(t *testing.T) {
 	require.True(t, ok)
 	require.Equal(t, false, headersConfig["isOpen"])
 	require.Empty(t, headersConfig["items"])
+	require.Equal(t, `{"headersConfig":{"isOpen":false,"items":[]},"url":"https://example.com/hook"}`, plan.OptSet.ValueString())
 }
 
 func TestGetNotifyObjectFromPlanRejectsInvalidOptSetJSON(t *testing.T) {
@@ -49,4 +52,25 @@ func TestGetNotifyObjectFromPlanRejectsInvalidOptSetJSON(t *testing.T) {
 
 	require.Nil(t, got)
 	require.Error(t, err)
+}
+
+func TestStateFromNotifyObjectContentCanonicalizesOptSet(t *testing.T) {
+	state := &notifyObjectDataSourceModel{}
+	content := &api.NotifyObjectContent{
+		UUID: "notify_xxx",
+		Type: "simpleHTTPRequest",
+		Name: "codex-notify-object",
+		OptSet: map[string]any{
+			"url": "https://example.com/hook",
+			"headersConfig": map[string]any{
+				"items":  []any{},
+				"isOpen": false,
+			},
+		},
+	}
+
+	err := stateFromNotifyObjectContent(state, content)
+
+	require.NoError(t, err)
+	require.Equal(t, `{"headersConfig":{"isOpen":false,"items":[]},"url":"https://example.com/hook"}`, state.OptSet.ValueString())
 }

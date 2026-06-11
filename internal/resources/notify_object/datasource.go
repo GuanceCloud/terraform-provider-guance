@@ -2,7 +2,6 @@ package notify_object
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/datasourcevalidator"
@@ -138,24 +137,31 @@ func (d *notifyObjectDataSource) Read(ctx context.Context, req datasource.ReadRe
 		*content = matched[0]
 	}
 
-	stateFromNotifyObjectContent(&state, content)
+	if err := stateFromNotifyObjectContent(&state, content); err != nil {
+		resp.Diagnostics.AddError("Error reading notify object opt_set", err.Error())
+		return
+	}
 	diags = resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 }
 
-func stateFromNotifyObjectContent(state *notifyObjectDataSourceModel, content *api.NotifyObjectContent) {
+func stateFromNotifyObjectContent(state *notifyObjectDataSourceModel, content *api.NotifyObjectContent) error {
 	state.UUID = types.StringValue(content.UUID)
 	state.Type = types.StringValue(content.Type)
 	state.Name = types.StringValue(content.Name)
 	if content.OptSet != nil {
-		optSetBytes, _ := json.Marshal(content.OptSet)
-		state.OptSet = types.StringValue(string(optSetBytes))
+		optSet, err := canonicalOptSetFromValue(content.OptSet)
+		if err != nil {
+			return err
+		}
+		state.OptSet = types.StringValue(optSet)
 	}
 	state.OpenPermissionSet = types.BoolValue(content.OpenPermissionSet)
 	state.PermissionSet = typesFromStrings(content.PermissionSet)
 	state.CreateAt = types.Int64Value(int64(content.CreateAt))
 	state.UpdateAt = types.Int64Value(int64(content.UpdateAt))
 	state.WorkspaceUUID = types.StringValue(content.WorkspaceUUID)
+	return nil
 }
 
 func typesFromStrings(values []string) []types.String {

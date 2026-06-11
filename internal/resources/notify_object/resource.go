@@ -120,8 +120,15 @@ func (r *notifyObjectResource) Read(ctx context.Context, req resource.ReadReques
 	state.Type = types.StringValue(content.Type)
 	state.Name = types.StringValue(content.Name)
 	if content.OptSet != nil {
-		optSetBytes, _ := json.Marshal(content.OptSet)
-		state.OptSet = types.StringValue(string(optSetBytes))
+		optSet, err := canonicalOptSetFromValue(content.OptSet)
+		if err != nil {
+			resp.Diagnostics.AddError(
+				"Error reading notify object opt_set",
+				"Could not encode notify object opt_set, unexpected error: "+err.Error(),
+			)
+			return
+		}
+		state.OptSet = types.StringValue(optSet)
 	}
 	state.OpenPermissionSet = types.BoolValue(content.OpenPermissionSet)
 	if len(content.PermissionSet) > 0 {
@@ -226,11 +233,12 @@ func (r *notifyObjectResource) getNotifyObjectFromPlan(plan *notifyObjectResourc
 	}
 
 	if !plan.OptSet.IsNull() {
-		var optSet interface{}
-		if err := json.Unmarshal([]byte(plan.OptSet.ValueString()), &optSet); err != nil {
+		optSet, canonicalOptSet, err := canonicalOptSetFromString(plan.OptSet.ValueString())
+		if err != nil {
 			return nil, err
 		}
 		n.OptSet = optSet
+		plan.OptSet = types.StringValue(canonicalOptSet)
 	}
 
 	if !plan.OpenPermissionSet.IsNull() {
@@ -246,4 +254,24 @@ func (r *notifyObjectResource) getNotifyObjectFromPlan(plan *notifyObjectResourc
 	}
 
 	return n, nil
+}
+
+func canonicalOptSetFromString(value string) (any, string, error) {
+	var optSet any
+	if err := json.Unmarshal([]byte(value), &optSet); err != nil {
+		return nil, "", err
+	}
+	canonical, err := canonicalOptSetFromValue(optSet)
+	if err != nil {
+		return nil, "", err
+	}
+	return optSet, canonical, nil
+}
+
+func canonicalOptSetFromValue(value any) (string, error) {
+	optSetBytes, err := json.Marshal(value)
+	if err != nil {
+		return "", err
+	}
+	return string(optSetBytes), nil
 }
