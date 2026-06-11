@@ -15,73 +15,58 @@ func TestAccAlertpolicy(t *testing.T) {
 			// Create and Read testing
 			{
 				Config: provider.Config + `
-variable "ding_talk_webhook" {
-  type = string
-}
+resource "guance_notify_object" "demo" {
+  type = "simpleHTTPRequest"
+  name = "oac-alert-policy-demo"
 
-variable "ding_talk_secret" {
-  type = string
-}
-
-variable "email" {
-  type = string
-}
-
-data "guance_members" "demo" {
-  filters = [
-    {
-      name   = "email"
-      values = [var.email]
+  opt_set = jsonencode({
+    url = "https://example.com/terraform-provider-guance-alert-policy-test"
+    headersConfig = {
+      isOpen = false
+      items  = []
     }
+  })
+}
+
+resource "guance_alert_policy_notice_date" "demo" {
+  name = "oac-alert-policy-date-demo"
+
+  notice_dates = [
+    "2026/06/10",
+    "2026/06/11",
   ]
 }
 
-resource "guance_membergroup" "demo" {
-  name       = "oac-demo"
-  member_ids = data.guance_members.demo.items[*].id
-}
+resource "guance_alert_policy" "demo" {
+  name          = "oac-alert-policy-demo"
+  desc          = "acceptance alert policy"
+  rule_timezone = "Asia/Shanghai"
 
-resource "guance_notification" "demo" {
-  name            = "oac-demo"
-  type            = "ding_talk_robot"
-  ding_talk_robot = {
-    webhook = var.ding_talk_webhook
-    secret  = var.ding_talk_secret
+  alert_opt = {
+    alert_type     = "status"
+    silent_timeout = 300
+    agg_interval   = 60
+    agg_fields     = ["df_monitor_checker_id"]
+
+    alert_target = [{
+      name              = "default"
+      custom_date_uuids = [guance_alert_policy_notice_date.demo.uuid]
+      custom_start_time = "09:30:00"
+      custom_duration   = 3600
+
+      targets = [{
+        to     = [guance_notify_object.demo.uuid]
+        status = "critical,error,warning"
+      }]
+    }]
   }
 }
-
-resource "guance_alertpolicy" "demo" {
-  name           = "oac-demo"
-  silent_timeout = "1h"
-
-  statuses = [
-    "critical",
-    "error",
-    "warning",
-    "info",
-    "ok",
-    "nodata",
-    "nodata_ok",
-    "nodata_as_ok",
-  ]
-
-  alert_targets = [
-    {
-      type         = "member_group"
-      member_group = {
-        id = guance_membergroup.demo.id
-      }
-    },
-    {
-      type         = "notification"
-      notification = {
-        id = guance_notification.demo.id
-      }
-    }
-  ]
-}
 `,
-				Check: resource.ComposeAggregateTestCheckFunc(),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("guance_alert_policy.demo", "name", "oac-alert-policy-demo"),
+					resource.TestCheckResourceAttr("guance_alert_policy.demo", "alert_opt.alert_type", "status"),
+					resource.TestCheckResourceAttr("guance_alert_policy.demo", "alert_opt.agg_interval", "60"),
+				),
 			},
 
 			// Delete testing automatically occurs in TestCase

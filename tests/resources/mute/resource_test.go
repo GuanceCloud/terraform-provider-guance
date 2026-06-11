@@ -15,140 +15,71 @@ func TestAccMute(t *testing.T) {
 			// Create and Read testing
 			{
 				Config: provider.Config + `
-variable "ding_talk_webhook" {
-  type = string
-}
+resource "guance_notify_object" "demo" {
+  type = "simpleHTTPRequest"
+  name = "oac-mute-notify-demo"
 
-variable "ding_talk_secret" {
-  type = string
-}
-
-variable "email" {
-  type = string
-}
-
-data "guance_members" "demo" {
-  filters = [
-    {
-      name   = "email"
-      values = [var.email]
+  opt_set = jsonencode({
+    url = "https://example.com/terraform-provider-guance-mute-test"
+    headersConfig = {
+      isOpen = false
+      items  = []
     }
-  ]
+  })
 }
 
-resource "guance_membergroup" "demo" {
-  name       = "oac-demo"
-  member_ids = data.guance_members.demo.items[*].id
-}
+resource "guance_alert_policy" "demo" {
+  name          = "oac-mute-alert-policy-demo"
+  desc          = "acceptance mute alert policy"
+  rule_timezone = "Asia/Shanghai"
 
-resource "guance_notification" "demo" {
-  name            = "oac-demo"
-  type            = "ding_talk_robot"
-  ding_talk_robot = {
-    webhook = var.ding_talk_webhook
-    secret  = var.ding_talk_secret
+  alert_opt = {
+    alert_type     = "status"
+    silent_timeout = 300
+    agg_interval   = 60
+
+    alert_target = [{
+      name = "default"
+
+      targets = [{
+        to     = [guance_notify_object.demo.uuid]
+        status = "critical,error,warning"
+      }]
+    }]
   }
-}
-
-resource "guance_alertpolicy" "demo" {
-  name           = "oac-demo"
-  silent_timeout = "1h"
-
-  statuses = [
-    "critical",
-    "error",
-    "warning",
-    "info",
-    "ok",
-    "nodata",
-    "nodata_ok",
-    "nodata_as_ok",
-  ]
-
-  alert_targets = [
-    {
-      type         = "member_group"
-      member_group = {
-        id = guance_membergroup.demo.id
-      }
-    },
-    {
-      type         = "notification"
-      notification = {
-        id = guance_notification.demo.id
-      }
-    }
-  ]
 }
 
 resource "guance_mute" "demo" {
-  // mute ranges
-  mute_ranges = [
-    {
-      type = "alert_policy"
+  name        = "oac-mute-demo"
+  description = "acceptance alert policy mute"
+  type        = "alertPolicy"
+  timezone    = "Asia/Shanghai"
+  enabled     = false
 
-      alert_policy = {
-        id = guance_alertpolicy.demo.id
-      }
-    }
-  ]
+  mute_ranges = [{
+    name              = guance_alert_policy.demo.name
+    alert_policy_uuid = guance_alert_policy.demo.uuid
+  }]
 
-  // notify options
-  notify = {
-    message = <<EOF
-      Muted
-    EOF
+  repeat_time_set = 0
+  start_time      = "2026/12/31 10:00:00"
+  end_time        = "2026/12/31 11:00:00"
 
-    before_time = "15m"
-  }
+  notify_time_str = "2026/12/31 09:50:00"
+  notify_message  = "mute starts soon"
 
-  notify_targets = [
-    {
-      type = "member_group"
-
-      member_group = {
-        id = guance_membergroup.demo.id
-      }
-    },
-    {
-      type = "notification"
-
-      notification = {
-        id = guance_notification.demo.id
-      }
-    }
-  ]
-
-  // ont-time options
-  onetime = {
-    start = "2022-08-04T12:00:00Z"
-    end   = "2023-12-31T12:00:00Z"
-  }
-
-  // cron options
-  repeat = {
-    crontab_duration = "30s"
-    start            = "05:00:00"
-    end              = "10:00:00"
-    expire           = "2023-12-31T12:00:00Z"
-    crontab          = {
-      min   = "0"
-      hour  = "0"
-      day   = "*"
-      month = "*"
-      week  = "*"
-    }
-  }
-
-  mute_tags = [
-    {
-      key   = "host"
-      value = "*"
-    }
-  ]
+  notify_targets = [{
+    type = "notifyObject"
+    to   = [guance_notify_object.demo.uuid]
+  }]
 }
 `,
-				Check: resource.ComposeAggregateTestCheckFunc(),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("guance_mute.demo", "name", "oac-mute-demo"),
+					resource.TestCheckResourceAttr("guance_mute.demo", "type", "alertPolicy"),
+					resource.TestCheckResourceAttr("guance_mute.demo", "enabled", "false"),
+					resource.TestCheckResourceAttr("guance_mute.demo", "status", "2"),
+				),
 			},
 
 			// Delete testing automatically occurs in TestCase

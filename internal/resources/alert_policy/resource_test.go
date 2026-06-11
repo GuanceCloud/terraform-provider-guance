@@ -226,3 +226,36 @@ func TestAlertOptFromContentComplexStatusMode(t *testing.T) {
 	require.Equal(t, int64(300), got.AlertTarget[0].Targets[0].UpgradeTargets[0].Duration.ValueInt64())
 	require.Equal(t, []types.String{types.StringValue("mail")}, got.AlertTarget[0].Targets[0].UpgradeTargets[0].ToWay)
 }
+
+func TestAlertOptFromContentPreservesPriorZeroValuesForResourceRead(t *testing.T) {
+	prior := &alertOptModel{
+		IgnoreOK:                    types.BoolValue(true),
+		SilentTimeout:               types.Int64Value(300),
+		SilentTimeoutByStatusEnable: types.BoolValue(true),
+		AggInterval:                 types.Int64Value(60),
+		AggSendFirst:                types.BoolValue(true),
+	}
+
+	got := alertOptFromContent(&api.AlertOpt{}, prior)
+
+	require.True(t, got.IgnoreOK.ValueBool())
+	require.Equal(t, int64(300), got.SilentTimeout.ValueInt64())
+	require.True(t, got.SilentTimeoutByStatusEnable.ValueBool())
+	require.Equal(t, int64(60), got.AggInterval.ValueInt64())
+	require.True(t, got.AggSendFirst.ValueBool())
+}
+
+func TestAlertOptFromContentForDataSourceIncludesZeroValues(t *testing.T) {
+	got := alertOptFromContentForDataSource(&api.AlertOpt{})
+
+	require.False(t, got.IgnoreOK.IsNull())
+	require.False(t, got.IgnoreOK.ValueBool())
+	require.False(t, got.SilentTimeout.IsNull())
+	require.Equal(t, int64(0), got.SilentTimeout.ValueInt64())
+	require.False(t, got.SilentTimeoutByStatusEnable.IsNull())
+	require.False(t, got.SilentTimeoutByStatusEnable.ValueBool())
+	require.False(t, got.AggInterval.IsNull())
+	require.Equal(t, int64(0), got.AggInterval.ValueInt64())
+	require.False(t, got.AggSendFirst.IsNull())
+	require.False(t, got.AggSendFirst.ValueBool())
+}

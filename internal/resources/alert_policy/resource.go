@@ -465,6 +465,14 @@ func (r *alertPolicyResource) getAlertPolicyFromPlan(plan *alertPolicyResourceMo
 }
 
 func alertOptFromContent(content *api.AlertOpt, prior *alertOptModel) *alertOptModel {
+	return alertOptFromContentWithZeroMode(content, prior, false)
+}
+
+func alertOptFromContentForDataSource(content *api.AlertOpt) *alertOptModel {
+	return alertOptFromContentWithZeroMode(content, nil, true)
+}
+
+func alertOptFromContentWithZeroMode(content *api.AlertOpt, prior *alertOptModel, includeZeroValues bool) *alertOptModel {
 	if content == nil {
 		return prior
 	}
@@ -477,16 +485,16 @@ func alertOptFromContent(content *api.AlertOpt, prior *alertOptModel) *alertOptM
 	if content.AggType != "" {
 		model.AggType = types.StringValue(content.AggType)
 	}
-	if content.IgnoreOK {
+	if content.IgnoreOK || includeZeroValues {
 		model.IgnoreOK = types.BoolValue(content.IgnoreOK)
 	}
 	if content.AlertType != "" {
 		model.AlertType = types.StringValue(content.AlertType)
 	}
-	if content.SilentTimeout != 0 {
+	if content.SilentTimeout != 0 || includeZeroValues {
 		model.SilentTimeout = types.Int64Value(int64(content.SilentTimeout))
 	}
-	if content.SilentTimeoutByStatusEnable {
+	if content.SilentTimeoutByStatusEnable || includeZeroValues {
 		model.SilentTimeoutByStatusEnable = types.BoolValue(content.SilentTimeoutByStatusEnable)
 	}
 	if content.SilentTimeoutByStatus != nil {
@@ -501,7 +509,7 @@ func alertOptFromContent(content *api.AlertOpt, prior *alertOptModel) *alertOptM
 	if content.AlertTarget != nil {
 		model.AlertTarget = alertTargetsFromContent(content.AlertTarget)
 	}
-	if content.AggInterval != 0 {
+	if content.AggInterval != 0 || includeZeroValues {
 		model.AggInterval = types.Int64Value(int64(content.AggInterval))
 	}
 	if content.AggFields != nil {
@@ -513,7 +521,7 @@ func alertOptFromContent(content *api.AlertOpt, prior *alertOptModel) *alertOptM
 	if content.AggClusterFields != nil {
 		model.AggClusterFields = stringsFromContent(content.AggClusterFields)
 	}
-	if content.AggSendFirst {
+	if content.AggSendFirst || includeZeroValues {
 		model.AggSendFirst = types.BoolValue(content.AggSendFirst)
 	}
 

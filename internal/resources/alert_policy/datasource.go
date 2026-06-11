@@ -170,7 +170,7 @@ func (d *alertPolicyDataSource) Read(ctx context.Context, req datasource.ReadReq
 	state.CheckerUUIDs = stringsFromContent(content.CheckerUUIDs)
 	state.SecurityRuleUUIDs = stringsFromContent(content.SecurityRuleUUIDs)
 	state.RuleTimezone = stringValueOrNull(content.RuleTimezone)
-	state.AlertOpt = alertOptFromContent(content.AlertOpt, nil)
+	state.AlertOpt = alertOptFromContentForDataSource(content.AlertOpt)
 	state.CreateAt = types.Int64Value(int64(content.CreateAt))
 	state.UpdateAt = types.Int64Value(int64(content.UpdateAt))
 	state.WorkspaceUUID = types.StringValue(content.WorkspaceUUID)
