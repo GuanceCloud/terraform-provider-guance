@@ -18,6 +18,7 @@ The `guance_alert_policy` data source reads an existing Guance alert policy by `
 ### Optional
 
 - `name` (String) The exact name of the alert policy.
+- `notify_object_uuids` (List of String) Filter alert policies by notification object UUIDs when looking up by name.
 - `uuid` (String) The UUID of the alert policy.
 
 ### Read-Only

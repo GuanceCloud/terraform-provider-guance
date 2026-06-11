@@ -31,6 +31,7 @@ type alertPolicyDataSource struct {
 type alertPolicyDataSourceModel struct {
 	UUID              types.String   `tfsdk:"uuid"`
 	Name              types.String   `tfsdk:"name"`
+	NotifyObjectUUIDs []types.String `tfsdk:"notify_object_uuids"`
 	Desc              types.String   `tfsdk:"desc"`
 	OpenPermissionSet types.Bool     `tfsdk:"open_permission_set"`
 	PermissionSet     []types.String `tfsdk:"permission_set"`
@@ -61,6 +62,11 @@ func (d *alertPolicyDataSource) Schema(_ context.Context, _ datasource.SchemaReq
 				Description: "The exact name of the alert policy.",
 				Optional:    true,
 				Computed:    true,
+			},
+			"notify_object_uuids": dsschema.ListAttribute{
+				Description: "Filter alert policies by notification object UUIDs when looking up by name.",
+				Optional:    true,
+				ElementType: types.StringType,
 			},
 			"desc": dsschema.StringAttribute{
 				Description: "The description of the alert policy.",
@@ -135,7 +141,11 @@ func (d *alertPolicyDataSource) Read(ctx context.Context, req datasource.ReadReq
 		}
 	} else {
 		list := &api.AlertPolicyListContent{}
-		if err := d.client.ListAlertPolicies(state.Name.ValueString(), list); err != nil {
+		options := api.AlertPolicyListOptions{
+			Search:            state.Name.ValueString(),
+			NotifyObjectUUIDs: typeStrings(state.NotifyObjectUUIDs),
+		}
+		if err := d.client.ListAlertPoliciesWithOptions(options, list); err != nil {
 			resp.Diagnostics.AddError("Error listing alert policies", err.Error())
 			return
 		}
@@ -166,6 +176,17 @@ func (d *alertPolicyDataSource) Read(ctx context.Context, req datasource.ReadReq
 	state.WorkspaceUUID = types.StringValue(content.WorkspaceUUID)
 	diags = resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
+}
+
+func typeStrings(values []types.String) []string {
+	result := make([]string, 0, len(values))
+	for _, value := range values {
+		if value.IsNull() || value.IsUnknown() {
+			continue
+		}
+		result = append(result, value.ValueString())
+	}
+	return result
 }
 
 func alertOptDataSourceAttribute() dsschema.SingleNestedAttribute {

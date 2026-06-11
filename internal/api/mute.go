@@ -80,12 +80,40 @@ type MuteListContent struct {
 	Data []json.RawMessage `json:"data,omitempty"`
 }
 
+type MuteListOptions struct {
+	Search     string
+	WorkStatus string
+	IsEnable   string
+	Type       string
+	Creator    string
+	Updator    string
+}
+
 func (c *Client) ListMutes(search string, content *MuteListContent) error {
+	return c.ListMutesWithOptions(MuteListOptions{Search: search}, content)
+}
+
+func (c *Client) ListMutesWithOptions(options MuteListOptions, content *MuteListContent) error {
 	query := url.Values{}
 	query.Set("pageIndex", "1")
 	query.Set("pageSize", "100")
-	if search != "" {
-		query.Set("search", search)
+	if options.Search != "" {
+		query.Set("search", options.Search)
+	}
+	if options.WorkStatus != "" {
+		query.Set("workStatus", options.WorkStatus)
+	}
+	if options.IsEnable != "" {
+		query.Set("isEnable", options.IsEnable)
+	}
+	if options.Type != "" {
+		query.Set("type", options.Type)
+	}
+	if options.Creator != "" {
+		query.Set("creator", options.Creator)
+	}
+	if options.Updator != "" {
+		query.Set("updator", options.Updator)
 	}
 	return c.get("/monitor/mute/list?"+query.Encode(), content)
 }

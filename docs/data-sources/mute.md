@@ -17,8 +17,13 @@ The `guance_mute` data source reads an existing Guance mute rule by `uuid` or ex
 
 ### Optional
 
+- `creator` (String) Filter mute rules by creator when looking up by name.
+- `is_enable` (String) Filter mute rules by enabled flag when looking up by name.
 - `name` (String) The exact name of the mute rule.
+- `type` (String) Mute rule type. When configured with name lookup, filters the mute list by type.
+- `updator` (String) Filter mute rules by updator when looking up by name.
 - `uuid` (String) The UUID of the mute rule.
+- `work_status` (String) Filter mute rules by work status when looking up by name.
 
 ### Read-Only
 
@@ -39,7 +44,6 @@ The `guance_mute` data source reads an existing Guance mute rule by `uuid` or ex
 - `status` (Number) Mute rule status returned by the API.
 - `tags` (Map of List of String) Event attribute filters.
 - `timezone` (String) Mute rule timezone.
-- `type` (String) Mute rule type.
 - `update_at` (Number) The timestamp seconds of the resource updated at.
 - `workspace_uuid` (String) The UUID of the workspace.
 

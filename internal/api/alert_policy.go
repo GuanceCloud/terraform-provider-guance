@@ -3,6 +3,7 @@ package api
 import (
 	"fmt"
 	"net/url"
+	"strings"
 
 	"github.com/GuanceCloud/terraform-provider-guance/internal/consts"
 )
@@ -37,6 +38,11 @@ type AlertPolicyContent struct {
 
 type AlertPolicyListContent struct {
 	Data []AlertPolicyContent `json:"data,omitempty"`
+}
+
+type AlertPolicyListOptions struct {
+	Search            string
+	NotifyObjectUUIDs []string
 }
 
 // AlertOpt represents the alertOpt structure
@@ -104,13 +110,31 @@ type AlertPolicyDeleteRequest struct {
 }
 
 func (c *Client) ListAlertPolicies(search string, content *AlertPolicyListContent) error {
+	return c.ListAlertPoliciesWithOptions(AlertPolicyListOptions{Search: search}, content)
+}
+
+func (c *Client) ListAlertPoliciesWithOptions(options AlertPolicyListOptions, content *AlertPolicyListContent) error {
 	query := url.Values{}
 	query.Set("pageIndex", "1")
 	query.Set("pageSize", "100")
-	if search != "" {
-		query.Set("search", search)
+	if options.Search != "" {
+		query.Set("search", options.Search)
+	}
+	notifyObjectUUIDs := compactStrings(options.NotifyObjectUUIDs)
+	if len(notifyObjectUUIDs) > 0 {
+		query.Set("notifyObjectUUIDs", strings.Join(notifyObjectUUIDs, ","))
 	}
 	return c.get("/alert_policy/list?"+query.Encode(), content)
+}
+
+func compactStrings(values []string) []string {
+	result := make([]string, 0, len(values))
+	for _, value := range values {
+		if value != "" {
+			result = append(result, value)
+		}
+	}
+	return result
 }
 
 func (c *Client) DeleteAlertPolicy(key string) error {

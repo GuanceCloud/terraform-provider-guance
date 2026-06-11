@@ -63,6 +63,87 @@ func TestMuteFromPlanRepeatedMuteWithNotify(t *testing.T) {
 	require.Equal(t, []string{"codex-weekly"}, got.Tags["service"])
 }
 
+func TestMuteFromPlanSupportsCheckerTagAndCustomRanges(t *testing.T) {
+	cases := []struct {
+		name       string
+		plan       *muteResourceModel
+		assertions func(t *testing.T, got *api.Mute)
+	}{
+		{
+			name: "checker",
+			plan: &muteResourceModel{
+				Name:        types.StringValue("codex-checker-mute"),
+				Description: types.StringValue("checker mute"),
+				Type:        types.StringValue("checker"),
+				MuteRanges: []muteRange{{
+					Name:        types.StringValue("codex checker"),
+					Type:        types.StringValue("monitor"),
+					CheckerUUID: types.StringValue("rul_xxx"),
+					MonitorUUID: types.StringValue("monitor_xxx"),
+				}},
+				FilterString:  types.StringValue("host:codex-checker"),
+				RepeatTimeSet: types.Int64Value(0),
+				StartTime:     types.StringValue("2026/12/31 10:00:00"),
+				EndTime:       types.StringValue("2026/12/31 11:00:00"),
+				Timezone:      types.StringValue("Asia/Shanghai"),
+			},
+			assertions: func(t *testing.T, got *api.Mute) {
+				require.Equal(t, "checker", got.Type)
+				require.Equal(t, "rul_xxx", got.MuteRanges[0].CheckerUUID)
+				require.Equal(t, "monitor_xxx", got.MuteRanges[0].MonitorUUID)
+				require.Equal(t, "host:codex-checker", got.FilterString)
+			},
+		},
+		{
+			name: "tag",
+			plan: &muteResourceModel{
+				Name: types.StringValue("codex-tag-mute"),
+				Type: types.StringValue("tag"),
+				MuteRanges: []muteRange{{
+					Name:    types.StringValue("codex tag"),
+					Type:    types.StringValue("tag"),
+					TagUUID: types.StringValue("tag_xxx"),
+				}},
+				RepeatTimeSet: types.Int64Value(0),
+				StartTime:     types.StringValue("2026/12/31 12:00:00"),
+				EndTime:       types.StringValue("2026/12/31 13:00:00"),
+				Timezone:      types.StringValue("Asia/Shanghai"),
+			},
+			assertions: func(t *testing.T, got *api.Mute) {
+				require.Equal(t, "tag", got.Type)
+				require.Equal(t, "tag_xxx", got.MuteRanges[0].TagUUID)
+			},
+		},
+		{
+			name: "custom",
+			plan: &muteResourceModel{
+				Name:          types.StringValue("codex-custom-mute"),
+				Type:          types.StringValue("custom"),
+				MuteRanges:    []muteRange{},
+				FilterString:  types.StringValue("host:codex-custom AND service:api"),
+				RepeatTimeSet: types.Int64Value(0),
+				StartTime:     types.StringValue("2026/12/31 14:00:00"),
+				EndTime:       types.StringValue("2026/12/31 15:00:00"),
+				Timezone:      types.StringValue("Asia/Shanghai"),
+				Declaration:   map[string]string{"source": "terraform"},
+			},
+			assertions: func(t *testing.T, got *api.Mute) {
+				require.Equal(t, "custom", got.Type)
+				require.Empty(t, got.MuteRanges)
+				require.Equal(t, "host:codex-custom AND service:api", got.FilterString)
+				require.Equal(t, "terraform", got.Declaration["source"])
+			},
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			got := muteFromPlan(tc.plan)
+			tc.assertions(t, got)
+		})
+	}
+}
+
 func TestApplyContentToStateInfersRepeatedMuteAndPreservesUnconfiguredWindow(t *testing.T) {
 	state := &muteResourceModel{
 		RepeatTimeSet: types.Int64Value(1),
@@ -103,6 +184,50 @@ func TestApplyContentToStateInfersRepeatedMuteAndPreservesUnconfiguredWindow(t *
 	require.Equal(t, int64(3600), state.CrontabDuration.ValueInt64())
 	require.True(t, state.RepeatExpireTime.IsNull())
 	require.Equal(t, "wksp_xxx", state.WorkspaceUUID.ValueString())
+}
+
+func TestApplyContentToStatePreservesCheckerTagAndCustomRanges(t *testing.T) {
+	state := &muteResourceModel{
+		MuteRanges: []muteRange{{
+			Name:        types.StringValue("existing checker"),
+			CheckerUUID: types.StringValue("rul_existing"),
+		}},
+	}
+	content := &api.MuteContent{
+		UUID: "mute_xxx",
+		Name: "codex-custom-mute",
+		Type: "custom",
+		MuteRanges: []api.MuteRange{
+			{
+				Name:        "codex checker",
+				Type:        "monitor",
+				CheckerUUID: "rul_xxx",
+				MonitorUUID: "monitor_xxx",
+			},
+			{
+				Name:    "codex tag",
+				Type:    "tag",
+				TagUUID: "tag_xxx",
+			},
+			{
+				Name:            "codex policy",
+				Type:            "alertPolicy",
+				AlertPolicyUUID: "altpl_xxx",
+			},
+		},
+		FilterString: "host:codex-custom",
+	}
+
+	applyContentToState(state, content)
+
+	require.Equal(t, "mute_xxx", state.UUID.ValueString())
+	require.Equal(t, "custom", state.Type.ValueString())
+	require.Equal(t, "host:codex-custom", state.FilterString.ValueString())
+	require.Len(t, state.MuteRanges, 3)
+	require.Equal(t, "rul_xxx", state.MuteRanges[0].CheckerUUID.ValueString())
+	require.Equal(t, "monitor_xxx", state.MuteRanges[0].MonitorUUID.ValueString())
+	require.Equal(t, "tag_xxx", state.MuteRanges[1].TagUUID.ValueString())
+	require.Equal(t, "altpl_xxx", state.MuteRanges[2].AlertPolicyUUID.ValueString())
 }
 
 func TestApplyContentToStateOneTimeMuteKeepsReturnedWindowAndNotifyTargets(t *testing.T) {

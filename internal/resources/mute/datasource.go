@@ -33,6 +33,10 @@ type muteDataSourceModel struct {
 	Name             types.String        `tfsdk:"name"`
 	Description      types.String        `tfsdk:"description"`
 	Type             types.String        `tfsdk:"type"`
+	WorkStatus       types.String        `tfsdk:"work_status"`
+	IsEnable         types.String        `tfsdk:"is_enable"`
+	Creator          types.String        `tfsdk:"creator"`
+	Updator          types.String        `tfsdk:"updator"`
 	MuteRanges       []muteRange         `tfsdk:"mute_ranges"`
 	Tags             map[string][]string `tfsdk:"tags"`
 	FilterString     types.String        `tfsdk:"filter_string"`
@@ -77,8 +81,25 @@ func (d *muteDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, r
 				Computed:    true,
 			},
 			"type": dsschema.StringAttribute{
-				Description: "Mute rule type.",
+				Description: "Mute rule type. When configured with name lookup, filters the mute list by type.",
+				Optional:    true,
 				Computed:    true,
+			},
+			"work_status": dsschema.StringAttribute{
+				Description: "Filter mute rules by work status when looking up by name.",
+				Optional:    true,
+			},
+			"is_enable": dsschema.StringAttribute{
+				Description: "Filter mute rules by enabled flag when looking up by name.",
+				Optional:    true,
+			},
+			"creator": dsschema.StringAttribute{
+				Description: "Filter mute rules by creator when looking up by name.",
+				Optional:    true,
+			},
+			"updator": dsschema.StringAttribute{
+				Description: "Filter mute rules by updator when looking up by name.",
+				Optional:    true,
 			},
 			"mute_ranges": dsschema.ListNestedAttribute{
 				Description: "Mute ranges.",
@@ -254,7 +275,15 @@ func (d *muteDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 		}
 	} else {
 		list := &api.MuteListContent{}
-		if err := d.client.ListMutes(state.Name.ValueString(), list); err != nil {
+		options := api.MuteListOptions{
+			Search:     state.Name.ValueString(),
+			WorkStatus: state.WorkStatus.ValueString(),
+			IsEnable:   state.IsEnable.ValueString(),
+			Type:       state.Type.ValueString(),
+			Creator:    state.Creator.ValueString(),
+			Updator:    state.Updator.ValueString(),
+		}
+		if err := d.client.ListMutesWithOptions(options, list); err != nil {
 			resp.Diagnostics.AddError("Error listing mute rules", err.Error())
 			return
 		}
