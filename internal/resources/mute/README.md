@@ -97,6 +97,7 @@ resource "guance_mute" "with_notify" {
 * `repeat_expire_time` - (Optional) Repeated mute expiration time in `YYYY/MM/DD HH:mm:ss`, or `0` for never expires.
 * `timezone` - (Optional) Mute rule timezone. Defaults to `Asia/Shanghai`.
 * `declaration` - (Optional) Custom declaration information.
+* `enabled` - (Optional) Whether the mute rule is enabled. Defaults to `true`.
 
 ### `mute_ranges`
 
@@ -116,7 +117,7 @@ resource "guance_mute" "with_notify" {
 ## Attribute Reference
 
 * `uuid` - Mute rule UUID.
-* `status` - Mute rule status returned by the API.
+* `status` - Mute rule status returned by the API. Status `0` maps to `enabled = true`; status `2` maps to `enabled = false`.
 * `create_at` - Creation timestamp in seconds.
 * `update_at` - Last update timestamp in seconds.
 * `workspace_uuid` - Workspace UUID.
@@ -145,7 +146,7 @@ data "guance_mute" "example" {
 }
 ```
 
-Name lookup must match exactly one mute rule. The data source exports all resource attributes as read-only values, including `mute_ranges`, `tags`, `filter_string`, `notify_targets`, `notify_message`, `notify_time_str`, `start_time`, `end_time`, `repeat_time_set`, `repeat_crontab_set`, `crontab_duration`, `repeat_expire_time`, `timezone`, `declaration`, `status`, `create_at`, `update_at`, and `workspace_uuid`.
+Name lookup must match exactly one mute rule. The data source exports all resource attributes as read-only values, including `mute_ranges`, `tags`, `filter_string`, `notify_targets`, `notify_message`, `notify_time_str`, `start_time`, `end_time`, `repeat_time_set`, `repeat_crontab_set`, `crontab_duration`, `repeat_expire_time`, `timezone`, `declaration`, `enabled`, `status`, `create_at`, `update_at`, and `workspace_uuid`.
 
 ## Import
 

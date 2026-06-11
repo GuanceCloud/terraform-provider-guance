@@ -3,6 +3,7 @@ package mute
 import (
 	"context"
 	_ "embed"
+	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -60,6 +61,15 @@ func (r *muteResource) Create(ctx context.Context, req resource.CreateRequest, r
 		)
 		return
 	}
+	if !plan.Enabled.IsNull() && !plan.Enabled.IsUnknown() {
+		if err := r.syncMuteEnabled(plan.UUID.ValueString(), content, plan.Enabled.ValueBool()); err != nil {
+			resp.Diagnostics.AddError(
+				"Error setting mute rule enabled state",
+				"Could not set mute rule enabled state, unexpected error: "+err.Error(),
+			)
+			return
+		}
+	}
 
 	applyContentToState(&plan, content)
 	diags = resp.State.Set(ctx, plan)
@@ -108,6 +118,15 @@ func (r *muteResource) Update(ctx context.Context, req resource.UpdateRequest, r
 		)
 		return
 	}
+	if !plan.Enabled.IsNull() && !plan.Enabled.IsUnknown() {
+		if err := r.syncMuteEnabled(plan.UUID.ValueString(), content, plan.Enabled.ValueBool()); err != nil {
+			resp.Diagnostics.AddError(
+				"Error setting mute rule enabled state",
+				"Could not set mute rule enabled state, unexpected error: "+err.Error(),
+			)
+			return
+		}
+	}
 
 	applyContentToState(&plan, content)
 	diags = resp.State.Set(ctx, plan)
@@ -132,6 +151,25 @@ func (r *muteResource) Delete(ctx context.Context, req resource.DeleteRequest, r
 
 func (r *muteResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("uuid"), req, resp)
+}
+
+func (r *muteResource) syncMuteEnabled(uuid string, content *api.MuteContent, enabled bool) error {
+	if uuid == "" {
+		uuid = content.UUID
+	}
+	if !muteStatusNeedsEnabledChange(content.Status, enabled) {
+		return nil
+	}
+	if uuid == "" {
+		return fmt.Errorf("mute UUID is empty")
+	}
+	if err := r.client.SetMuteEnabled(uuid, enabled); err != nil {
+		return err
+	}
+	if err := r.client.GetMute(uuid, content); err != nil {
+		content.Status = muteStatusForEnabled(enabled)
+	}
+	return nil
 }
 
 func muteFromPlan(plan *muteResourceModel) *api.Mute {
@@ -219,9 +257,34 @@ func applyContentToState(state *muteResourceModel, content *api.MuteContent) {
 		state.Declaration = declarationFromContent(content.Declaration, state.Declaration)
 	}
 	state.Status = types.Int64Value(int64(content.Status))
+	state.Enabled = muteEnabledFromStatus(content.Status, state.Enabled)
 	state.CreateAt = types.Int64Value(int64(content.CreateAt))
 	state.UpdateAt = types.Int64Value(int64(content.UpdateAt))
 	state.WorkspaceUUID = types.StringValue(content.WorkspaceUUID)
+}
+
+func muteEnabledFromStatus(status int, existing types.Bool) types.Bool {
+	if status == 0 {
+		return types.BoolValue(true)
+	}
+	if status == 2 {
+		return types.BoolValue(false)
+	}
+	return existing
+}
+
+func muteStatusNeedsEnabledChange(status int, enabled bool) bool {
+	if enabled {
+		return status == muteStatusForEnabled(false)
+	}
+	return status != muteStatusForEnabled(false)
+}
+
+func muteStatusForEnabled(enabled bool) int {
+	if enabled {
+		return 0
+	}
+	return 2
 }
 
 func stringValueOrExisting(value string, existing types.String) types.String {

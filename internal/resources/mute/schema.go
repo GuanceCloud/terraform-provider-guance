@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
@@ -201,6 +202,12 @@ var resourceSchema = schema.Schema{
 			Description: "Custom declaration information.",
 			Optional:    true,
 			ElementType: types.StringType,
+		},
+		"enabled": schema.BoolAttribute{
+			Description: "Whether the mute rule is enabled. This manages API status 0/2 through the mute enable/disable endpoints.",
+			Optional:    true,
+			Computed:    true,
+			Default:     booldefault.StaticBool(true),
 		},
 		"status": schema.Int64Attribute{
 			Description: "Mute rule status returned by the API.",

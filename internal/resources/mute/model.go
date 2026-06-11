@@ -21,6 +21,7 @@ type muteResourceModel struct {
 	RepeatExpireTime types.String        `tfsdk:"repeat_expire_time"`
 	Timezone         types.String        `tfsdk:"timezone"`
 	Declaration      map[string]string   `tfsdk:"declaration"`
+	Enabled          types.Bool          `tfsdk:"enabled"`
 	Status           types.Int64         `tfsdk:"status"`
 	CreateAt         types.Int64         `tfsdk:"create_at"`
 	UpdateAt         types.Int64         `tfsdk:"update_at"`

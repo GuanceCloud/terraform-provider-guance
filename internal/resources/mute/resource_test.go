@@ -150,6 +150,7 @@ func TestApplyContentToStateInfersRepeatedMuteAndPreservesUnconfiguredWindow(t *
 		StartTime:     types.StringNull(),
 		EndTime:       types.StringNull(),
 		Timezone:      types.StringValue("Asia/Shanghai"),
+		Enabled:       types.BoolValue(true),
 	}
 	content := &api.MuteContent{
 		UUID:          "mute_xxx",
@@ -183,7 +184,41 @@ func TestApplyContentToStateInfersRepeatedMuteAndPreservesUnconfiguredWindow(t *
 	require.Equal(t, "1,2,3,4,5", state.RepeatCrontabSet.Week.ValueString())
 	require.Equal(t, int64(3600), state.CrontabDuration.ValueInt64())
 	require.True(t, state.RepeatExpireTime.IsNull())
+	require.True(t, state.Enabled.ValueBool())
 	require.Equal(t, "wksp_xxx", state.WorkspaceUUID.ValueString())
+}
+
+func TestApplyContentToStateMapsDisabledStatusToEnabled(t *testing.T) {
+	state := &muteResourceModel{
+		Enabled: types.BoolValue(true),
+	}
+	content := &api.MuteContent{
+		UUID:   "mute_xxx",
+		Name:   "codex-disabled-mute",
+		Type:   "custom",
+		Status: 2,
+	}
+
+	applyContentToState(state, content)
+
+	require.Equal(t, int64(2), state.Status.ValueInt64())
+	require.False(t, state.Enabled.ValueBool())
+}
+
+func TestMuteEnabledFromStatusPreservesUnknownStatuses(t *testing.T) {
+	require.True(t, muteEnabledFromStatus(1, types.BoolValue(true)).ValueBool())
+	require.False(t, muteEnabledFromStatus(1, types.BoolValue(false)).ValueBool())
+	require.True(t, muteEnabledFromStatus(0, types.BoolValue(false)).ValueBool())
+	require.False(t, muteEnabledFromStatus(2, types.BoolValue(true)).ValueBool())
+}
+
+func TestMuteStatusNeedsEnabledChange(t *testing.T) {
+	require.False(t, muteStatusNeedsEnabledChange(0, true))
+	require.False(t, muteStatusNeedsEnabledChange(2, false))
+	require.False(t, muteStatusNeedsEnabledChange(1, true))
+	require.True(t, muteStatusNeedsEnabledChange(2, true))
+	require.True(t, muteStatusNeedsEnabledChange(0, false))
+	require.True(t, muteStatusNeedsEnabledChange(1, false))
 }
 
 func TestApplyContentToStatePreservesCheckerTagAndCustomRanges(t *testing.T) {

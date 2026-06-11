@@ -31,6 +31,7 @@ The `guance_mute` data source reads an existing Guance mute rule by `uuid` or ex
 - `crontab_duration` (Number) Repeated mute duration in seconds.
 - `declaration` (Map of String) Custom declaration information.
 - `description` (String) The description of the mute rule.
+- `enabled` (Boolean) Whether the mute rule is enabled. API status 0 maps to true, and status 2 maps to false.
 - `end_time` (String) One-time mute end time.
 - `filter_string` (String) Event attribute filter expression.
 - `mute_ranges` (Attributes List) Mute ranges. (see [below for nested schema](#nestedatt--mute_ranges))

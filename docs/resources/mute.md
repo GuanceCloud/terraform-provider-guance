@@ -67,13 +67,13 @@ description: |-
   }
   ```
   Argument Reference
-  name - (Required) Mute rule name.type - (Required) Mute rule type. Valid values are checker, alertPolicy, tag, and custom.mute_ranges - (Required) Mute ranges. An empty list means all resources for the selected type.description - (Optional) Mute rule description.tags - (Optional) Event attribute filters. Prefix a key with - for negative matching.filter_string - (Optional) Event attribute filter expression. This has higher priority than tags.notify_targets - (Optional) Notification targets.notify_message - (Optional) Notification message.notify_time_str - (Optional) Notification time in YYYY/MM/DD HH:mm:ss.start_time - (Optional) One-time mute start time in YYYY/MM/DD HH:mm:ss.end_time - (Optional) One-time mute end time in YYYY/MM/DD HH:mm:ss.repeat_time_set - (Optional) 0 for one-time mute, 1 for repeated mute. Defaults to 0.repeat_crontab_set - (Optional) Repeated mute crontab fields.crontab_duration - (Optional) Repeated mute duration in seconds.repeat_expire_time - (Optional) Repeated mute expiration time in YYYY/MM/DD HH:mm:ss, or 0 for never expires.timezone - (Optional) Mute rule timezone. Defaults to Asia/Shanghai.declaration - (Optional) Custom declaration information.
+  name - (Required) Mute rule name.type - (Required) Mute rule type. Valid values are checker, alertPolicy, tag, and custom.mute_ranges - (Required) Mute ranges. An empty list means all resources for the selected type.description - (Optional) Mute rule description.tags - (Optional) Event attribute filters. Prefix a key with - for negative matching.filter_string - (Optional) Event attribute filter expression. This has higher priority than tags.notify_targets - (Optional) Notification targets.notify_message - (Optional) Notification message.notify_time_str - (Optional) Notification time in YYYY/MM/DD HH:mm:ss.start_time - (Optional) One-time mute start time in YYYY/MM/DD HH:mm:ss.end_time - (Optional) One-time mute end time in YYYY/MM/DD HH:mm:ss.repeat_time_set - (Optional) 0 for one-time mute, 1 for repeated mute. Defaults to 0.repeat_crontab_set - (Optional) Repeated mute crontab fields.crontab_duration - (Optional) Repeated mute duration in seconds.repeat_expire_time - (Optional) Repeated mute expiration time in YYYY/MM/DD HH:mm:ss, or 0 for never expires.timezone - (Optional) Mute rule timezone. Defaults to Asia/Shanghai.declaration - (Optional) Custom declaration information.enabled - (Optional) Whether the mute rule is enabled. Defaults to true.
   mute_ranges
   name - (Optional) Display name of the muted resource.type - (Optional) Resource type returned by the API.checker_uuid - (Optional) Monitor/checker UUID.monitor_uuid - (Optional) Monitor UUID.slo_uuid - (Optional) SLO UUID.alert_policy_uuid - (Optional) Alert policy UUID.tag_uuid - (Optional) Monitor tag UUID.
   notify_targets
   type - (Required) Notification target type, such as mail or notifyObject.to - (Required) Notification target UUIDs.
   Attribute Reference
-  uuid - Mute rule UUID.status - Mute rule status returned by the API.create_at - Creation timestamp in seconds.update_at - Last update timestamp in seconds.workspace_uuid - Workspace UUID.
+  uuid - Mute rule UUID.status - Mute rule status returned by the API. Status 0 maps to enabled = true; status 2 maps to enabled = false.create_at - Creation timestamp in seconds.update_at - Last update timestamp in seconds.workspace_uuid - Workspace UUID.
   Data Source
   The guance_mute data source reads an existing mute rule by uuid or exact name.
   Lookup by name:
@@ -91,7 +91,7 @@ description: |-
     uuid = "mute_xxx"
   }
   
-  Name lookup must match exactly one mute rule. The data source exports all resource attributes as read-only values, including mute_ranges, tags, filter_string, notify_targets, notify_message, notify_time_str, start_time, end_time, repeat_time_set, repeat_crontab_set, crontab_duration, repeat_expire_time, timezone, declaration, status, create_at, update_at, and workspace_uuid.
+  Name lookup must match exactly one mute rule. The data source exports all resource attributes as read-only values, including mute_ranges, tags, filter_string, notify_targets, notify_message, notify_time_str, start_time, end_time, repeat_time_set, repeat_crontab_set, crontab_duration, repeat_expire_time, timezone, declaration, enabled, status, create_at, update_at, and workspace_uuid.
   Import
   shell
   terraform import guance_mute.example mute_xxx
@@ -198,6 +198,7 @@ resource "guance_mute" "with_notify" {
 * `repeat_expire_time` - (Optional) Repeated mute expiration time in `YYYY/MM/DD HH:mm:ss`, or `0` for never expires.
 * `timezone` - (Optional) Mute rule timezone. Defaults to `Asia/Shanghai`.
 * `declaration` - (Optional) Custom declaration information.
+* `enabled` - (Optional) Whether the mute rule is enabled. Defaults to `true`.
 
 ### `mute_ranges`
 
@@ -217,7 +218,7 @@ resource "guance_mute" "with_notify" {
 ## Attribute Reference
 
 * `uuid` - Mute rule UUID.
-* `status` - Mute rule status returned by the API.
+* `status` - Mute rule status returned by the API. Status `0` maps to `enabled = true`; status `2` maps to `enabled = false`.
 * `create_at` - Creation timestamp in seconds.
 * `update_at` - Last update timestamp in seconds.
 * `workspace_uuid` - Workspace UUID.
@@ -246,7 +247,7 @@ data "guance_mute" "example" {
 }
 ```
 
-Name lookup must match exactly one mute rule. The data source exports all resource attributes as read-only values, including `mute_ranges`, `tags`, `filter_string`, `notify_targets`, `notify_message`, `notify_time_str`, `start_time`, `end_time`, `repeat_time_set`, `repeat_crontab_set`, `crontab_duration`, `repeat_expire_time`, `timezone`, `declaration`, `status`, `create_at`, `update_at`, and `workspace_uuid`.
+Name lookup must match exactly one mute rule. The data source exports all resource attributes as read-only values, including `mute_ranges`, `tags`, `filter_string`, `notify_targets`, `notify_message`, `notify_time_str`, `start_time`, `end_time`, `repeat_time_set`, `repeat_crontab_set`, `crontab_duration`, `repeat_expire_time`, `timezone`, `declaration`, `enabled`, `status`, `create_at`, `update_at`, and `workspace_uuid`.
 
 ## Import
 
@@ -270,6 +271,7 @@ terraform import guance_mute.example mute_xxx
 - `crontab_duration` (Number) Repeated mute duration in seconds.
 - `declaration` (Map of String) Custom declaration information.
 - `description` (String) The description of the mute rule.
+- `enabled` (Boolean) Whether the mute rule is enabled. This manages API status 0/2 through the mute enable/disable endpoints.
 - `end_time` (String) One-time mute end time in YYYY/MM/DD HH:mm:ss.
 - `filter_string` (String) Event attribute filter expression. Takes precedence over tags.
 - `notify_message` (String) Notification message.

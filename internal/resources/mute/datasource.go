@@ -51,6 +51,7 @@ type muteDataSourceModel struct {
 	RepeatExpireTime types.String        `tfsdk:"repeat_expire_time"`
 	Timezone         types.String        `tfsdk:"timezone"`
 	Declaration      map[string]string   `tfsdk:"declaration"`
+	Enabled          types.Bool          `tfsdk:"enabled"`
 	Status           types.Int64         `tfsdk:"status"`
 	CreateAt         types.Int64         `tfsdk:"create_at"`
 	UpdateAt         types.Int64         `tfsdk:"update_at"`
@@ -226,6 +227,10 @@ func (d *muteDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, r
 				Computed:    true,
 				ElementType: types.StringType,
 			},
+			"enabled": dsschema.BoolAttribute{
+				Description: "Whether the mute rule is enabled. API status 0 maps to true, and status 2 maps to false.",
+				Computed:    true,
+			},
 			"status": dsschema.Int64Attribute{
 				Description: "Mute rule status returned by the API.",
 				Computed:    true,
@@ -332,6 +337,7 @@ func (d *muteDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 	state.Timezone = stringPointerValue(content.Timezone)
 	state.Declaration = declarationFromContent(content.Declaration, nil)
 	state.Status = types.Int64Value(int64(content.Status))
+	state.Enabled = muteEnabledFromStatus(content.Status, state.Enabled)
 	state.CreateAt = types.Int64Value(int64(content.CreateAt))
 	state.UpdateAt = types.Int64Value(int64(content.UpdateAt))
 	state.WorkspaceUUID = types.StringValue(content.WorkspaceUUID)
