@@ -196,10 +196,16 @@ func applyContentToState(state *muteResourceModel, content *api.MuteContent) {
 	state.NotifyTargets = notifyTargetsFromContent(content.NotifyTargets, state.NotifyTargets)
 	state.NotifyMessage = stringValueOrExisting(content.NotifyMessage, state.NotifyMessage)
 	state.NotifyTimeStr = stringValueOrExisting(content.NotifyTimeStr, state.NotifyTimeStr)
-	state.StartTime = stringValueOrExisting(content.StartTime, state.StartTime)
-	state.EndTime = stringValueOrExisting(content.EndTime, state.EndTime)
-	if content.RepeatTimeSet != 0 || state.RepeatTimeSet.IsNull() || state.RepeatTimeSet.IsUnknown() {
-		state.RepeatTimeSet = types.Int64Value(int64(content.RepeatTimeSet))
+	repeatTimeSet := repeatTimeSetFromContent(content)
+	if repeatTimeSet != 0 || state.RepeatTimeSet.IsNull() || state.RepeatTimeSet.IsUnknown() {
+		state.RepeatTimeSet = types.Int64Value(int64(repeatTimeSet))
+	}
+	if state.RepeatTimeSet.ValueInt64() == 1 {
+		state.StartTime = stringValueOrConfigured(content.StartTime, state.StartTime)
+		state.EndTime = stringValueOrConfigured(content.EndTime, state.EndTime)
+	} else {
+		state.StartTime = stringValueOrExisting(content.StartTime, state.StartTime)
+		state.EndTime = stringValueOrExisting(content.EndTime, state.EndTime)
 	}
 	if content.RepeatCrontabSet != nil {
 		state.RepeatCrontabSet = repeatCrontabSetFromContent(content.RepeatCrontabSet)
@@ -223,6 +229,13 @@ func stringValueOrExisting(value string, existing types.String) types.String {
 		return existing
 	}
 	return types.StringValue(value)
+}
+
+func stringValueOrConfigured(value string, existing types.String) types.String {
+	if existing.IsNull() || existing.IsUnknown() {
+		return existing
+	}
+	return stringValueOrExisting(value, existing)
 }
 
 func repeatExpireTimeValueOrExisting(value string, existing types.String) types.String {
@@ -327,6 +340,16 @@ func repeatCrontabSetFromContent(value *api.RepeatCrontabSet) *repeatCrontabSet 
 		Month: types.StringValue(value.Month),
 		Week:  types.StringValue(value.Week),
 	}
+}
+
+func repeatTimeSetFromContent(content *api.MuteContent) int {
+	if content.RepeatTimeSet != 0 {
+		return content.RepeatTimeSet
+	}
+	if content.RepeatCrontabSet != nil {
+		return 1
+	}
+	return 0
 }
 
 func stringsFromTypes(values []types.String) []string {

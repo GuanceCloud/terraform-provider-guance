@@ -294,7 +294,7 @@ func (d *muteDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 	state.NotifyTimeStr = stringPointerValue(content.NotifyTimeStr)
 	state.StartTime = stringPointerValue(content.StartTime)
 	state.EndTime = stringPointerValue(content.EndTime)
-	state.RepeatTimeSet = types.Int64Value(int64(content.RepeatTimeSet))
+	state.RepeatTimeSet = types.Int64Value(int64(repeatTimeSetFromContent(content)))
 	if content.RepeatCrontabSet != nil {
 		state.RepeatCrontabSet = repeatCrontabSetFromContent(content.RepeatCrontabSet)
 	}
