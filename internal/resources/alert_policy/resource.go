@@ -160,7 +160,7 @@ func (r *alertPolicyResource) Update(ctx context.Context, req resource.UpdateReq
 	item := r.getAlertPolicyFromPlan(&plan)
 
 	content := &api.AlertPolicyContent{}
-	err := r.client.Update(consts.TypeNameAlertPolicy, plan.UUID.ValueString(), item, content)
+	err := r.client.Update(consts.TypeNameAlertPolicy, plan.UUID.ValueString(), alertPolicyUpdateBody(item), content)
 
 	if err != nil {
 		resp.Diagnostics.AddError(
@@ -462,6 +462,33 @@ func (r *alertPolicyResource) getAlertPolicyFromPlan(plan *alertPolicyResourceMo
 	}
 
 	return ap
+}
+
+func alertPolicyUpdateBody(item *api.AlertPolicy) map[string]any {
+	body := map[string]any{
+		"name":              item.Name,
+		"desc":              item.Desc,
+		"ruleTimezone":      item.RuleTimezone,
+		"openPermissionSet": item.OpenPermissionSet,
+		"permissionSet":     emptyStringSliceIfNil(item.PermissionSet),
+	}
+	if item.CheckerUUIDs != nil {
+		body["checkerUUIDs"] = item.CheckerUUIDs
+	}
+	if item.SecurityRuleUUIDs != nil {
+		body["securityRuleUUIDs"] = item.SecurityRuleUUIDs
+	}
+	if item.AlertOpt != nil {
+		body["alertOpt"] = item.AlertOpt
+	}
+	return body
+}
+
+func emptyStringSliceIfNil(values []string) []string {
+	if values == nil {
+		return []string{}
+	}
+	return values
 }
 
 func alertOptFromContent(content *api.AlertOpt, prior *alertOptModel) *alertOptModel {

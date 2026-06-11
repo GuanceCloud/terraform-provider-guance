@@ -54,6 +54,21 @@ func TestGetNotifyObjectFromPlanRejectsInvalidOptSetJSON(t *testing.T) {
 	require.Error(t, err)
 }
 
+func TestNotifyObjectUpdateBodyPreservesPermissionZeroValues(t *testing.T) {
+	got := notifyObjectUpdateBody("notify_xxx", &api.NotifyObject{
+		Name:              "codex-notify-object",
+		OptSet:            map[string]any{"url": "https://example.com/hook"},
+		OpenPermissionSet: false,
+		PermissionSet:     nil,
+	})
+
+	require.Equal(t, "notify_xxx", got["notifyObjectUUID"])
+	require.Equal(t, "codex-notify-object", got["name"])
+	require.Equal(t, map[string]any{"url": "https://example.com/hook"}, got["optSet"])
+	require.Equal(t, false, got["openPermissionSet"])
+	require.Equal(t, []string{}, got["permissionSet"])
+}
+
 func TestStateFromNotifyObjectContentCanonicalizesOptSet(t *testing.T) {
 	state := &notifyObjectDataSourceModel{}
 	content := &api.NotifyObjectContent{

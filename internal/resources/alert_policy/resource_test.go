@@ -12,10 +12,12 @@ import (
 func TestGetAlertPolicyFromPlanStatusMode(t *testing.T) {
 	resource := &alertPolicyResource{}
 	plan := &alertPolicyResourceModel{
-		Name:         types.StringValue("codex-status-policy"),
-		Desc:         types.StringValue("status mode"),
-		CheckerUUIDs: []types.String{types.StringValue("rul_xxx")},
-		RuleTimezone: types.StringValue("Asia/Shanghai"),
+		Name:              types.StringValue("codex-status-policy"),
+		Desc:              types.StringValue("status mode"),
+		OpenPermissionSet: types.BoolValue(true),
+		PermissionSet:     []types.String{types.StringValue("wsAdmin")},
+		CheckerUUIDs:      []types.String{types.StringValue("rul_xxx")},
+		RuleTimezone:      types.StringValue("Asia/Shanghai"),
 		AlertOpt: &alertOptModel{
 			AggType:                     types.StringValue("byFields"),
 			IgnoreOK:                    types.BoolValue(true),
@@ -58,6 +60,8 @@ func TestGetAlertPolicyFromPlanStatusMode(t *testing.T) {
 
 	require.Equal(t, "codex-status-policy", got.Name)
 	require.Equal(t, "status mode", got.Desc)
+	require.True(t, got.OpenPermissionSet)
+	require.Equal(t, []string{"wsAdmin"}, got.PermissionSet)
 	require.Equal(t, []string{"rul_xxx"}, got.CheckerUUIDs)
 	require.Equal(t, "Asia/Shanghai", got.RuleTimezone)
 	require.NotNil(t, got.AlertOpt)
@@ -89,6 +93,23 @@ func TestGetAlertPolicyFromPlanStatusMode(t *testing.T) {
 	require.Equal(t, []string{"notify_yyy"}, got.AlertOpt.AlertTarget[0].Targets[0].UpgradeTargets[0].To)
 	require.Equal(t, 300, got.AlertOpt.AlertTarget[0].Targets[0].UpgradeTargets[0].Duration)
 	require.Equal(t, []string{"mail"}, got.AlertOpt.AlertTarget[0].Targets[0].UpgradeTargets[0].ToWay)
+}
+
+func TestAlertPolicyUpdateBodyPreservesPermissionZeroValues(t *testing.T) {
+	got := alertPolicyUpdateBody(&api.AlertPolicy{
+		Name:              "codex-status-policy",
+		RuleTimezone:      "Asia/Shanghai",
+		OpenPermissionSet: false,
+		PermissionSet:     nil,
+		AlertOpt:          &api.AlertOpt{AlertType: "status"},
+	})
+
+	require.Equal(t, "codex-status-policy", got["name"])
+	require.Equal(t, "", got["desc"])
+	require.Equal(t, "Asia/Shanghai", got["ruleTimezone"])
+	require.Equal(t, false, got["openPermissionSet"])
+	require.Equal(t, []string{}, got["permissionSet"])
+	require.Equal(t, &api.AlertOpt{AlertType: "status"}, got["alertOpt"])
 }
 
 func TestGetAlertPolicyFromPlanMemberMode(t *testing.T) {

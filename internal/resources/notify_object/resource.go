@@ -131,7 +131,7 @@ func (r *notifyObjectResource) Read(ctx context.Context, req resource.ReadReques
 		state.OptSet = types.StringValue(optSet)
 	}
 	state.OpenPermissionSet = types.BoolValue(content.OpenPermissionSet)
-	if len(content.PermissionSet) > 0 {
+	if content.PermissionSet != nil {
 		permissionSet := make([]types.String, len(content.PermissionSet))
 		for i, perm := range content.PermissionSet {
 			permissionSet[i] = types.StringValue(perm)
@@ -169,19 +169,8 @@ func (r *notifyObjectResource) Update(ctx context.Context, req resource.UpdateRe
 		)
 		return
 	}
-	// For notify object, the UUID is in the body, not the path
-	itemWithUUID := map[string]interface{}{
-		"notifyObjectUUID":  plan.UUID.ValueString(),
-		"name":              item.Name,
-		"optSet":            item.OptSet,
-		"openPermissionSet": item.OpenPermissionSet,
-	}
-	if len(item.PermissionSet) > 0 {
-		itemWithUUID["permissionSet"] = item.PermissionSet
-	}
-
 	content := &api.NotifyObjectContent{}
-	err = r.client.UpdateNotifyObject(itemWithUUID, content)
+	err = r.client.UpdateNotifyObject(notifyObjectUpdateBody(plan.UUID.ValueString(), item), content)
 
 	if err != nil {
 		resp.Diagnostics.AddError(
@@ -254,6 +243,23 @@ func (r *notifyObjectResource) getNotifyObjectFromPlan(plan *notifyObjectResourc
 	}
 
 	return n, nil
+}
+
+func notifyObjectUpdateBody(uuid string, item *api.NotifyObject) map[string]any {
+	return map[string]any{
+		"notifyObjectUUID":  uuid,
+		"name":              item.Name,
+		"optSet":            item.OptSet,
+		"openPermissionSet": item.OpenPermissionSet,
+		"permissionSet":     emptyStringSliceIfNil(item.PermissionSet),
+	}
+}
+
+func emptyStringSliceIfNil(values []string) []string {
+	if values == nil {
+		return []string{}
+	}
+	return values
 }
 
 func canonicalOptSetFromString(value string) (any, string, error) {
