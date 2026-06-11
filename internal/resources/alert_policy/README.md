@@ -92,6 +92,38 @@ resource "guance_alert_policy" "custom_date_example" {
 }
 ```
 
+### Alert Policy by Member
+
+```hcl
+data "guance_members" "all" {}
+
+resource "guance_alert_policy" "member_example" {
+  name          = "Member Alert"
+  desc          = "Route alerts by member"
+  rule_timezone = "Asia/Shanghai"
+
+  alert_opt = {
+    alert_type     = "member"
+    agg_interval   = 60
+    silent_timeout = 300
+
+    alert_target = [{
+      name = "Member notification"
+
+      alert_info = [{
+        name        = "Owner route"
+        member_info = [data.guance_members.all.members[0].uuid]
+
+        targets = [{
+          to     = ["notify_xxx"]
+          status = "critical,error,warning"
+        }]
+      }]
+    }]
+  }
+}
+```
+
 ## Argument Reference
 
 | Name | Type | Required | Default | Description |
@@ -121,6 +153,9 @@ resource "guance_alert_policy" "custom_date_example" {
 | `agg_labels` | list(string) | No | Aggregation labels. |
 | `agg_cluster_fields` | list(string) | No | Smart aggregation field list. |
 | `agg_send_first` | bool | No | Whether to send the first alert directly before aggregation. |
+
+For `alert_type = "status"`, configure notification recipients under `alert_target.targets`.
+For `alert_type = "member"`, configure member routing under `alert_target.alert_info`; each `alert_info.member_info` entry is a member UUID and its `targets` list defines recipients for that member route. In real OpenAPI validation, `agg_interval` is required for member mode.
 
 ## Data Source
 
