@@ -47,7 +47,7 @@ func (d *notifyObjectDataSource) Metadata(_ context.Context, req datasource.Meta
 func (d *notifyObjectDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = dsschema.Schema{
 		Description:         "Lookup a notify object by UUID or exact name.",
-		MarkdownDescription: resourceDocument,
+		MarkdownDescription: "The `guance_notify_object` data source reads an existing Guance alert notification object by `uuid` or exact `name`.",
 		Attributes: map[string]dsschema.Attribute{
 			"uuid": dsschema.StringAttribute{
 				Description: "The UUID of the notify object.",

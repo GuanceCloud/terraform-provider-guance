@@ -44,7 +44,7 @@ func (d *alertPolicyNoticeDateDataSource) Metadata(_ context.Context, req dataso
 func (d *alertPolicyNoticeDateDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = dsschema.Schema{
 		Description:         "Lookup an alert policy custom notice date by UUID or exact name.",
-		MarkdownDescription: resourceDocument,
+		MarkdownDescription: "The `guance_alert_policy_notice_date` data source reads an existing custom notice date by `uuid` or exact `name`.",
 		Attributes: map[string]dsschema.Attribute{
 			"uuid": dsschema.StringAttribute{
 				Description: "The UUID of the notice date.",

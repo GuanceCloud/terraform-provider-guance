@@ -50,7 +50,7 @@ func (d *alertPolicyDataSource) Metadata(_ context.Context, req datasource.Metad
 func (d *alertPolicyDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = dsschema.Schema{
 		Description:         "Lookup an alert policy by UUID or exact name.",
-		MarkdownDescription: resourceDocument,
+		MarkdownDescription: "The `guance_alert_policy` data source reads an existing Guance alert policy by `uuid` or exact `name`.",
 		Attributes: map[string]dsschema.Attribute{
 			"uuid": dsschema.StringAttribute{
 				Description: "The UUID of the alert policy.",

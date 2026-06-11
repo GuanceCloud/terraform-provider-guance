@@ -33,6 +33,20 @@ description: |-
   ```
   More Examples
   Example Source Code https://github.com/GuanceCloud/terraform-provider-guance/tree/main/examples
+  Alert Module
+  The alert-related Terraform resources are based on Guance Forethought OpenAPI endpoints.
+  Typical dependency flow:
+  ```hcl
+  guancenotifyobject
+    -> guancealertpolicy.alertopt.alerttarget.targets.to
+  guancealertpolicynoticedate
+    -> guancealertpolicy.alertopt.alerttarget.customdateuuids
+  guancealertpolicy
+    -> guancemute.muteranges.alertpolicyuuid
+  ```
+  Available alert resources:
+  guance_notify_object - manages alert notification objects.guance_alert_policy_notice_date - manages custom notice dates for alert policies.guance_alert_policy - manages alert delivery, aggregation, silence, and notification targets.guance_mute - manages mute rules for alert policies, checkers, tags, or custom ranges.
+  Each alert resource also has a matching data source with the same Terraform type name. The data source supports lookup by either uuid or exact name, and fails if name lookup does not return exactly one object.
 ---
 
 # guance Provider
@@ -79,6 +93,32 @@ provider "guance" {
 ## More Examples
 
 * [Example Source Code](https://github.com/GuanceCloud/terraform-provider-guance/tree/main/examples)
+
+## Alert Module
+
+The alert-related Terraform resources are based on Guance Forethought OpenAPI endpoints.
+
+Typical dependency flow:
+
+```hcl
+guance_notify_object
+  -> guance_alert_policy.alert_opt.alert_target.targets.to
+
+guance_alert_policy_notice_date
+  -> guance_alert_policy.alert_opt.alert_target.custom_date_uuids
+
+guance_alert_policy
+  -> guance_mute.mute_ranges.alert_policy_uuid
+```
+
+Available alert resources:
+
+* `guance_notify_object` - manages alert notification objects.
+* `guance_alert_policy_notice_date` - manages custom notice dates for alert policies.
+* `guance_alert_policy` - manages alert delivery, aggregation, silence, and notification targets.
+* `guance_mute` - manages mute rules for alert policies, checkers, tags, or custom ranges.
+
+Each alert resource also has a matching data source with the same Terraform type name. The data source supports lookup by either `uuid` or exact `name`, and fails if name lookup does not return exactly one object.
 
 
 

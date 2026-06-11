@@ -60,7 +60,7 @@ func (d *muteDataSource) Metadata(_ context.Context, req datasource.MetadataRequ
 func (d *muteDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = dsschema.Schema{
 		Description:         "Lookup a mute rule by UUID or exact name.",
-		MarkdownDescription: resourceDocument,
+		MarkdownDescription: "The `guance_mute` data source reads an existing Guance mute rule by `uuid` or exact `name`.",
 		Attributes: map[string]dsschema.Attribute{
 			"uuid": dsschema.StringAttribute{
 				Description: "The UUID of the mute rule.",
