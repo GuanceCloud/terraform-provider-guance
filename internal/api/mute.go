@@ -51,6 +51,29 @@ type MuteContent struct {
 	CreateAt         float64             `json:"createAt,omitempty"`
 	UpdateAt         float64             `json:"updateAt,omitempty"`
 	WorkspaceUUID    string              `json:"workspaceUUID,omitempty"`
+	fieldPresent     map[string]bool     `json:"-"`
+}
+
+func (m *MuteContent) UnmarshalJSON(data []byte) error {
+	type muteContentAlias MuteContent
+	var raw map[string]json.RawMessage
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+	var content muteContentAlias
+	if err := json.Unmarshal(data, &content); err != nil {
+		return err
+	}
+	*m = MuteContent(content)
+	m.fieldPresent = make(map[string]bool, len(raw))
+	for field := range raw {
+		m.fieldPresent[field] = true
+	}
+	return nil
+}
+
+func (m *MuteContent) FieldPresent(field string) bool {
+	return m != nil && m.fieldPresent[field]
 }
 
 type MuteRange struct {

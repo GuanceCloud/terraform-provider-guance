@@ -1,6 +1,7 @@
 package mute
 
 import (
+	"encoding/json"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -324,4 +325,87 @@ func TestApplyContentToStateOneTimeMuteKeepsReturnedWindowAndNotifyTargets(t *te
 	require.Len(t, state.NotifyTargets, 1)
 	require.Equal(t, "notifyObject", state.NotifyTargets[0].Type.ValueString())
 	require.Equal(t, []types.String{types.StringValue("notify_xxx")}, state.NotifyTargets[0].To)
+}
+
+func TestApplyContentToStateAppliesRemoteClears(t *testing.T) {
+	state := &muteResourceModel{
+		Description: types.StringValue("existing description"),
+		Type:        types.StringValue("alertPolicy"),
+		MuteRanges: []muteRange{{
+			Name: types.StringValue("existing policy"),
+		}},
+		Tags: map[string][]string{
+			"service": {"api"},
+		},
+		FilterString: types.StringValue("host:old"),
+		NotifyTargets: []notifyTarget{{
+			Type: types.StringValue("notifyObject"),
+			To:   []types.String{types.StringValue("notify_xxx")},
+		}},
+		NotifyMessage: types.StringValue("old message"),
+		NotifyTimeStr: types.StringValue("2026/12/31 11:50:00"),
+		StartTime:     types.StringValue("2026/12/31 12:00:00"),
+		EndTime:       types.StringValue("2026/12/31 13:00:00"),
+		RepeatTimeSet: types.Int64Value(1),
+		RepeatCrontabSet: &repeatCrontabSet{
+			Min:   types.StringValue("0"),
+			Hour:  types.StringValue("9"),
+			Day:   types.StringValue("*"),
+			Month: types.StringValue("*"),
+			Week:  types.StringValue("1"),
+		},
+		CrontabDuration:  types.Int64Value(3600),
+		RepeatExpireTime: types.StringValue("2026/12/31 23:59:59"),
+		Timezone:         types.StringValue("Asia/Shanghai"),
+		Declaration: map[string]string{
+			"reason": "maintenance",
+		},
+		Enabled: types.BoolValue(true),
+	}
+	content := muteContentFromJSON(t, `{
+		"uuid": "mute_xxx",
+		"name": "codex-mute-clear",
+		"description": "",
+		"type": "alertPolicy",
+		"muteRanges": [],
+		"tags": {},
+		"filterString": "",
+		"notifyTargets": [],
+		"notifyMessage": "",
+		"notifyTimeStr": "",
+		"startTime": "",
+		"endTime": "",
+		"repeatTimeSet": 0,
+		"repeatCrontabSet": null,
+		"crontabDuration": 0,
+		"repeatExpireTime": "",
+		"timezone": "Asia/Shanghai",
+		"declaration": {},
+		"status": 0
+	}`)
+
+	applyContentToState(state, content)
+
+	require.Equal(t, "mute_xxx", state.UUID.ValueString())
+	require.Equal(t, "", state.Description.ValueString())
+	require.Empty(t, state.MuteRanges)
+	require.Empty(t, state.Tags)
+	require.Equal(t, "", state.FilterString.ValueString())
+	require.Empty(t, state.NotifyTargets)
+	require.Equal(t, "", state.NotifyMessage.ValueString())
+	require.Equal(t, "", state.NotifyTimeStr.ValueString())
+	require.Equal(t, int64(0), state.RepeatTimeSet.ValueInt64())
+	require.Equal(t, "", state.StartTime.ValueString())
+	require.Equal(t, "", state.EndTime.ValueString())
+	require.Nil(t, state.RepeatCrontabSet)
+	require.Equal(t, int64(0), state.CrontabDuration.ValueInt64())
+	require.Equal(t, "", state.RepeatExpireTime.ValueString())
+	require.Empty(t, state.Declaration)
+}
+
+func muteContentFromJSON(t *testing.T, value string) *api.MuteContent {
+	t.Helper()
+	var content api.MuteContent
+	require.NoError(t, json.Unmarshal([]byte(value), &content))
+	return &content
 }
