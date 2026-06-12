@@ -479,14 +479,119 @@ func alertPolicyUpdateBody(item *api.AlertPolicy) map[string]any {
 		body["securityRuleUUIDs"] = item.SecurityRuleUUIDs
 	}
 	if item.AlertOpt != nil {
-		body["alertOpt"] = item.AlertOpt
+		body["alertOpt"] = alertOptUpdateBody(item.AlertOpt)
 	}
 	return body
+}
+
+func alertOptUpdateBody(item *api.AlertOpt) map[string]any {
+	body := map[string]any{
+		"ignoreOK":                    item.IgnoreOK,
+		"silentTimeout":               item.SilentTimeout,
+		"silentTimeoutByStatusEnable": item.SilentTimeoutByStatusEnable,
+		"silentTimeoutByStatus":       silentTimeoutByStatusUpdateBody(item.SilentTimeoutByStatus),
+		"alertTarget":                 alertTargetsUpdateBody(item.AlertTarget),
+		"aggInterval":                 item.AggInterval,
+		"aggFields":                   emptyStringSliceIfNil(item.AggFields),
+		"aggLabels":                   emptyStringSliceIfNil(item.AggLabels),
+		"aggClusterFields":            emptyStringSliceIfNil(item.AggClusterFields),
+		"aggSendFirst":                item.AggSendFirst,
+	}
+	if item.AggType != "" {
+		body["aggType"] = item.AggType
+	}
+	if item.AlertType != "" {
+		body["alertType"] = item.AlertType
+	}
+	return body
+}
+
+func silentTimeoutByStatusUpdateBody(items []api.SilentTimeoutByStatus) []map[string]any {
+	result := make([]map[string]any, 0, len(items))
+	for _, item := range items {
+		result = append(result, map[string]any{
+			"status":        item.Status,
+			"silentTimeout": item.SilentTimeout,
+		})
+	}
+	return result
+}
+
+func alertTargetsUpdateBody(items []api.AlertTarget) []map[string]any {
+	result := make([]map[string]any, 0, len(items))
+	for _, item := range items {
+		body := map[string]any{
+			"name":            item.Name,
+			"targets":         targetsUpdateBody(item.Targets),
+			"customDateUUIDs": emptyStringSliceIfNil(item.CustomDateUUIDs),
+			"alertInfo":       alertInfoUpdateBody(item.AlertInfo),
+		}
+		if item.Crontab != "" {
+			body["crontab"] = item.Crontab
+			body["crontabDuration"] = item.CrontabDuration
+		}
+		if item.CustomStartTime != "" || len(item.CustomDateUUIDs) > 0 || item.CustomDuration != 0 {
+			body["customStartTime"] = item.CustomStartTime
+			body["customDuration"] = item.CustomDuration
+		}
+		result = append(result, body)
+	}
+	return result
+}
+
+func targetsUpdateBody(items []api.Target) []map[string]any {
+	result := make([]map[string]any, 0, len(items))
+	for _, item := range items {
+		body := map[string]any{
+			"to":             emptyStringSliceIfNil(item.To),
+			"status":         item.Status,
+			"upgradeTargets": upgradeTargetsUpdateBody(item.UpgradeTargets),
+			"tags":           emptyStringListMapIfNil(item.Tags),
+			"filterString":   item.FilterString,
+		}
+		if item.DfSource != "" {
+			body["df_source"] = item.DfSource
+		}
+		result = append(result, body)
+	}
+	return result
+}
+
+func upgradeTargetsUpdateBody(items []api.UpgradeTarget) []map[string]any {
+	result := make([]map[string]any, 0, len(items))
+	for _, item := range items {
+		result = append(result, map[string]any{
+			"to":       emptyStringSliceIfNil(item.To),
+			"duration": item.Duration,
+			"toWay":    emptyStringSliceIfNil(item.ToWay),
+		})
+	}
+	return result
+}
+
+func alertInfoUpdateBody(items []api.AlertInfo) []map[string]any {
+	result := make([]map[string]any, 0, len(items))
+	for _, item := range items {
+		result = append(result, map[string]any{
+			"name":         item.Name,
+			"targets":      targetsUpdateBody(item.Targets),
+			"filterString": item.FilterString,
+			"memberInfo":   emptyStringSliceIfNil(item.MemberInfo),
+		})
+	}
+	return result
 }
 
 func emptyStringSliceIfNil(values []string) []string {
 	if values == nil {
 		return []string{}
+	}
+	return values
+}
+
+func emptyStringListMapIfNil(values map[string][]string) map[string][]string {
+	if values == nil {
+		return map[string][]string{}
 	}
 	return values
 }

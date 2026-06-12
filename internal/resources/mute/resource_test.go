@@ -144,6 +144,35 @@ func TestMuteFromPlanSupportsCheckerTagAndCustomRanges(t *testing.T) {
 	}
 }
 
+func TestMuteUpdateBodyPreservesClearableZeroValues(t *testing.T) {
+	got := muteUpdateBody(&api.Mute{
+		Name:          "codex-mute",
+		Description:   "",
+		Type:          "custom",
+		MuteRanges:    []api.MuteRange{},
+		RepeatTimeSet: 0,
+		Timezone:      "Asia/Shanghai",
+	})
+
+	require.Equal(t, "codex-mute", got["name"])
+	require.Equal(t, "", got["description"])
+	require.Equal(t, "custom", got["type"])
+	require.Equal(t, []api.MuteRange{}, got["muteRanges"])
+	require.Equal(t, map[string][]string{}, got["tags"])
+	require.Equal(t, "", got["filterString"])
+	require.Equal(t, []api.MuteNotifyTarget{}, got["notifyTargets"])
+	require.Equal(t, "", got["notifyMessage"])
+	require.Equal(t, "", got["notifyTimeStr"])
+	require.Equal(t, "", got["startTime"])
+	require.Equal(t, "", got["endTime"])
+	require.Equal(t, 0, got["repeatTimeSet"])
+	require.Nil(t, got["repeatCrontabSet"])
+	require.Equal(t, 0, got["crontabDuration"])
+	require.Equal(t, "", got["repeatExpireTime"])
+	require.Equal(t, "Asia/Shanghai", got["timezone"])
+	require.Equal(t, map[string]string{}, got["declaration"])
+}
+
 func TestApplyContentToStateInfersRepeatedMuteAndPreservesUnconfiguredWindow(t *testing.T) {
 	state := &muteResourceModel{
 		RepeatTimeSet: types.Int64Value(1),

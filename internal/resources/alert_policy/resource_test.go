@@ -101,7 +101,14 @@ func TestAlertPolicyUpdateBodyPreservesPermissionZeroValues(t *testing.T) {
 		RuleTimezone:      "Asia/Shanghai",
 		OpenPermissionSet: false,
 		PermissionSet:     nil,
-		AlertOpt:          &api.AlertOpt{AlertType: "status"},
+		AlertOpt: &api.AlertOpt{
+			AlertType:                   "status",
+			IgnoreOK:                    false,
+			SilentTimeout:               0,
+			SilentTimeoutByStatusEnable: false,
+			AggInterval:                 0,
+			AggSendFirst:                false,
+		},
 	})
 
 	require.Equal(t, "codex-status-policy", got["name"])
@@ -109,7 +116,19 @@ func TestAlertPolicyUpdateBodyPreservesPermissionZeroValues(t *testing.T) {
 	require.Equal(t, "Asia/Shanghai", got["ruleTimezone"])
 	require.Equal(t, false, got["openPermissionSet"])
 	require.Equal(t, []string{}, got["permissionSet"])
-	require.Equal(t, &api.AlertOpt{AlertType: "status"}, got["alertOpt"])
+	alertOpt, ok := got["alertOpt"].(map[string]any)
+	require.True(t, ok)
+	require.Equal(t, "status", alertOpt["alertType"])
+	require.Equal(t, false, alertOpt["ignoreOK"])
+	require.Equal(t, 0, alertOpt["silentTimeout"])
+	require.Equal(t, false, alertOpt["silentTimeoutByStatusEnable"])
+	require.Equal(t, []map[string]any{}, alertOpt["silentTimeoutByStatus"])
+	require.Equal(t, []map[string]any{}, alertOpt["alertTarget"])
+	require.Equal(t, 0, alertOpt["aggInterval"])
+	require.Equal(t, []string{}, alertOpt["aggFields"])
+	require.Equal(t, []string{}, alertOpt["aggLabels"])
+	require.Equal(t, []string{}, alertOpt["aggClusterFields"])
+	require.Equal(t, false, alertOpt["aggSendFirst"])
 }
 
 func TestGetAlertPolicyFromPlanMemberMode(t *testing.T) {

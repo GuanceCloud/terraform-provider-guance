@@ -111,7 +111,7 @@ func (r *muteResource) Update(ctx context.Context, req resource.UpdateRequest, r
 	}
 
 	content := &api.MuteContent{}
-	if err := r.client.Update(consts.TypeNameMute, plan.UUID.ValueString(), muteFromPlan(&plan), content); err != nil {
+	if err := r.client.Update(consts.TypeNameMute, plan.UUID.ValueString(), muteUpdateBody(muteFromPlan(&plan)), content); err != nil {
 		resp.Diagnostics.AddError(
 			"Error updating mute rule",
 			"Could not update mute rule, unexpected error: "+err.Error(),
@@ -219,6 +219,49 @@ func muteFromPlan(plan *muteResourceModel) *api.Mute {
 	}
 
 	return item
+}
+
+func muteUpdateBody(item *api.Mute) map[string]any {
+	return map[string]any{
+		"name":             item.Name,
+		"description":      item.Description,
+		"type":             item.Type,
+		"muteRanges":       item.MuteRanges,
+		"tags":             emptyStringListMapIfNil(item.Tags),
+		"filterString":     item.FilterString,
+		"notifyTargets":    emptyMuteNotifyTargetsIfNil(item.NotifyTargets),
+		"notifyMessage":    item.NotifyMessage,
+		"notifyTimeStr":    item.NotifyTimeStr,
+		"startTime":        item.StartTime,
+		"endTime":          item.EndTime,
+		"repeatTimeSet":    item.RepeatTimeSet,
+		"repeatCrontabSet": item.RepeatCrontabSet,
+		"crontabDuration":  item.CrontabDuration,
+		"repeatExpireTime": item.RepeatExpireTime,
+		"timezone":         item.Timezone,
+		"declaration":      emptyStringMapIfNil(item.Declaration),
+	}
+}
+
+func emptyMuteNotifyTargetsIfNil(values []api.MuteNotifyTarget) []api.MuteNotifyTarget {
+	if values == nil {
+		return []api.MuteNotifyTarget{}
+	}
+	return values
+}
+
+func emptyStringListMapIfNil(values map[string][]string) map[string][]string {
+	if values == nil {
+		return map[string][]string{}
+	}
+	return values
+}
+
+func emptyStringMapIfNil(values map[string]string) map[string]string {
+	if values == nil {
+		return map[string]string{}
+	}
+	return values
 }
 
 func applyContentToState(state *muteResourceModel, content *api.MuteContent) {
