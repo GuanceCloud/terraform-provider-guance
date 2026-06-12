@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"github.com/GuanceCloud/terraform-provider-guance/internal/api"
+	resourcemute "github.com/GuanceCloud/terraform-provider-guance/internal/resources/mute"
 )
 
 var (
@@ -29,33 +30,33 @@ type muteDataSource struct {
 }
 
 type muteDataSourceModel struct {
-	UUID             types.String        `tfsdk:"uuid"`
-	Name             types.String        `tfsdk:"name"`
-	Description      types.String        `tfsdk:"description"`
-	Type             types.String        `tfsdk:"type"`
-	WorkStatus       types.String        `tfsdk:"work_status"`
-	IsEnable         types.String        `tfsdk:"is_enable"`
-	Creator          types.String        `tfsdk:"creator"`
-	Updator          types.String        `tfsdk:"updator"`
-	MuteRanges       []muteRange         `tfsdk:"mute_ranges"`
-	Tags             map[string][]string `tfsdk:"tags"`
-	FilterString     types.String        `tfsdk:"filter_string"`
-	NotifyTargets    []notifyTarget      `tfsdk:"notify_targets"`
-	NotifyMessage    types.String        `tfsdk:"notify_message"`
-	NotifyTimeStr    types.String        `tfsdk:"notify_time_str"`
-	StartTime        types.String        `tfsdk:"start_time"`
-	EndTime          types.String        `tfsdk:"end_time"`
-	RepeatTimeSet    types.Int64         `tfsdk:"repeat_time_set"`
-	RepeatCrontabSet *repeatCrontabSet   `tfsdk:"repeat_crontab_set"`
-	CrontabDuration  types.Int64         `tfsdk:"crontab_duration"`
-	RepeatExpireTime types.String        `tfsdk:"repeat_expire_time"`
-	Timezone         types.String        `tfsdk:"timezone"`
-	Declaration      map[string]string   `tfsdk:"declaration"`
-	Enabled          types.Bool          `tfsdk:"enabled"`
-	Status           types.Int64         `tfsdk:"status"`
-	CreateAt         types.Int64         `tfsdk:"create_at"`
-	UpdateAt         types.Int64         `tfsdk:"update_at"`
-	WorkspaceUUID    types.String        `tfsdk:"workspace_uuid"`
+	UUID             types.String                   `tfsdk:"uuid"`
+	Name             types.String                   `tfsdk:"name"`
+	Description      types.String                   `tfsdk:"description"`
+	Type             types.String                   `tfsdk:"type"`
+	WorkStatus       types.String                   `tfsdk:"work_status"`
+	IsEnable         types.String                   `tfsdk:"is_enable"`
+	Creator          types.String                   `tfsdk:"creator"`
+	Updator          types.String                   `tfsdk:"updator"`
+	MuteRanges       []resourcemute.MuteRange       `tfsdk:"mute_ranges"`
+	Tags             map[string][]string            `tfsdk:"tags"`
+	FilterString     types.String                   `tfsdk:"filter_string"`
+	NotifyTargets    []resourcemute.NotifyTarget    `tfsdk:"notify_targets"`
+	NotifyMessage    types.String                   `tfsdk:"notify_message"`
+	NotifyTimeStr    types.String                   `tfsdk:"notify_time_str"`
+	StartTime        types.String                   `tfsdk:"start_time"`
+	EndTime          types.String                   `tfsdk:"end_time"`
+	RepeatTimeSet    types.Int64                    `tfsdk:"repeat_time_set"`
+	RepeatCrontabSet *resourcemute.RepeatCrontabSet `tfsdk:"repeat_crontab_set"`
+	CrontabDuration  types.Int64                    `tfsdk:"crontab_duration"`
+	RepeatExpireTime types.String                   `tfsdk:"repeat_expire_time"`
+	Timezone         types.String                   `tfsdk:"timezone"`
+	Declaration      map[string]string              `tfsdk:"declaration"`
+	Enabled          types.Bool                     `tfsdk:"enabled"`
+	Status           types.Int64                    `tfsdk:"status"`
+	CreateAt         types.Int64                    `tfsdk:"create_at"`
+	UpdateAt         types.Int64                    `tfsdk:"update_at"`
+	WorkspaceUUID    types.String                   `tfsdk:"workspace_uuid"`
 }
 
 func (d *muteDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
@@ -318,26 +319,26 @@ func (d *muteDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 
 	state.UUID = types.StringValue(content.UUID)
 	state.Name = types.StringValue(content.Name)
-	state.Description = stringPointerValue(content.Description)
+	state.Description = resourcemute.StringPointerValue(content.Description)
 	state.Type = types.StringValue(content.Type)
-	state.MuteRanges = muteRangesFromContent(content.MuteRanges, nil, true)
+	state.MuteRanges = resourcemute.MuteRangesFromContent(content.MuteRanges, nil, true)
 	state.Tags = content.Tags
-	state.FilterString = stringPointerValue(content.FilterString)
-	state.NotifyTargets = notifyTargetsFromContent(content.NotifyTargets, nil, true)
-	state.NotifyMessage = stringPointerValue(content.NotifyMessage)
-	state.NotifyTimeStr = stringPointerValue(content.NotifyTimeStr)
-	state.StartTime = stringPointerValue(content.StartTime)
-	state.EndTime = stringPointerValue(content.EndTime)
-	state.RepeatTimeSet = types.Int64Value(int64(repeatTimeSetFromContent(content)))
+	state.FilterString = resourcemute.StringPointerValue(content.FilterString)
+	state.NotifyTargets = resourcemute.NotifyTargetsFromContent(content.NotifyTargets, nil, true)
+	state.NotifyMessage = resourcemute.StringPointerValue(content.NotifyMessage)
+	state.NotifyTimeStr = resourcemute.StringPointerValue(content.NotifyTimeStr)
+	state.StartTime = resourcemute.StringPointerValue(content.StartTime)
+	state.EndTime = resourcemute.StringPointerValue(content.EndTime)
+	state.RepeatTimeSet = types.Int64Value(int64(resourcemute.RepeatTimeSetFromContent(content)))
 	if content.RepeatCrontabSet != nil {
-		state.RepeatCrontabSet = repeatCrontabSetFromContent(content.RepeatCrontabSet)
+		state.RepeatCrontabSet = resourcemute.RepeatCrontabSetFromContent(content.RepeatCrontabSet)
 	}
 	state.CrontabDuration = types.Int64Value(int64(content.CrontabDuration))
-	state.RepeatExpireTime = repeatExpireTimeValueOrExisting(content.RepeatExpireTime, types.StringNull())
-	state.Timezone = stringPointerValue(content.Timezone)
-	state.Declaration = declarationFromContent(content.Declaration)
+	state.RepeatExpireTime = resourcemute.RepeatExpireTimeValueOrExisting(content.RepeatExpireTime, types.StringNull())
+	state.Timezone = resourcemute.StringPointerValue(content.Timezone)
+	state.Declaration = resourcemute.DeclarationFromContent(content.Declaration)
 	state.Status = types.Int64Value(int64(content.Status))
-	state.Enabled = muteEnabledFromStatus(content.Status, state.Enabled)
+	state.Enabled = resourcemute.MuteEnabledFromStatus(content.Status, state.Enabled)
 	state.CreateAt = types.Int64Value(int64(content.CreateAt))
 	state.UpdateAt = types.Int64Value(int64(content.UpdateAt))
 	state.WorkspaceUUID = types.StringValue(content.WorkspaceUUID)

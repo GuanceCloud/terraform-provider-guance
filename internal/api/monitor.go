@@ -2,6 +2,7 @@ package api
 
 import (
 	"fmt"
+	"net/url"
 
 	"github.com/GuanceCloud/terraform-provider-guance/internal/consts"
 )
@@ -49,6 +50,52 @@ type MonitorContent struct {
 	UpdatorInfo       interface{} `json:"updatorInfo,omitempty"`
 }
 
+type MonitorListContent struct {
+	Data []MonitorContent `json:"data,omitempty"`
+}
+
+type MonitorListOptions struct {
+	Search          string
+	Type            string
+	Status          string
+	TagsUUID        string
+	AlertPolicyUUID string
+	DashboardUUID   string
+	CheckerUUID     string
+}
+
+func (c *Client) ListMonitors(search string, content *MonitorListContent) error {
+	return c.ListMonitorsWithOptions(MonitorListOptions{Search: search}, content)
+}
+
+func (c *Client) ListMonitorsWithOptions(options MonitorListOptions, content *MonitorListContent) error {
+	query := url.Values{}
+	query.Set("pageIndex", "1")
+	query.Set("pageSize", "100")
+	if options.Search != "" {
+		query.Set("search", options.Search)
+	}
+	if options.Type != "" {
+		query.Set("checkerTypes", options.Type)
+	}
+	if options.Status != "" {
+		query.Set("checkerStatus", options.Status)
+	}
+	if options.TagsUUID != "" {
+		query.Set("tagsUUID", options.TagsUUID)
+	}
+	if options.AlertPolicyUUID != "" {
+		query.Set("alertPolicyUUID", options.AlertPolicyUUID)
+	}
+	if options.DashboardUUID != "" {
+		query.Set("dashboardUUID", options.DashboardUUID)
+	}
+	if options.CheckerUUID != "" {
+		query.Set("checkerUUID", options.CheckerUUID)
+	}
+	return c.get("/checker/list?"+query.Encode(), content)
+}
+
 func (c *Client) DeleteMonitor(key string) error {
 	path, err := getResourcePath(consts.TypeNameMonitor, ResourceDelete)
 	if err != nil {
@@ -78,5 +125,6 @@ func init() {
 		ResourceRead:   "/checker/%s/get",
 		ResourceUpdate: "/checker/%s/modify",
 		ResourceDelete: "/checker/delete",
+		ResourceList:   "/checker/list",
 	}
 }

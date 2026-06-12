@@ -3,7 +3,6 @@ package notify_object
 import (
 	"context"
 	_ "embed"
-	"encoding/json"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -11,6 +10,7 @@ import (
 
 	"github.com/GuanceCloud/terraform-provider-guance/internal/api"
 	"github.com/GuanceCloud/terraform-provider-guance/internal/consts"
+	"github.com/GuanceCloud/terraform-provider-guance/internal/helpers/tfconvert"
 )
 
 //go:embed README.md
@@ -120,7 +120,7 @@ func (r *notifyObjectResource) Read(ctx context.Context, req resource.ReadReques
 	state.Type = types.StringValue(content.Type)
 	state.Name = types.StringValue(content.Name)
 	if content.OptSet != nil {
-		optSet, err := canonicalOptSetFromValue(content.OptSet)
+		optSet, err := tfconvert.CanonicalJSONFromValue(content.OptSet)
 		if err != nil {
 			resp.Diagnostics.AddError(
 				"Error reading notify object opt_set",
@@ -218,7 +218,7 @@ func (r *notifyObjectResource) getNotifyObjectFromPlan(plan *notifyObjectResourc
 	}
 
 	if !plan.OptSet.IsNull() {
-		optSet, canonicalOptSet, err := canonicalOptSetFromString(plan.OptSet.ValueString())
+		optSet, canonicalOptSet, err := tfconvert.CanonicalJSONFromString(plan.OptSet.ValueString())
 		if err != nil {
 			return nil, err
 		}
@@ -267,24 +267,4 @@ func permissionSetFromContent(values []string, existing []types.String) []types.
 		result[i] = types.StringValue(value)
 	}
 	return result
-}
-
-func canonicalOptSetFromString(value string) (any, string, error) {
-	var optSet any
-	if err := json.Unmarshal([]byte(value), &optSet); err != nil {
-		return nil, "", err
-	}
-	canonical, err := canonicalOptSetFromValue(optSet)
-	if err != nil {
-		return nil, "", err
-	}
-	return optSet, canonical, nil
-}
-
-func canonicalOptSetFromValue(value any) (string, error) {
-	optSetBytes, err := json.Marshal(value)
-	if err != nil {
-		return "", err
-	}
-	return string(optSetBytes), nil
 }

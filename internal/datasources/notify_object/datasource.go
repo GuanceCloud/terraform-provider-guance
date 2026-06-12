@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"github.com/GuanceCloud/terraform-provider-guance/internal/api"
+	"github.com/GuanceCloud/terraform-provider-guance/internal/helpers/tfconvert"
 )
 
 var (
@@ -150,24 +151,16 @@ func stateFromNotifyObjectContent(state *notifyObjectDataSourceModel, content *a
 	state.Type = types.StringValue(content.Type)
 	state.Name = types.StringValue(content.Name)
 	if content.OptSet != nil {
-		optSet, err := canonicalOptSetFromValue(content.OptSet)
+		optSet, err := tfconvert.CanonicalJSONFromValue(content.OptSet)
 		if err != nil {
 			return err
 		}
 		state.OptSet = types.StringValue(optSet)
 	}
 	state.OpenPermissionSet = types.BoolValue(content.OpenPermissionSet)
-	state.PermissionSet = typesFromStrings(content.PermissionSet)
+	state.PermissionSet = tfconvert.StringsToTypes(content.PermissionSet)
 	state.CreateAt = types.Int64Value(int64(content.CreateAt))
 	state.UpdateAt = types.Int64Value(int64(content.UpdateAt))
 	state.WorkspaceUUID = types.StringValue(content.WorkspaceUUID)
 	return nil
-}
-
-func typesFromStrings(values []string) []types.String {
-	result := make([]types.String, 0, len(values))
-	for _, value := range values {
-		result = append(result, types.StringValue(value))
-	}
-	return result
 }

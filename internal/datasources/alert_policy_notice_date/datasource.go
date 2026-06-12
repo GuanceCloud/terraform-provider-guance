@@ -12,6 +12,7 @@ import (
 
 	"github.com/GuanceCloud/terraform-provider-guance/internal/api"
 	"github.com/GuanceCloud/terraform-provider-guance/internal/consts"
+	"github.com/GuanceCloud/terraform-provider-guance/internal/helpers/tfconvert"
 )
 
 var (
@@ -125,7 +126,7 @@ func (d *alertPolicyNoticeDateDataSource) Read(ctx context.Context, req datasour
 
 	state.UUID = types.StringValue(content.UUID)
 	state.Name = types.StringValue(content.Name)
-	state.NoticeDates = typesFromStrings(content.Dates)
+	state.NoticeDates = tfconvert.StringsToTypes(content.Dates)
 	state.CreateAt = types.Int64Value(int64(content.CreateAt))
 	state.UpdateAt = types.Int64Value(int64(content.UpdateAt))
 	state.WorkspaceUUID = types.StringValue(content.WorkspaceUUID)

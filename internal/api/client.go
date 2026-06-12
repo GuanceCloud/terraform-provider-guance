@@ -39,6 +39,7 @@ const (
 	ResourceRead   = "read"
 	ResourceUpdate = "update"
 	ResourceDelete = "delete"
+	ResourceList   = "list"
 )
 
 var apiURLs = map[string]map[string]string{}

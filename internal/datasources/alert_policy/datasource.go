@@ -12,6 +12,8 @@ import (
 
 	"github.com/GuanceCloud/terraform-provider-guance/internal/api"
 	"github.com/GuanceCloud/terraform-provider-guance/internal/consts"
+	"github.com/GuanceCloud/terraform-provider-guance/internal/helpers/tfconvert"
+	resourcealert "github.com/GuanceCloud/terraform-provider-guance/internal/resources/alert_policy"
 )
 
 var (
@@ -29,19 +31,19 @@ type alertPolicyDataSource struct {
 }
 
 type alertPolicyDataSourceModel struct {
-	UUID              types.String   `tfsdk:"uuid"`
-	Name              types.String   `tfsdk:"name"`
-	NotifyObjectUUIDs []types.String `tfsdk:"notify_object_uuids"`
-	Desc              types.String   `tfsdk:"desc"`
-	OpenPermissionSet types.Bool     `tfsdk:"open_permission_set"`
-	PermissionSet     []types.String `tfsdk:"permission_set"`
-	CheckerUUIDs      []types.String `tfsdk:"checker_uuids"`
-	SecurityRuleUUIDs []types.String `tfsdk:"security_rule_uuids"`
-	RuleTimezone      types.String   `tfsdk:"rule_timezone"`
-	AlertOpt          *alertOptModel `tfsdk:"alert_opt"`
-	CreateAt          types.Int64    `tfsdk:"create_at"`
-	UpdateAt          types.Int64    `tfsdk:"update_at"`
-	WorkspaceUUID     types.String   `tfsdk:"workspace_uuid"`
+	UUID              types.String                 `tfsdk:"uuid"`
+	Name              types.String                 `tfsdk:"name"`
+	NotifyObjectUUIDs []types.String               `tfsdk:"notify_object_uuids"`
+	Desc              types.String                 `tfsdk:"desc"`
+	OpenPermissionSet types.Bool                   `tfsdk:"open_permission_set"`
+	PermissionSet     []types.String               `tfsdk:"permission_set"`
+	CheckerUUIDs      []types.String               `tfsdk:"checker_uuids"`
+	SecurityRuleUUIDs []types.String               `tfsdk:"security_rule_uuids"`
+	RuleTimezone      types.String                 `tfsdk:"rule_timezone"`
+	AlertOpt          *resourcealert.AlertOptModel `tfsdk:"alert_opt"`
+	CreateAt          types.Int64                  `tfsdk:"create_at"`
+	UpdateAt          types.Int64                  `tfsdk:"update_at"`
+	WorkspaceUUID     types.String                 `tfsdk:"workspace_uuid"`
 }
 
 func (d *alertPolicyDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
@@ -143,7 +145,7 @@ func (d *alertPolicyDataSource) Read(ctx context.Context, req datasource.ReadReq
 		list := &api.AlertPolicyListContent{}
 		options := api.AlertPolicyListOptions{
 			Search:            state.Name.ValueString(),
-			NotifyObjectUUIDs: typeStrings(state.NotifyObjectUUIDs),
+			NotifyObjectUUIDs: tfconvert.TypesToStrings(state.NotifyObjectUUIDs),
 		}
 		if err := d.client.ListAlertPoliciesWithOptions(options, list); err != nil {
 			resp.Diagnostics.AddError("Error listing alert policies", err.Error())
@@ -164,29 +166,18 @@ func (d *alertPolicyDataSource) Read(ctx context.Context, req datasource.ReadReq
 
 	state.UUID = types.StringValue(content.UUID)
 	state.Name = types.StringValue(content.Name)
-	state.Desc = stringValueOrNull(content.Desc)
+	state.Desc = tfconvert.StringValueOrNull(content.Desc)
 	state.OpenPermissionSet = types.BoolValue(content.OpenPermissionSet)
-	state.PermissionSet = stringsFromContent(content.PermissionSet)
-	state.CheckerUUIDs = stringsFromContent(content.CheckerUUIDs)
-	state.SecurityRuleUUIDs = stringsFromContent(content.SecurityRuleUUIDs)
-	state.RuleTimezone = stringValueOrNull(content.RuleTimezone)
-	state.AlertOpt = alertOptFromContentForDataSource(content.AlertOpt)
+	state.PermissionSet = tfconvert.StringsToTypes(content.PermissionSet)
+	state.CheckerUUIDs = tfconvert.StringsToTypes(content.CheckerUUIDs)
+	state.SecurityRuleUUIDs = tfconvert.StringsToTypes(content.SecurityRuleUUIDs)
+	state.RuleTimezone = tfconvert.StringValueOrNull(content.RuleTimezone)
+	state.AlertOpt = resourcealert.AlertOptFromContentForDataSource(content.AlertOpt)
 	state.CreateAt = types.Int64Value(int64(content.CreateAt))
 	state.UpdateAt = types.Int64Value(int64(content.UpdateAt))
 	state.WorkspaceUUID = types.StringValue(content.WorkspaceUUID)
 	diags = resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
-}
-
-func typeStrings(values []types.String) []string {
-	result := make([]string, 0, len(values))
-	for _, value := range values {
-		if value.IsNull() || value.IsUnknown() {
-			continue
-		}
-		result = append(result, value.ValueString())
-	}
-	return result
 }
 
 func alertOptDataSourceAttribute() dsschema.SingleNestedAttribute {
