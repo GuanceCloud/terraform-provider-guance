@@ -523,16 +523,12 @@ func alertTargetsUpdateBody(items []api.AlertTarget) []map[string]any {
 		body := map[string]any{
 			"name":            item.Name,
 			"targets":         targetsUpdateBody(item.Targets),
+			"crontab":         item.Crontab,
+			"crontabDuration": item.CrontabDuration,
 			"customDateUUIDs": emptyStringSliceIfNil(item.CustomDateUUIDs),
+			"customStartTime": item.CustomStartTime,
+			"customDuration":  item.CustomDuration,
 			"alertInfo":       alertInfoUpdateBody(item.AlertInfo),
-		}
-		if item.Crontab != "" {
-			body["crontab"] = item.Crontab
-			body["crontabDuration"] = item.CrontabDuration
-		}
-		if item.CustomStartTime != "" || len(item.CustomDateUUIDs) > 0 || item.CustomDuration != 0 {
-			body["customStartTime"] = item.CustomStartTime
-			body["customDuration"] = item.CustomDuration
 		}
 		result = append(result, body)
 	}

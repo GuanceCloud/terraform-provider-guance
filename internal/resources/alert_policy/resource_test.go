@@ -108,6 +108,9 @@ func TestAlertPolicyUpdateBodyPreservesPermissionZeroValues(t *testing.T) {
 			SilentTimeoutByStatusEnable: false,
 			AggInterval:                 0,
 			AggSendFirst:                false,
+			AlertTarget: []api.AlertTarget{{
+				Name: "clear schedule",
+			}},
 		},
 	})
 
@@ -123,7 +126,16 @@ func TestAlertPolicyUpdateBodyPreservesPermissionZeroValues(t *testing.T) {
 	require.Equal(t, 0, alertOpt["silentTimeout"])
 	require.Equal(t, false, alertOpt["silentTimeoutByStatusEnable"])
 	require.Equal(t, []map[string]any{}, alertOpt["silentTimeoutByStatus"])
-	require.Equal(t, []map[string]any{}, alertOpt["alertTarget"])
+	require.Equal(t, []map[string]any{{
+		"name":            "clear schedule",
+		"targets":         []map[string]any{},
+		"crontab":         "",
+		"crontabDuration": 0,
+		"customDateUUIDs": []string{},
+		"customStartTime": "",
+		"customDuration":  0,
+		"alertInfo":       []map[string]any{},
+	}}, alertOpt["alertTarget"])
 	require.Equal(t, 0, alertOpt["aggInterval"])
 	require.Equal(t, []string{}, alertOpt["aggFields"])
 	require.Equal(t, []string{}, alertOpt["aggLabels"])
