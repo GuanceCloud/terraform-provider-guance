@@ -101,6 +101,8 @@ func TestAlertPolicyUpdateBodyPreservesPermissionZeroValues(t *testing.T) {
 		RuleTimezone:      "Asia/Shanghai",
 		OpenPermissionSet: false,
 		PermissionSet:     nil,
+		CheckerUUIDs:      nil,
+		SecurityRuleUUIDs: nil,
 		AlertOpt: &api.AlertOpt{
 			AlertType:                   "status",
 			IgnoreOK:                    false,
@@ -110,6 +112,9 @@ func TestAlertPolicyUpdateBodyPreservesPermissionZeroValues(t *testing.T) {
 			AggSendFirst:                false,
 			AlertTarget: []api.AlertTarget{{
 				Name: "clear schedule",
+				Targets: []api.Target{{
+					Status: "critical",
+				}},
 			}},
 		},
 	})
@@ -119,6 +124,8 @@ func TestAlertPolicyUpdateBodyPreservesPermissionZeroValues(t *testing.T) {
 	require.Equal(t, "Asia/Shanghai", got["ruleTimezone"])
 	require.Equal(t, false, got["openPermissionSet"])
 	require.Equal(t, []string{}, got["permissionSet"])
+	require.Equal(t, []string{}, got["checkerUUIDs"])
+	require.Equal(t, []string{}, got["securityRuleUUIDs"])
 	alertOpt, ok := got["alertOpt"].(map[string]any)
 	require.True(t, ok)
 	require.Equal(t, "status", alertOpt["alertType"])
@@ -127,8 +134,15 @@ func TestAlertPolicyUpdateBodyPreservesPermissionZeroValues(t *testing.T) {
 	require.Equal(t, false, alertOpt["silentTimeoutByStatusEnable"])
 	require.Equal(t, []map[string]any{}, alertOpt["silentTimeoutByStatus"])
 	require.Equal(t, []map[string]any{{
-		"name":            "clear schedule",
-		"targets":         []map[string]any{},
+		"name": "clear schedule",
+		"targets": []map[string]any{{
+			"to":             []string{},
+			"status":         "critical",
+			"df_source":      "",
+			"upgradeTargets": []map[string]any{},
+			"tags":           map[string][]string{},
+			"filterString":   "",
+		}},
 		"crontab":         "",
 		"crontabDuration": 0,
 		"customDateUUIDs": []string{},

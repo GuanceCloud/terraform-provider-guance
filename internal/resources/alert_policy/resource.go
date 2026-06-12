@@ -471,12 +471,8 @@ func alertPolicyUpdateBody(item *api.AlertPolicy) map[string]any {
 		"ruleTimezone":      item.RuleTimezone,
 		"openPermissionSet": item.OpenPermissionSet,
 		"permissionSet":     emptyStringSliceIfNil(item.PermissionSet),
-	}
-	if item.CheckerUUIDs != nil {
-		body["checkerUUIDs"] = item.CheckerUUIDs
-	}
-	if item.SecurityRuleUUIDs != nil {
-		body["securityRuleUUIDs"] = item.SecurityRuleUUIDs
+		"checkerUUIDs":      emptyStringSliceIfNil(item.CheckerUUIDs),
+		"securityRuleUUIDs": emptyStringSliceIfNil(item.SecurityRuleUUIDs),
 	}
 	if item.AlertOpt != nil {
 		body["alertOpt"] = alertOptUpdateBody(item.AlertOpt)
@@ -541,12 +537,10 @@ func targetsUpdateBody(items []api.Target) []map[string]any {
 		body := map[string]any{
 			"to":             emptyStringSliceIfNil(item.To),
 			"status":         item.Status,
+			"df_source":      item.DfSource,
 			"upgradeTargets": upgradeTargetsUpdateBody(item.UpgradeTargets),
 			"tags":           emptyStringListMapIfNil(item.Tags),
 			"filterString":   item.FilterString,
-		}
-		if item.DfSource != "" {
-			body["df_source"] = item.DfSource
 		}
 		result = append(result, body)
 	}
