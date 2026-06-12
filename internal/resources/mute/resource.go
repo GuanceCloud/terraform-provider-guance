@@ -270,7 +270,7 @@ func applyContentToState(state *muteResourceModel, content *api.MuteContent) {
 	state.Description = stringValueFromContent(content, "description", content.Description, state.Description)
 	state.Type = types.StringValue(content.Type)
 	state.MuteRanges = muteRangesFromContent(content.MuteRanges, state.MuteRanges, content.FieldPresent("muteRanges"))
-	if content.FieldPresent("tags") {
+	if content.FieldPresent("tags") && (len(content.Tags) > 0 || state.Tags != nil) {
 		state.Tags = content.Tags
 	}
 	state.FilterString = stringValueFromContent(content, "filterString", content.FilterString, state.FilterString)
@@ -296,12 +296,14 @@ func applyContentToState(state *muteResourceModel, content *api.MuteContent) {
 	} else if content.RepeatCrontabSet != nil {
 		state.RepeatCrontabSet = repeatCrontabSetFromContent(content.RepeatCrontabSet)
 	}
-	if content.FieldPresent("crontabDuration") || content.CrontabDuration != 0 || !state.CrontabDuration.IsNull() {
+	if content.FieldPresent("crontabDuration") && (content.CrontabDuration != 0 || !state.CrontabDuration.IsNull()) {
+		state.CrontabDuration = types.Int64Value(int64(content.CrontabDuration))
+	} else if content.CrontabDuration != 0 || !state.CrontabDuration.IsNull() {
 		state.CrontabDuration = types.Int64Value(int64(content.CrontabDuration))
 	}
 	state.RepeatExpireTime = repeatExpireTimeValueFromContent(content, state.RepeatExpireTime)
 	state.Timezone = stringValueFromContent(content, "timezone", content.Timezone, state.Timezone)
-	if content.FieldPresent("declaration") {
+	if content.FieldPresent("declaration") && (len(content.Declaration) > 0 || state.Declaration != nil) {
 		state.Declaration = declarationFromContent(content.Declaration)
 	} else if len(content.Declaration) > 0 && state.Declaration != nil {
 		state.Declaration = declarationFromContent(content.Declaration)
@@ -346,6 +348,9 @@ func stringValueOrExisting(value string, existing types.String) types.String {
 
 func stringValueFromContent(content *api.MuteContent, field string, value string, existing types.String) types.String {
 	if content.FieldPresent(field) {
+		if value == "" && (existing.IsNull() || existing.IsUnknown()) {
+			return existing
+		}
 		return types.StringValue(value)
 	}
 	return stringValueOrExisting(value, existing)
@@ -368,6 +373,9 @@ func repeatExpireTimeValueOrExisting(value string, existing types.String) types.
 func repeatExpireTimeValueFromContent(content *api.MuteContent, existing types.String) types.String {
 	if !content.FieldPresent("repeatExpireTime") {
 		return repeatExpireTimeValueOrExisting(content.RepeatExpireTime, existing)
+	}
+	if content.RepeatExpireTime == "" && (existing.IsNull() || existing.IsUnknown()) {
+		return existing
 	}
 	if content.RepeatExpireTime == "-1" {
 		return types.StringNull()
@@ -392,7 +400,7 @@ func muteRangesFromPlan(values []muteRange) []api.MuteRange {
 }
 
 func muteRangesFromContent(values []api.MuteRange, existing []muteRange, present bool) []muteRange {
-	if len(values) == 0 && len(existing) > 0 && !present {
+	if len(values) == 0 && (!present || len(existing) == 0) {
 		return existing
 	}
 	result := make([]muteRange, 0, len(values))
@@ -439,7 +447,7 @@ func notifyTargetsFromPlan(values []notifyTarget) []api.MuteNotifyTarget {
 }
 
 func notifyTargetsFromContent(values []api.MuteNotifyTarget, existing []notifyTarget, present bool) []notifyTarget {
-	if len(values) == 0 && !present {
+	if len(values) == 0 && (!present || len(existing) == 0) {
 		return existing
 	}
 	result := make([]notifyTarget, 0, len(values))

@@ -403,6 +403,42 @@ func TestApplyContentToStateAppliesRemoteClears(t *testing.T) {
 	require.Empty(t, state.Declaration)
 }
 
+func TestApplyContentToStateKeepsUnconfiguredOptionalNulls(t *testing.T) {
+	state := &muteResourceModel{
+		FilterString:     types.StringNull(),
+		NotifyMessage:    types.StringNull(),
+		NotifyTimeStr:    types.StringNull(),
+		CrontabDuration:  types.Int64Null(),
+		RepeatExpireTime: types.StringNull(),
+	}
+	content := muteContentFromJSON(t, `{
+		"uuid": "mute_xxx",
+		"name": "codex-mute-null",
+		"type": "alertPolicy",
+		"muteRanges": [],
+		"tags": {},
+		"filterString": "",
+		"notifyTargets": [],
+		"notifyMessage": "",
+		"notifyTimeStr": "",
+		"crontabDuration": 0,
+		"repeatExpireTime": "",
+		"declaration": {}
+	}`)
+
+	applyContentToState(state, content)
+
+	require.Empty(t, state.MuteRanges)
+	require.Nil(t, state.Tags)
+	require.True(t, state.FilterString.IsNull())
+	require.Empty(t, state.NotifyTargets)
+	require.True(t, state.NotifyMessage.IsNull())
+	require.True(t, state.NotifyTimeStr.IsNull())
+	require.True(t, state.CrontabDuration.IsNull())
+	require.True(t, state.RepeatExpireTime.IsNull())
+	require.Nil(t, state.Declaration)
+}
+
 func muteContentFromJSON(t *testing.T, value string) *api.MuteContent {
 	t.Helper()
 	var content api.MuteContent

@@ -69,6 +69,16 @@ func TestNotifyObjectUpdateBodyPreservesPermissionZeroValues(t *testing.T) {
 	require.Equal(t, []string{}, got["permissionSet"])
 }
 
+func TestPermissionSetFromContentKeepsUnconfiguredNull(t *testing.T) {
+	require.Nil(t, permissionSetFromContent([]string{}, nil))
+}
+
+func TestPermissionSetFromContentAppliesRemoteClear(t *testing.T) {
+	got := permissionSetFromContent([]string{}, []types.String{types.StringValue("wsAdmin")})
+
+	require.Empty(t, got)
+}
+
 func TestStateFromNotifyObjectContentCanonicalizesOptSet(t *testing.T) {
 	state := &notifyObjectDataSourceModel{}
 	content := &api.NotifyObjectContent{

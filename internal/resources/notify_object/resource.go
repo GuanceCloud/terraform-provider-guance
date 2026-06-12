@@ -132,11 +132,7 @@ func (r *notifyObjectResource) Read(ctx context.Context, req resource.ReadReques
 	}
 	state.OpenPermissionSet = types.BoolValue(content.OpenPermissionSet)
 	if content.PermissionSet != nil {
-		permissionSet := make([]types.String, len(content.PermissionSet))
-		for i, perm := range content.PermissionSet {
-			permissionSet[i] = types.StringValue(perm)
-		}
-		state.PermissionSet = permissionSet
+		state.PermissionSet = permissionSetFromContent(content.PermissionSet, state.PermissionSet)
 	}
 	state.CreateAt = types.Int64Value(int64(content.CreateAt))
 	state.UpdateAt = types.Int64Value(int64(content.UpdateAt))
@@ -260,6 +256,17 @@ func emptyStringSliceIfNil(values []string) []string {
 		return []string{}
 	}
 	return values
+}
+
+func permissionSetFromContent(values []string, existing []types.String) []types.String {
+	if len(values) == 0 && len(existing) == 0 {
+		return existing
+	}
+	result := make([]types.String, len(values))
+	for i, value := range values {
+		result[i] = types.StringValue(value)
+	}
+	return result
 }
 
 func canonicalOptSetFromString(value string) (any, string, error) {
