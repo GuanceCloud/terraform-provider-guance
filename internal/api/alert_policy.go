@@ -22,18 +22,18 @@ type AlertPolicy struct {
 
 // AlertPolicyContent represents the alert policy structure for API responses
 type AlertPolicyContent struct {
-	UUID              string    `json:"uuid,omitempty"`
-	Name              string    `json:"name,omitempty"`
-	Desc              string    `json:"desc,omitempty"`
-	OpenPermissionSet bool      `json:"openPermissionSet,omitempty"`
-	PermissionSet     []string  `json:"permissionSet,omitempty"`
-	CheckerUUIDs      []string  `json:"checkerUUIDs,omitempty"`
-	SecurityRuleUUIDs []string  `json:"securityRuleUUIDs,omitempty"`
-	RuleTimezone      string    `json:"ruleTimezone,omitempty"`
-	AlertOpt          *AlertOpt `json:"alertOpt,omitempty"`
-	CreateAt          float64   `json:"createAt,omitempty"`
-	UpdateAt          float64   `json:"updateAt,omitempty"`
-	WorkspaceUUID     string    `json:"workspaceUUID,omitempty"`
+	UUID              string           `json:"uuid,omitempty"`
+	Name              string           `json:"name,omitempty"`
+	Desc              string           `json:"desc,omitempty"`
+	OpenPermissionSet bool             `json:"openPermissionSet,omitempty"`
+	PermissionSet     []string         `json:"permissionSet,omitempty"`
+	CheckerUUIDs      []string         `json:"checkerUUIDs,omitempty"`
+	SecurityRuleUUIDs []string         `json:"securityRuleUUIDs,omitempty"`
+	RuleTimezone      string           `json:"ruleTimezone,omitempty"`
+	AlertOpt          *AlertOptContent `json:"alertOpt,omitempty"`
+	CreateAt          float64          `json:"createAt,omitempty"`
+	UpdateAt          float64          `json:"updateAt,omitempty"`
+	WorkspaceUUID     string           `json:"workspaceUUID,omitempty"`
 }
 
 type AlertPolicyListContent struct {
@@ -59,6 +59,22 @@ type AlertOpt struct {
 	AggLabels                   []string                `json:"aggLabels,omitempty"`
 	AggClusterFields            []string                `json:"aggClusterFields,omitempty"`
 	AggSendFirst                bool                    `json:"aggSendFirst,omitempty"`
+}
+
+// AlertOptContent represents the alertOpt structure for API responses.
+type AlertOptContent struct {
+	AggType                     string                  `json:"aggType,omitempty"`
+	IgnoreOK                    *bool                   `json:"ignoreOK,omitempty"`
+	AlertType                   string                  `json:"alertType,omitempty"`
+	SilentTimeout               *int                    `json:"silentTimeout,omitempty"`
+	SilentTimeoutByStatusEnable *bool                   `json:"silentTimeoutByStatusEnable,omitempty"`
+	SilentTimeoutByStatus       []SilentTimeoutByStatus `json:"silentTimeoutByStatus,omitempty"`
+	AlertTarget                 []AlertTarget           `json:"alertTarget,omitempty"`
+	AggInterval                 *int                    `json:"aggInterval,omitempty"`
+	AggFields                   []string                `json:"aggFields,omitempty"`
+	AggLabels                   []string                `json:"aggLabels,omitempty"`
+	AggClusterFields            []string                `json:"aggClusterFields,omitempty"`
+	AggSendFirst                *bool                   `json:"aggSendFirst,omitempty"`
 }
 
 // SilentTimeoutByStatus represents the silentTimeoutByStatus structure

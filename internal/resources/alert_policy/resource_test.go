@@ -195,10 +195,10 @@ func TestGetAlertPolicyFromPlanMemberMode(t *testing.T) {
 }
 
 func TestAlertOptFromContentMemberMode(t *testing.T) {
-	got := alertOptFromContent(&api.AlertOpt{
+	got := alertOptFromContent(&api.AlertOptContent{
 		AlertType:     "member",
-		AggInterval:   60,
-		SilentTimeout: 300,
+		AggInterval:   intPtr(60),
+		SilentTimeout: intPtr(300),
 		AlertTarget: []api.AlertTarget{{
 			Name: "member target",
 			AlertInfo: []api.AlertInfo{{
@@ -225,12 +225,12 @@ func TestAlertOptFromContentMemberMode(t *testing.T) {
 }
 
 func TestAlertOptFromContentComplexStatusMode(t *testing.T) {
-	got := alertOptFromContent(&api.AlertOpt{
+	got := alertOptFromContent(&api.AlertOptContent{
 		AggType:                     "byFields",
-		IgnoreOK:                    true,
+		IgnoreOK:                    boolPtr(true),
 		AlertType:                   "status",
-		SilentTimeout:               300,
-		SilentTimeoutByStatusEnable: true,
+		SilentTimeout:               intPtr(300),
+		SilentTimeoutByStatusEnable: boolPtr(true),
 		SilentTimeoutByStatus: []api.SilentTimeoutByStatus{{
 			Status:        "critical",
 			SilentTimeout: 120,
@@ -257,11 +257,11 @@ func TestAlertOptFromContentComplexStatusMode(t *testing.T) {
 			CustomStartTime: "09:30:00",
 			CustomDuration:  1800,
 		}},
-		AggInterval:      60,
+		AggInterval:      intPtr(60),
 		AggFields:        []string{"df_monitor_checker_id", "df_label"},
 		AggLabels:        []string{"service"},
 		AggClusterFields: []string{"df_title"},
-		AggSendFirst:     true,
+		AggSendFirst:     boolPtr(true),
 	}, nil)
 
 	require.Equal(t, "byFields", got.AggType.ValueString())
@@ -302,7 +302,7 @@ func TestAlertOptFromContentPreservesPriorZeroValuesForResourceRead(t *testing.T
 		AggSendFirst:                types.BoolValue(true),
 	}
 
-	got := alertOptFromContent(&api.AlertOpt{}, prior)
+	got := alertOptFromContent(&api.AlertOptContent{}, prior)
 
 	require.True(t, got.IgnoreOK.ValueBool())
 	require.Equal(t, int64(300), got.SilentTimeout.ValueInt64())
@@ -311,8 +311,22 @@ func TestAlertOptFromContentPreservesPriorZeroValuesForResourceRead(t *testing.T
 	require.True(t, got.AggSendFirst.ValueBool())
 }
 
-func TestAlertOptFromContentForDataSourceIncludesZeroValues(t *testing.T) {
-	got := alertOptFromContentForDataSource(&api.AlertOpt{})
+func TestAlertOptFromContentAppliesRemoteZeroValuesForResourceRead(t *testing.T) {
+	prior := &alertOptModel{
+		IgnoreOK:                    types.BoolValue(true),
+		SilentTimeout:               types.Int64Value(300),
+		SilentTimeoutByStatusEnable: types.BoolValue(true),
+		AggInterval:                 types.Int64Value(60),
+		AggSendFirst:                types.BoolValue(true),
+	}
+
+	got := alertOptFromContent(&api.AlertOptContent{
+		IgnoreOK:                    boolPtr(false),
+		SilentTimeout:               intPtr(0),
+		SilentTimeoutByStatusEnable: boolPtr(false),
+		AggInterval:                 intPtr(0),
+		AggSendFirst:                boolPtr(false),
+	}, prior)
 
 	require.False(t, got.IgnoreOK.IsNull())
 	require.False(t, got.IgnoreOK.ValueBool())
@@ -324,4 +338,27 @@ func TestAlertOptFromContentForDataSourceIncludesZeroValues(t *testing.T) {
 	require.Equal(t, int64(0), got.AggInterval.ValueInt64())
 	require.False(t, got.AggSendFirst.IsNull())
 	require.False(t, got.AggSendFirst.ValueBool())
+}
+
+func TestAlertOptFromContentForDataSourceIncludesZeroValues(t *testing.T) {
+	got := alertOptFromContentForDataSource(&api.AlertOptContent{})
+
+	require.False(t, got.IgnoreOK.IsNull())
+	require.False(t, got.IgnoreOK.ValueBool())
+	require.False(t, got.SilentTimeout.IsNull())
+	require.Equal(t, int64(0), got.SilentTimeout.ValueInt64())
+	require.False(t, got.SilentTimeoutByStatusEnable.IsNull())
+	require.False(t, got.SilentTimeoutByStatusEnable.ValueBool())
+	require.False(t, got.AggInterval.IsNull())
+	require.Equal(t, int64(0), got.AggInterval.ValueInt64())
+	require.False(t, got.AggSendFirst.IsNull())
+	require.False(t, got.AggSendFirst.ValueBool())
+}
+
+func boolPtr(value bool) *bool {
+	return &value
+}
+
+func intPtr(value int) *int {
+	return &value
 }

@@ -586,15 +586,15 @@ func emptyStringListMapIfNil(values map[string][]string) map[string][]string {
 	return values
 }
 
-func alertOptFromContent(content *api.AlertOpt, prior *alertOptModel) *alertOptModel {
+func alertOptFromContent(content *api.AlertOptContent, prior *alertOptModel) *alertOptModel {
 	return alertOptFromContentWithZeroMode(content, prior, false)
 }
 
-func alertOptFromContentForDataSource(content *api.AlertOpt) *alertOptModel {
+func alertOptFromContentForDataSource(content *api.AlertOptContent) *alertOptModel {
 	return alertOptFromContentWithZeroMode(content, nil, true)
 }
 
-func alertOptFromContentWithZeroMode(content *api.AlertOpt, prior *alertOptModel, includeZeroValues bool) *alertOptModel {
+func alertOptFromContentWithZeroMode(content *api.AlertOptContent, prior *alertOptModel, includeZeroValues bool) *alertOptModel {
 	if content == nil {
 		return prior
 	}
@@ -607,17 +607,23 @@ func alertOptFromContentWithZeroMode(content *api.AlertOpt, prior *alertOptModel
 	if content.AggType != "" {
 		model.AggType = types.StringValue(content.AggType)
 	}
-	if content.IgnoreOK || includeZeroValues {
-		model.IgnoreOK = types.BoolValue(content.IgnoreOK)
+	if content.IgnoreOK != nil {
+		model.IgnoreOK = types.BoolValue(*content.IgnoreOK)
+	} else if includeZeroValues {
+		model.IgnoreOK = types.BoolValue(false)
 	}
 	if content.AlertType != "" {
 		model.AlertType = types.StringValue(content.AlertType)
 	}
-	if content.SilentTimeout != 0 || includeZeroValues {
-		model.SilentTimeout = types.Int64Value(int64(content.SilentTimeout))
+	if content.SilentTimeout != nil {
+		model.SilentTimeout = types.Int64Value(int64(*content.SilentTimeout))
+	} else if includeZeroValues {
+		model.SilentTimeout = types.Int64Value(0)
 	}
-	if content.SilentTimeoutByStatusEnable || includeZeroValues {
-		model.SilentTimeoutByStatusEnable = types.BoolValue(content.SilentTimeoutByStatusEnable)
+	if content.SilentTimeoutByStatusEnable != nil {
+		model.SilentTimeoutByStatusEnable = types.BoolValue(*content.SilentTimeoutByStatusEnable)
+	} else if includeZeroValues {
+		model.SilentTimeoutByStatusEnable = types.BoolValue(false)
 	}
 	if content.SilentTimeoutByStatus != nil {
 		model.SilentTimeoutByStatus = make([]silentTimeoutByStatus, len(content.SilentTimeoutByStatus))
@@ -631,8 +637,10 @@ func alertOptFromContentWithZeroMode(content *api.AlertOpt, prior *alertOptModel
 	if content.AlertTarget != nil {
 		model.AlertTarget = alertTargetsFromContent(content.AlertTarget)
 	}
-	if content.AggInterval != 0 || includeZeroValues {
-		model.AggInterval = types.Int64Value(int64(content.AggInterval))
+	if content.AggInterval != nil {
+		model.AggInterval = types.Int64Value(int64(*content.AggInterval))
+	} else if includeZeroValues {
+		model.AggInterval = types.Int64Value(0)
 	}
 	if content.AggFields != nil {
 		model.AggFields = stringsFromContent(content.AggFields)
@@ -643,8 +651,10 @@ func alertOptFromContentWithZeroMode(content *api.AlertOpt, prior *alertOptModel
 	if content.AggClusterFields != nil {
 		model.AggClusterFields = stringsFromContent(content.AggClusterFields)
 	}
-	if content.AggSendFirst || includeZeroValues {
-		model.AggSendFirst = types.BoolValue(content.AggSendFirst)
+	if content.AggSendFirst != nil {
+		model.AggSendFirst = types.BoolValue(*content.AggSendFirst)
+	} else if includeZeroValues {
+		model.AggSendFirst = types.BoolValue(false)
 	}
 
 	return model
