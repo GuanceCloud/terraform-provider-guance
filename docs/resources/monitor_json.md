@@ -104,7 +104,7 @@ description: |-
   You can import a monitor json resource using its UUID:
   sh
   terraform import guance_monitor_json.example <uuid>
-  
+
   Notes
   The checker_json field accepts a single JSON object of monitor configuration (not an array).The checker_json_export field contains the actual monitor configurations after import, including the generated UUIDs.When updating the resource, the Replace API is used to update the existing monitor.The import operation uses the Guance Cloud checker import API endpoints.You can export monitors from Guance Cloud and use the exported JSON as the checker_json input.
 ---
@@ -204,7 +204,7 @@ resource "guance_monitor_json" "example" {
     tagInfo = []
     type = "trigger"
   })
-  
+
   type = "trigger"
 }
 ```

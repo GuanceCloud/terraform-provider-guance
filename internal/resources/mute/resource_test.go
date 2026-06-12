@@ -439,6 +439,22 @@ func TestApplyContentToStateKeepsUnconfiguredOptionalNulls(t *testing.T) {
 	require.Nil(t, state.Declaration)
 }
 
+func TestMuteContentFieldPresentDistinguishesExplicitClears(t *testing.T) {
+	content := muteContentFromJSON(t, `{
+		"filterString": "",
+		"notifyTargets": [],
+		"repeatCrontabSet": null,
+		"declaration": {}
+	}`)
+
+	require.True(t, content.FieldPresent("filterString"))
+	require.True(t, content.FieldPresent("notifyTargets"))
+	require.True(t, content.FieldPresent("repeatCrontabSet"))
+	require.True(t, content.FieldPresent("declaration"))
+	require.False(t, content.FieldPresent("notifyMessage"))
+	require.False(t, content.FieldPresent("tags"))
+}
+
 func muteContentFromJSON(t *testing.T, value string) *api.MuteContent {
 	t.Helper()
 	var content api.MuteContent

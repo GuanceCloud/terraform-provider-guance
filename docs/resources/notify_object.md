@@ -17,7 +17,7 @@ description: |-
     open_permission_set = false
     permission_set = ["wsAdmin"]
   }
-  
+
   Argument Reference
   The following arguments are supported:
   type - (Required) The type of notify object. Valid values are:
@@ -42,7 +42,7 @@ description: |-
   data "guance_notify_object" "example" {
     uuid = "notify_xxx"
   }
-  
+
   Name lookup must match exactly one notify object. The data source exports uuid, type, name, opt_set, open_permission_set, permission_set, create_at, update_at, and workspace_uuid.
   Import
   Notify objects can be imported using their UUID:

@@ -90,7 +90,7 @@ description: |-
   data "guance_mute" "example" {
     uuid = "mute_xxx"
   }
-  
+
   Name lookup must match exactly one mute rule. The data source exports all resource attributes as read-only values, including mute_ranges, tags, filter_string, notify_targets, notify_message, notify_time_str, start_time, end_time, repeat_time_set, repeat_crontab_set, crontab_duration, repeat_expire_time, timezone, declaration, enabled, status, create_at, update_at, and workspace_uuid.
   Import
   shell

@@ -9,7 +9,7 @@ description: |-
   mermaid
   graph LR
       A[Workspace] --> B[Member]
-  
+
   Example Usage
   ```terraform
   variable "email" {

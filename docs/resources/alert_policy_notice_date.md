@@ -43,13 +43,13 @@ description: |-
       alerttype = "status"
   alert_target = [{
     custom_date_uuids = [data.guance_alert_policy_notice_date.holiday.uuid]
-  
+
     targets = [{
       to     = ["notify_xxx"]
       status = "critical,error"
     }]
   }]
-  
+
   }
   }
   ```
@@ -58,7 +58,7 @@ description: |-
   data "guance_alert_policy_notice_date" "holiday" {
     uuid = "ndate_xxx"
   }
-  
+
   Name lookup must match exactly one notice date. The data source exports uuid, name, notice_dates, create_at, update_at, and workspace_uuid.
   Import
   bash

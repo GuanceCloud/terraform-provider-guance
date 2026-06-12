@@ -318,13 +318,24 @@ func TestAlertOptFromContentAppliesRemoteZeroValuesForResourceRead(t *testing.T)
 		SilentTimeoutByStatusEnable: types.BoolValue(true),
 		AggInterval:                 types.Int64Value(60),
 		AggSendFirst:                types.BoolValue(true),
+		AggFields:                   []types.String{types.StringValue("df_monitor_checker_id")},
+		AggLabels:                   []types.String{types.StringValue("service")},
+		AggClusterFields:            []types.String{types.StringValue("df_title")},
+		SilentTimeoutByStatus: []silentTimeoutByStatus{{
+			Status:        types.StringValue("critical"),
+			SilentTimeout: types.Int64Value(120),
+		}},
 	}
 
 	got := alertOptFromContent(&api.AlertOptContent{
 		IgnoreOK:                    boolPtr(false),
 		SilentTimeout:               intPtr(0),
 		SilentTimeoutByStatusEnable: boolPtr(false),
+		SilentTimeoutByStatus:       []api.SilentTimeoutByStatus{},
 		AggInterval:                 intPtr(0),
+		AggFields:                   []string{},
+		AggLabels:                   []string{},
+		AggClusterFields:            []string{},
 		AggSendFirst:                boolPtr(false),
 		AlertTarget: []api.AlertTargetContent{{
 			Name:            "zero durations",
@@ -349,6 +360,10 @@ func TestAlertOptFromContentAppliesRemoteZeroValuesForResourceRead(t *testing.T)
 	require.Equal(t, int64(0), got.AggInterval.ValueInt64())
 	require.False(t, got.AggSendFirst.IsNull())
 	require.False(t, got.AggSendFirst.ValueBool())
+	require.Empty(t, got.AggFields)
+	require.Empty(t, got.AggLabels)
+	require.Empty(t, got.AggClusterFields)
+	require.Empty(t, got.SilentTimeoutByStatus)
 	require.Len(t, got.AlertTarget, 1)
 	require.False(t, got.AlertTarget[0].CrontabDuration.IsNull())
 	require.Equal(t, int64(0), got.AlertTarget[0].CrontabDuration.ValueInt64())

@@ -57,12 +57,12 @@ resource "guance_dashboard" "example" {
   name     = "example-dashboard"
   desc     = "An example dashboard created with Terraform"
   is_public = 0
-  
+
   tag_names = [
     "example",
     "terraform"
   ]
-  
+
   template_info = jsonencode({
     title = "Example Dashboard"
     main = {
