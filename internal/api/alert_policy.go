@@ -69,7 +69,7 @@ type AlertOptContent struct {
 	SilentTimeout               *int                    `json:"silentTimeout,omitempty"`
 	SilentTimeoutByStatusEnable *bool                   `json:"silentTimeoutByStatusEnable,omitempty"`
 	SilentTimeoutByStatus       []SilentTimeoutByStatus `json:"silentTimeoutByStatus,omitempty"`
-	AlertTarget                 []AlertTarget           `json:"alertTarget,omitempty"`
+	AlertTarget                 []AlertTargetContent    `json:"alertTarget,omitempty"`
 	AggInterval                 *int                    `json:"aggInterval,omitempty"`
 	AggFields                   []string                `json:"aggFields,omitempty"`
 	AggLabels                   []string                `json:"aggLabels,omitempty"`
@@ -95,6 +95,18 @@ type AlertTarget struct {
 	AlertInfo       []AlertInfo `json:"alertInfo,omitempty"`
 }
 
+// AlertTargetContent represents the alertTarget structure for API responses.
+type AlertTargetContent struct {
+	Name            string             `json:"name,omitempty"`
+	Targets         []TargetContent    `json:"targets,omitempty"`
+	Crontab         string             `json:"crontab,omitempty"`
+	CrontabDuration *int               `json:"crontabDuration,omitempty"`
+	CustomDateUUIDs []string           `json:"customDateUUIDs,omitempty"`
+	CustomStartTime string             `json:"customStartTime,omitempty"`
+	CustomDuration  *int               `json:"customDuration,omitempty"`
+	AlertInfo       []AlertInfoContent `json:"alertInfo,omitempty"`
+}
+
 // Target represents the targets structure
 type Target struct {
 	To             []string            `json:"to,omitempty"`
@@ -105,10 +117,27 @@ type Target struct {
 	FilterString   string              `json:"filterString,omitempty"`
 }
 
+// TargetContent represents the targets structure for API responses.
+type TargetContent struct {
+	To             []string               `json:"to,omitempty"`
+	Status         string                 `json:"status,omitempty"`
+	DfSource       string                 `json:"df_source,omitempty"`
+	UpgradeTargets []UpgradeTargetContent `json:"upgradeTargets,omitempty"`
+	Tags           map[string][]string    `json:"tags,omitempty"`
+	FilterString   string                 `json:"filterString,omitempty"`
+}
+
 // UpgradeTarget represents the upgradeTargets structure
 type UpgradeTarget struct {
 	To       []string `json:"to,omitempty"`
 	Duration int      `json:"duration,omitempty"`
+	ToWay    []string `json:"toWay,omitempty"`
+}
+
+// UpgradeTargetContent represents the upgradeTargets structure for API responses.
+type UpgradeTargetContent struct {
+	To       []string `json:"to,omitempty"`
+	Duration *int     `json:"duration,omitempty"`
 	ToWay    []string `json:"toWay,omitempty"`
 }
 
@@ -118,6 +147,14 @@ type AlertInfo struct {
 	Targets      []Target `json:"targets,omitempty"`
 	FilterString string   `json:"filterString,omitempty"`
 	MemberInfo   []string `json:"memberInfo,omitempty"`
+}
+
+// AlertInfoContent represents the alertInfo structure for API responses.
+type AlertInfoContent struct {
+	Name         string          `json:"name,omitempty"`
+	Targets      []TargetContent `json:"targets,omitempty"`
+	FilterString string          `json:"filterString,omitempty"`
+	MemberInfo   []string        `json:"memberInfo,omitempty"`
 }
 
 // AlertPolicyDeleteRequest represents the request body for deleting alert policies

@@ -660,7 +660,7 @@ func alertOptFromContentWithZeroMode(content *api.AlertOptContent, prior *alertO
 	return model
 }
 
-func alertTargetsFromContent(items []api.AlertTarget) []alertTarget {
+func alertTargetsFromContent(items []api.AlertTargetContent) []alertTarget {
 	result := make([]alertTarget, len(items))
 	for i, item := range items {
 		result[i] = alertTarget{
@@ -671,17 +671,17 @@ func alertTargetsFromContent(items []api.AlertTarget) []alertTarget {
 			CustomStartTime: stringValueOrNull(item.CustomStartTime),
 			AlertInfo:       alertInfoFromContent(item.AlertInfo),
 		}
-		if item.CrontabDuration != 0 {
-			result[i].CrontabDuration = types.Int64Value(int64(item.CrontabDuration))
+		if item.CrontabDuration != nil {
+			result[i].CrontabDuration = types.Int64Value(int64(*item.CrontabDuration))
 		}
-		if item.CustomDuration != 0 {
-			result[i].CustomDuration = types.Int64Value(int64(item.CustomDuration))
+		if item.CustomDuration != nil {
+			result[i].CustomDuration = types.Int64Value(int64(*item.CustomDuration))
 		}
 	}
 	return result
 }
 
-func targetsFromContent(items []api.Target) []target {
+func targetsFromContent(items []api.TargetContent) []target {
 	if items == nil {
 		return nil
 	}
@@ -700,7 +700,7 @@ func targetsFromContent(items []api.Target) []target {
 	return result
 }
 
-func upgradeTargetsFromContent(items []api.UpgradeTarget) []upgradeTarget {
+func upgradeTargetsFromContent(items []api.UpgradeTargetContent) []upgradeTarget {
 	if items == nil {
 		return nil
 	}
@@ -711,14 +711,14 @@ func upgradeTargetsFromContent(items []api.UpgradeTarget) []upgradeTarget {
 			To:    stringsFromContent(item.To),
 			ToWay: stringsFromContent(item.ToWay),
 		}
-		if item.Duration != 0 {
-			result[i].Duration = types.Int64Value(int64(item.Duration))
+		if item.Duration != nil {
+			result[i].Duration = types.Int64Value(int64(*item.Duration))
 		}
 	}
 	return result
 }
 
-func alertInfoFromContent(items []api.AlertInfo) []alertInfo {
+func alertInfoFromContent(items []api.AlertInfoContent) []alertInfo {
 	if items == nil {
 		return nil
 	}

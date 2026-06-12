@@ -199,12 +199,12 @@ func TestAlertOptFromContentMemberMode(t *testing.T) {
 		AlertType:     "member",
 		AggInterval:   intPtr(60),
 		SilentTimeout: intPtr(300),
-		AlertTarget: []api.AlertTarget{{
+		AlertTarget: []api.AlertTargetContent{{
 			Name: "member target",
-			AlertInfo: []api.AlertInfo{{
+			AlertInfo: []api.AlertInfoContent{{
 				Name:       "member route",
 				MemberInfo: []string{"acnt_xxx"},
-				Targets: []api.Target{{
+				Targets: []api.TargetContent{{
 					To:     []string{"notify_xxx"},
 					Status: "critical,error,warning",
 				}},
@@ -235,10 +235,10 @@ func TestAlertOptFromContentComplexStatusMode(t *testing.T) {
 			Status:        "critical",
 			SilentTimeout: 120,
 		}},
-		AlertTarget: []api.AlertTarget{{
+		AlertTarget: []api.AlertTargetContent{{
 			Name:            "status route",
 			CustomDateUUIDs: []string{"ndate_xxx"},
-			Targets: []api.Target{{
+			Targets: []api.TargetContent{{
 				To:           []string{"notify_xxx"},
 				Status:       "critical,error",
 				DfSource:     "security",
@@ -246,16 +246,16 @@ func TestAlertOptFromContentComplexStatusMode(t *testing.T) {
 				Tags: map[string][]string{
 					"service": {"codex"},
 				},
-				UpgradeTargets: []api.UpgradeTarget{{
+				UpgradeTargets: []api.UpgradeTargetContent{{
 					To:       []string{"notify_yyy"},
-					Duration: 300,
+					Duration: intPtr(300),
 					ToWay:    []string{"mail"},
 				}},
 			}},
 			Crontab:         "0 9 * * 1",
-			CrontabDuration: 3600,
+			CrontabDuration: intPtr(3600),
 			CustomStartTime: "09:30:00",
-			CustomDuration:  1800,
+			CustomDuration:  intPtr(1800),
 		}},
 		AggInterval:      intPtr(60),
 		AggFields:        []string{"df_monitor_checker_id", "df_label"},
@@ -326,6 +326,17 @@ func TestAlertOptFromContentAppliesRemoteZeroValuesForResourceRead(t *testing.T)
 		SilentTimeoutByStatusEnable: boolPtr(false),
 		AggInterval:                 intPtr(0),
 		AggSendFirst:                boolPtr(false),
+		AlertTarget: []api.AlertTargetContent{{
+			Name:            "zero durations",
+			CrontabDuration: intPtr(0),
+			CustomDuration:  intPtr(0),
+			Targets: []api.TargetContent{{
+				Status: "critical",
+				UpgradeTargets: []api.UpgradeTargetContent{{
+					Duration: intPtr(0),
+				}},
+			}},
+		}},
 	}, prior)
 
 	require.False(t, got.IgnoreOK.IsNull())
@@ -338,6 +349,15 @@ func TestAlertOptFromContentAppliesRemoteZeroValuesForResourceRead(t *testing.T)
 	require.Equal(t, int64(0), got.AggInterval.ValueInt64())
 	require.False(t, got.AggSendFirst.IsNull())
 	require.False(t, got.AggSendFirst.ValueBool())
+	require.Len(t, got.AlertTarget, 1)
+	require.False(t, got.AlertTarget[0].CrontabDuration.IsNull())
+	require.Equal(t, int64(0), got.AlertTarget[0].CrontabDuration.ValueInt64())
+	require.False(t, got.AlertTarget[0].CustomDuration.IsNull())
+	require.Equal(t, int64(0), got.AlertTarget[0].CustomDuration.ValueInt64())
+	require.Len(t, got.AlertTarget[0].Targets, 1)
+	require.Len(t, got.AlertTarget[0].Targets[0].UpgradeTargets, 1)
+	require.False(t, got.AlertTarget[0].Targets[0].UpgradeTargets[0].Duration.IsNull())
+	require.Equal(t, int64(0), got.AlertTarget[0].Targets[0].UpgradeTargets[0].Duration.ValueInt64())
 }
 
 func TestAlertOptFromContentForDataSourceIncludesZeroValues(t *testing.T) {
