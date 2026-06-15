@@ -14,6 +14,9 @@ The resource supports as follows:
 * [x] member group
 * [x] black list
 * [x] role
+* [x] dashboard
+* [x] monitor
+* [x] monitor json
 * [x] notify object
 * [x] alert policy
 * [x] alert policy notice date
@@ -23,6 +26,8 @@ The data source supports as follows:
 
 * [x] members
 * [x] permissions
+* [x] monitor
+* [x] monitors
 * [x] notify object
 * [x] alert policy
 * [x] alert policy notice date

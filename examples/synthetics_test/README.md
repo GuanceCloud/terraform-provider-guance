@@ -1,5 +1,7 @@
 # Synthetics Test Example
 
+> Note: `guance_synthetics_test` is not registered by the provider in the current release branch. This example is kept as implementation reference only and cannot be applied until `guance_synthetics_test` is enabled in `provider/resources.go`.
+
 This example demonstrates how to use the `guance_synthetics_test` resource to create and manage synthetics tests in Guance Cloud. Synthetics tests are proactive monitoring tasks that regularly test targets (such as websites, APIs, TCP services, etc.) from multiple regions around the world to detect their availability and performance.
 
 ## Requirements
@@ -140,4 +142,3 @@ resource "guance_synthetics_test" "icmp_test" {
 - The `success_when_logic` field specifies the logical relationship between success conditions. Valid values are: `and`, `or`.
 - The `advance_options` field allows you to configure advanced settings such as request headers, authentication, and proxy settings.
 - The `success_when` field allows you to define custom success conditions based on status codes, response content, and response time.
-

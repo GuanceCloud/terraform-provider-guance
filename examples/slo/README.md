@@ -1,5 +1,7 @@
 # SLO Example
 
+> Note: `guance_slo` is not registered by the provider in the current release branch. This example is kept as implementation reference only and cannot be applied until `guance_slo` is enabled in `provider/resources.go`.
+
 This example demonstrates how to create an SLO (Service Level Objective) resource using the Guance Cloud Terraform provider.
 
 ## Prerequisites

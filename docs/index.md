@@ -33,6 +33,12 @@ description: |-
   ```
   More Examples
   Example Source Code https://github.com/GuanceCloud/terraform-provider-guance/tree/main/examples
+  Monitor Module
+  The monitor-related Terraform resources are based on Guance Forethought OpenAPI checker endpoints.
+  Use guance_monitor when you want to manage a monitor/checker with structured Terraform fields. Use guance_monitor_json when you want to import, replace, or manage a monitor from the checker JSON export format.
+  Available monitor resources and data sources:
+  guance_monitor - manages monitor checker rules with structured fields.guance_monitor_json - manages monitor checker rules with JSON import/export semantics.guance_monitor data source - reads one existing monitor/checker by uuid or exact name.guance_monitors data source - lists existing monitors/checkers by search and optional filters.
+  Note: updating guance_monitor.secret from a non-empty value to an empty string currently depends on Forethought OpenAPI behavior. The current OpenAPI implementation accepts the request but keeps the old secret, so avoid using an empty secret to clear an existing value until the OpenAPI contract is adjusted.
   Alert Module
   The alert-related Terraform resources are based on Guance Forethought OpenAPI endpoints.
   Typical dependency flow:
@@ -95,6 +101,21 @@ provider "guance" {
 ## More Examples
 
 * [Example Source Code](https://github.com/GuanceCloud/terraform-provider-guance/tree/main/examples)
+
+## Monitor Module
+
+The monitor-related Terraform resources are based on Guance Forethought OpenAPI checker endpoints.
+
+Use `guance_monitor` when you want to manage a monitor/checker with structured Terraform fields. Use `guance_monitor_json` when you want to import, replace, or manage a monitor from the checker JSON export format.
+
+Available monitor resources and data sources:
+
+* `guance_monitor` - manages monitor checker rules with structured fields.
+* `guance_monitor_json` - manages monitor checker rules with JSON import/export semantics.
+* `guance_monitor` data source - reads one existing monitor/checker by `uuid` or exact `name`.
+* `guance_monitors` data source - lists existing monitors/checkers by search and optional filters.
+
+Note: updating `guance_monitor.secret` from a non-empty value to an empty string currently depends on Forethought OpenAPI behavior. The current OpenAPI implementation accepts the request but keeps the old secret, so avoid using an empty secret to clear an existing value until the OpenAPI contract is adjusted.
 
 ## Alert Module
 
