@@ -138,7 +138,6 @@ func TestAlertPolicyUpdateBodyPreservesPermissionZeroValues(t *testing.T) {
 		"targets": []map[string]any{{
 			"to":             []string{},
 			"status":         "critical",
-			"df_source":      "",
 			"upgradeTargets": []map[string]any{},
 			"tags":           map[string][]string{},
 			"filterString":   "",
@@ -148,7 +147,6 @@ func TestAlertPolicyUpdateBodyPreservesPermissionZeroValues(t *testing.T) {
 		"customDateUUIDs": []string{},
 		"customStartTime": "",
 		"customDuration":  0,
-		"alertInfo":       []map[string]any{},
 	}}, alertOpt["alertTarget"])
 	require.Equal(t, 0, alertOpt["aggInterval"])
 	require.Equal(t, []string{}, alertOpt["aggFields"])

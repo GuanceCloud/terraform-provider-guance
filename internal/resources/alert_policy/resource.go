@@ -524,7 +524,9 @@ func alertTargetsUpdateBody(items []api.AlertTarget) []map[string]any {
 			"customDateUUIDs": emptyStringSliceIfNil(item.CustomDateUUIDs),
 			"customStartTime": item.CustomStartTime,
 			"customDuration":  item.CustomDuration,
-			"alertInfo":       alertInfoUpdateBody(item.AlertInfo),
+		}
+		if len(item.AlertInfo) > 0 {
+			body["alertInfo"] = alertInfoUpdateBody(item.AlertInfo)
 		}
 		result = append(result, body)
 	}
@@ -537,10 +539,12 @@ func targetsUpdateBody(items []api.Target) []map[string]any {
 		body := map[string]any{
 			"to":             emptyStringSliceIfNil(item.To),
 			"status":         item.Status,
-			"df_source":      item.DfSource,
 			"upgradeTargets": upgradeTargetsUpdateBody(item.UpgradeTargets),
 			"tags":           emptyStringListMapIfNil(item.Tags),
 			"filterString":   item.FilterString,
+		}
+		if item.DfSource != "" {
+			body["df_source"] = item.DfSource
 		}
 		result = append(result, body)
 	}

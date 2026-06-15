@@ -28,7 +28,7 @@ variable "notice_dates" {
 variable "alert_filter" {
   description = "DQL-style alert target filter expression."
   type        = string
-  default     = "`service` IN ['checkout']"
+  default     = null
 }
 
 variable "mute_start_time" {
@@ -48,4 +48,3 @@ variable "mute_notify_time" {
   type        = string
   default     = "2026/12/31 09:50:00"
 }
-
