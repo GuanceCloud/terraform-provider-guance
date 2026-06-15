@@ -117,11 +117,32 @@ func (r *monitorResource) Read(ctx context.Context, req resource.ReadRequest, re
 	state.UUID = types.StringValue(content.UUID)
 	state.Type = types.StringValue(content.Type)
 	state.Status = types.Int64Value(int64(content.Status))
+	state.OpenPermissionSet = types.BoolValue(content.OpenPermissionSet)
 	state.MonitorUUID = types.StringValue(content.MonitorUUID)
 	state.MonitorName = types.StringValue(content.MonitorName)
 	state.WorkspaceUUID = types.StringValue(content.WorkspaceUUID)
 	state.CreateAt = types.Int64Value(int64(content.CreateAt))
 	state.UpdateAt = types.Int64Value(int64(content.UpdateAt))
+	if content.Extend != nil && (state.Extend.IsNull() || state.Extend.IsUnknown()) {
+		if extendBytes, err := json.Marshal(content.Extend); err == nil {
+			state.Extend = types.StringValue(string(extendBytes))
+		}
+	}
+	if content.AlertPolicyUUIDs != nil {
+		state.AlertPolicyUUIDs = stringsFromContent(content.AlertPolicyUUIDs)
+	}
+	if content.DashboardUUID != "" {
+		state.DashboardUUID = types.StringValue(content.DashboardUUID)
+	}
+	if content.Tags != nil {
+		state.Tags = stringsFromContent(content.Tags)
+	}
+	if content.Secret != "" {
+		state.Secret = types.StringValue(content.Secret)
+	}
+	if content.PermissionSet != nil {
+		state.PermissionSet = stringsFromContent(content.PermissionSet)
+	}
 
 	// Map JsonScript from API response
 	if content.JsonScript != nil {
@@ -296,7 +317,7 @@ func (r *monitorResource) Update(ctx context.Context, req resource.UpdateRequest
 	// Type is not updatable, so we need to set it to empty string to avoid error
 	item.Type = ""
 	content := &api.MonitorContent{}
-	err := r.client.Update(consts.TypeNameMonitor, plan.UUID.ValueString(), item, content)
+	err := r.client.Update(consts.TypeNameMonitor, plan.UUID.ValueString(), monitorUpdateBody(item), content)
 
 	if err != nil {
 		resp.Diagnostics.AddError(
@@ -313,6 +334,35 @@ func (r *monitorResource) Update(ctx context.Context, req resource.UpdateRequest
 	if resp.Diagnostics.HasError() {
 		return
 	}
+}
+
+func monitorUpdateBody(item *api.Monitor) map[string]any {
+	return map[string]any{
+		"status":            item.Status,
+		"extend":            item.Extend,
+		"alertPolicyUUIDs":  emptyStringSliceIfNil(item.AlertPolicyUUIDs),
+		"dashboardUUID":     item.DashboardUUID,
+		"tags":              emptyStringSliceIfNil(item.Tags),
+		"secret":            item.Secret,
+		"jsonScript":        item.JsonScript,
+		"openPermissionSet": item.OpenPermissionSet,
+		"permissionSet":     emptyStringSliceIfNil(item.PermissionSet),
+	}
+}
+
+func emptyStringSliceIfNil(values []string) []string {
+	if values == nil {
+		return []string{}
+	}
+	return values
+}
+
+func stringsFromContent(values []string) []types.String {
+	result := make([]types.String, len(values))
+	for i, value := range values {
+		result[i] = types.StringValue(value)
+	}
+	return result
 }
 
 // Delete deletes the resource and removes the Terraform state on success.

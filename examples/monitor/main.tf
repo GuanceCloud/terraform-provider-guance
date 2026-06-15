@@ -1,64 +1,63 @@
 resource "guance_monitor" "example" {
-  type = "trigger"
-  status = 0
-  alert_policy_uuids = []
-  dashboard_uuid = []
-  tags = ["example", "terraform"]
-  secret = ["TF-MONITOR-SECRET"]
-  open_permission_set = []
-  permission_set = []
-  
+  type                = "trigger"
+  status              = 0
+  alert_policy_uuids  = var.alert_policy_uuids
+  tags                = var.tags
+  secret              = var.secret
+  open_permission_set = var.open_permission_set
+  permission_set      = var.permission_set
+
   extend = jsonencode({
     isNeedCreateIssue = false
-    issueLevelUUID = ""
-    needRecoverIssue = false
+    issueLevelUUID    = ""
+    needRecoverIssue  = false
   })
-  
+
   json_script = {
-    type = "simpleCheck"
-    title = "Terraform Monitor Example"
-    message = ">Level：{{status}}  \n>Host：{{host}}  \n>Content：Host SSH Status {{ Result |  to_fixed(2) }}%  \n>Suggestion：Check Host SSH Service Status"
-    every = "1m"
-    interval = 300
+    type                      = "simpleCheck"
+    title                     = "Terraform Monitor Example"
+    message                   = ">Level: {{status}}\n>Host: {{host}}\n>Content: Host SSH Status {{ Result | to_fixed(2) }}%\n>Suggestion: Check Host SSH Service Status"
+    every                     = "1m"
+    interval                  = 300
     recover_need_period_count = 2
-    disable_check_end_time = false
-    group_by = ["host"]
-    targets = [
-      {
-        dql = "M::`ssh`:(count(`ssh_check`)) BY `host`"
-        alias = "Result"
-        qtype = "dql"
-      }
-    ]
+    disable_check_end_time    = false
+    group_by                  = ["host"]
+
+    targets = [{
+      dql   = "M::`ssh`:(count(`ssh_check`)) BY `host`"
+      alias = "Result"
+      qtype = "dql"
+    }]
+
     checker_opt = {
+      info_event = false
+
       rules = [
         {
           condition_logic = "and"
-          conditions = [
-            {
-              alias = "Result"
-              operands = ["90"]
-              operator = ">="
-            }
-          ]
-          status = "critical"
+          status          = "critical"
+
+          conditions = [{
+            alias    = "Result"
+            operator = ">="
+            operands = ["90"]
+          }]
         },
         {
           condition_logic = "and"
-          conditions = [
-            {
-              alias = "Result"
-              operands = ["0"]
-              operator = ">="
-            }
-          ]
-          status = "error"
-        }
+          status          = "error"
+
+          conditions = [{
+            alias    = "Result"
+            operator = ">="
+            operands = ["0"]
+          }]
+        },
       ]
-      info_event = false
     }
-    channels = []
-    at_accounts = []
+
+    channels            = []
+    at_accounts         = []
     at_no_data_accounts = []
   }
 }

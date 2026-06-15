@@ -30,7 +30,7 @@ variable "open_permission_set" {
 variable "permission_set" {
   description = "Operation permission configuration."
   type        = list(string)
-  default     = ["wsAdmin"]
+  default     = []
 }
 
 variable "sli_uuids" {

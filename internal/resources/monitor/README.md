@@ -1,72 +1,71 @@
 # Monitor Resource
 
-The `guance_monitor` resource manages monitors in Guance Cloud. Monitors are used to detect anomalies and trigger alerts based on defined rules and conditions.
+The `guance_monitor` resource manages monitor checker rules in Guance Cloud.
 
 ## Example Usage
 
 ```terraform
 resource "guance_monitor" "example" {
-  type = "trigger"
-  status = 0
-  alert_policy_uuids = ["altpl_xxxx32"]
-  dashboard_uuid = "dsbd_xxxx32"
-  tags = ["example", "terraform"]
-  secret = "secret_xxxxx"
+  type                = "trigger"
+  status              = 0
+  tags                = ["example", "terraform"]
+  secret              = "secret_xxxxx"
   open_permission_set = false
-  permission_set = ["wsAdmin", "acnt_xxxx", "group_yyyy"]
-  
+  permission_set      = []
+  alert_policy_uuids  = []
+
   extend = jsonencode({
     isNeedCreateIssue = false
-    issueLevelUUID = ""
-    needRecoverIssue = false
+    issueLevelUUID    = ""
+    needRecoverIssue  = false
   })
-  
-  json_script = jsonencode({
-    type = "simpleCheck"
-    title = "SSH Service Exception"
-    message = ">Content：Host SSH Status Failed  \n>Suggestion：Check Host SSH Service Status"
-    every = "1m"
-    interval = 300
-    recoverNeedPeriodCount = 2
-    disableCheckEndTime = false
-    groupBy = ["host"]
-    targets = [
-      {
-        dql = "M::`ssh`:(count(`ssh_check`)) BY `host`"
-        alias = "Result"
-        qtype = "dql"
-      }
-    ]
-    checkerOpt = {
+
+  json_script = {
+    type                      = "simpleCheck"
+    title                     = "SSH Service Exception"
+    message                   = ">Content: Host SSH Status Failed\n>Suggestion: Check Host SSH Service Status"
+    every                     = "1m"
+    interval                  = 300
+    recover_need_period_count = 2
+    disable_check_end_time    = false
+    group_by                  = ["host"]
+
+    targets = [{
+      dql   = "M::`ssh`:(count(`ssh_check`)) BY `host`"
+      alias = "Result"
+      qtype = "dql"
+    }]
+
+    checker_opt = {
+      info_event = false
+
       rules = [
         {
-          conditionLogic = "and"
-          conditions = [
-            {
-              alias = "Result"
-              operands = ["90"]
-              operator = ">="
-            }
-          ]
-          status = "critical"
+          condition_logic = "and"
+          status          = "critical"
+
+          conditions = [{
+            alias    = "Result"
+            operator = ">="
+            operands = ["90"]
+          }]
         },
         {
-          conditionLogic = "and"
-          conditions = [
-            {
-              alias = "Result"
-              operands = ["0"]
-              operator = ">="
-            }
-          ]
-          status = "error"
-        }
+          condition_logic = "and"
+          status          = "error"
+
+          conditions = [{
+            alias    = "Result"
+            operator = ">="
+            operands = ["0"]
+          }]
+        },
       ]
-      infoEvent = false
     }
-    channels = []
-    atAccounts = []
-    atNoDataAccounts = []
-  })
+
+    channels            = []
+    at_accounts         = []
+    at_no_data_accounts = []
+  }
 }
 ```

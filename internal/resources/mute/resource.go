@@ -222,7 +222,7 @@ func muteFromPlan(plan *muteResourceModel) *api.Mute {
 }
 
 func muteUpdateBody(item *api.Mute) map[string]any {
-	return map[string]any{
+	body := map[string]any{
 		"name":             item.Name,
 		"description":      item.Description,
 		"type":             item.Type,
@@ -232,8 +232,6 @@ func muteUpdateBody(item *api.Mute) map[string]any {
 		"notifyTargets":    emptyMuteNotifyTargetsIfNil(item.NotifyTargets),
 		"notifyMessage":    item.NotifyMessage,
 		"notifyTimeStr":    item.NotifyTimeStr,
-		"startTime":        item.StartTime,
-		"endTime":          item.EndTime,
 		"repeatTimeSet":    item.RepeatTimeSet,
 		"repeatCrontabSet": item.RepeatCrontabSet,
 		"crontabDuration":  item.CrontabDuration,
@@ -241,6 +239,13 @@ func muteUpdateBody(item *api.Mute) map[string]any {
 		"timezone":         item.Timezone,
 		"declaration":      emptyStringMapIfNil(item.Declaration),
 	}
+	if item.StartTime != "" {
+		body["startTime"] = item.StartTime
+	}
+	if item.EndTime != "" {
+		body["endTime"] = item.EndTime
+	}
+	return body
 }
 
 func emptyMuteNotifyTargetsIfNil(values []api.MuteNotifyTarget) []api.MuteNotifyTarget {
@@ -358,6 +363,9 @@ func stringValueFromContent(content *api.MuteContent, field string, value string
 
 func stringValueFromContentIfConfigured(content *api.MuteContent, field string, value string, existing types.String) types.String {
 	if existing.IsNull() || existing.IsUnknown() {
+		return existing
+	}
+	if value == "" {
 		return existing
 	}
 	return stringValueFromContent(content, field, value, existing)

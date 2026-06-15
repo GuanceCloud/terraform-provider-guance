@@ -10,6 +10,7 @@ import (
 	"github.com/GuanceCloud/terraform-provider-guance/internal/resources/blacklist"
 	"github.com/GuanceCloud/terraform-provider-guance/internal/resources/dashboard"
 	"github.com/GuanceCloud/terraform-provider-guance/internal/resources/membergroup"
+	"github.com/GuanceCloud/terraform-provider-guance/internal/resources/monitor"
 	"github.com/GuanceCloud/terraform-provider-guance/internal/resources/monitor_json"
 	"github.com/GuanceCloud/terraform-provider-guance/internal/resources/mute"
 	"github.com/GuanceCloud/terraform-provider-guance/internal/resources/notify_object"
@@ -26,8 +27,8 @@ func (p *guanceProvider) Resources(_ context.Context) []func() resource.Resource
 		// custom_region.NewCustomRegionResource,
 		dashboard.NewDashboardResource,
 		membergroup.NewMemberGroupResource,
+		monitor.NewMonitorResource,
 		monitor_json.NewMonitorJsonResource,
-		// monitor.NewMonitorResource,
 		mute.NewMuteResource,
 		notify_object.NewNotifyObjectResource,
 		pipeline.NewPipelineResource,

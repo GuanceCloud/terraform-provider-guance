@@ -164,14 +164,29 @@ func TestMuteUpdateBodyPreservesClearableZeroValues(t *testing.T) {
 	require.Equal(t, []api.MuteNotifyTarget{}, got["notifyTargets"])
 	require.Equal(t, "", got["notifyMessage"])
 	require.Equal(t, "", got["notifyTimeStr"])
-	require.Equal(t, "", got["startTime"])
-	require.Equal(t, "", got["endTime"])
+	require.NotContains(t, got, "startTime")
+	require.NotContains(t, got, "endTime")
 	require.Equal(t, 0, got["repeatTimeSet"])
 	require.Nil(t, got["repeatCrontabSet"])
 	require.Equal(t, 0, got["crontabDuration"])
 	require.Equal(t, "", got["repeatExpireTime"])
 	require.Equal(t, "Asia/Shanghai", got["timezone"])
 	require.Equal(t, map[string]string{}, got["declaration"])
+}
+
+func TestMuteUpdateBodyIncludesConfiguredTimes(t *testing.T) {
+	got := muteUpdateBody(&api.Mute{
+		Name:          "codex-mute",
+		Type:          "alertPolicy",
+		MuteRanges:    []api.MuteRange{},
+		RepeatTimeSet: 1,
+		StartTime:     "2026/12/31 10:00:00",
+		EndTime:       "2026/12/31 11:00:00",
+		Timezone:      "Asia/Shanghai",
+	})
+
+	require.Equal(t, "2026/12/31 10:00:00", got["startTime"])
+	require.Equal(t, "2026/12/31 11:00:00", got["endTime"])
 }
 
 func TestApplyContentToStateInfersRepeatedMuteAndPreservesUnconfiguredWindow(t *testing.T) {
@@ -216,6 +231,42 @@ func TestApplyContentToStateInfersRepeatedMuteAndPreservesUnconfiguredWindow(t *
 	require.True(t, state.RepeatExpireTime.IsNull())
 	require.True(t, state.Enabled.ValueBool())
 	require.Equal(t, "wksp_xxx", state.WorkspaceUUID.ValueString())
+}
+
+func TestApplyContentToStatePreservesConfiguredRepeatedWindowWhenAPIReturnsEmpty(t *testing.T) {
+	state := &muteResourceModel{
+		RepeatTimeSet: types.Int64Value(1),
+		StartTime:     types.StringValue("2026/12/31 10:00:00"),
+		EndTime:       types.StringValue("2026/12/31 11:00:00"),
+		Timezone:      types.StringValue("Asia/Shanghai"),
+		Enabled:       types.BoolValue(true),
+	}
+	content := muteContentFromJSON(t, `{
+		"uuid": "mute_xxx",
+		"name": "codex-mute-weekly",
+		"type": "alertPolicy",
+		"startTime": "2026/12/31 10:00:00",
+		"endTime": "",
+		"repeatTimeSet": 1,
+		"repeatCrontabSet": {
+			"min": "0",
+			"hour": "10",
+			"day": "*",
+			"month": "*",
+			"week": "*"
+		},
+		"crontabDuration": 3600,
+		"repeatExpireTime": "2027/01/01 00:00:00",
+		"timezone": "Asia/Shanghai",
+		"status": 0
+	}`)
+
+	applyContentToState(state, content)
+
+	require.Equal(t, "2026/12/31 10:00:00", state.StartTime.ValueString())
+	require.Equal(t, "2026/12/31 11:00:00", state.EndTime.ValueString())
+	require.NotNil(t, state.RepeatCrontabSet)
+	require.Equal(t, int64(3600), state.CrontabDuration.ValueInt64())
 }
 
 func TestApplyContentToStateMapsDisabledStatusToEnabled(t *testing.T) {
