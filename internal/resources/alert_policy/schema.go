@@ -315,9 +315,6 @@ var resourceSchema = schema.Schema{
 		"update_at": schema.Int64Attribute{
 			Description: "The timestamp seconds of the resource updated at.",
 			Computed:    true,
-			PlanModifiers: []planmodifier.Int64{
-				int64planmodifier.UseStateForUnknown(),
-			},
 		},
 		"workspace_uuid": schema.StringAttribute{
 			Description: "The uuid of the workspace.",
