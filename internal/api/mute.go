@@ -117,9 +117,24 @@ func (c *Client) ListMutes(search string, content *MuteListContent) error {
 }
 
 func (c *Client) ListMutesWithOptions(options MuteListOptions, content *MuteListContent) error {
+	content.Data = nil
+	for pageIndex := 1; ; pageIndex++ {
+		query := muteListQuery(options, pageIndex)
+		var page MuteListContent
+		if err := c.get("/monitor/mute/list?"+query.Encode(), &page); err != nil {
+			return err
+		}
+		content.Data = append(content.Data, page.Data...)
+		if len(page.Data) < muteLookupPageSize {
+			return nil
+		}
+	}
+}
+
+func muteListQuery(options MuteListOptions, pageIndex int) url.Values {
 	query := url.Values{}
-	query.Set("pageIndex", "1")
-	query.Set("pageSize", "100")
+	query.Set("pageIndex", fmt.Sprintf("%d", pageIndex))
+	query.Set("pageSize", fmt.Sprintf("%d", muteLookupPageSize))
 	if options.Search != "" {
 		query.Set("search", options.Search)
 	}
@@ -138,7 +153,7 @@ func (c *Client) ListMutesWithOptions(options MuteListOptions, content *MuteList
 	if options.Updator != "" {
 		query.Set("updator", options.Updator)
 	}
-	return c.get("/monitor/mute/list?"+query.Encode(), content)
+	return query
 }
 
 const muteLookupPageSize = 100

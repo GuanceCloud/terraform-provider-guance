@@ -30,6 +30,7 @@
 * [guance_monitors] Page through all monitor list results.
 * [guance_monitors] Clarify checker type filtering and avoid examples that send monitor resource types to the list API.
 * [guance_mute] Page through all mute list results when reading by UUID.
+* [guance_mute] Page through all mute list results for name-based data source lookups.
 * [guance_mute] Stabilize clearable fields, repeated mute windows, declarations, tags, filters, notification targets, and messages.
 * [guance_notify_object] Preserve disabled and empty permission updates.
 
