@@ -29,9 +29,9 @@ variable "monitor_name" {
 }
 
 variable "monitor_type" {
-  description = "Optional monitor type filter, such as trigger or smartMonitor."
+  description = "Optional checker type filter for guance_monitors, such as simpleCheck. Leave empty to list all monitor/checker types."
   type        = string
-  default     = "trigger"
+  default     = ""
 }
 
 variable "monitor_search" {

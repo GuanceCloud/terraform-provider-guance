@@ -373,6 +373,43 @@ func TestAlertOptFromContentAppliesRemoteZeroValuesForResourceRead(t *testing.T)
 	require.Equal(t, int64(0), got.AlertTarget[0].Targets[0].UpgradeTargets[0].Duration.ValueInt64())
 }
 
+func TestAlertOptFromContentPreservesPriorNestedEmptyValuesForResourceRead(t *testing.T) {
+	prior := &alertOptModel{
+		AlertTarget: []alertTarget{{
+			Name:            types.StringValue("default"),
+			CrontabDuration: types.Int64Value(0),
+			CustomDateUUIDs: []types.String{},
+			CustomDuration:  types.Int64Value(0),
+			Targets: []target{{
+				To:             []types.String{types.StringValue("notify_xxx")},
+				Status:         types.StringValue("critical,error,warning"),
+				Tags:           map[string][]string{},
+				UpgradeTargets: []upgradeTarget{},
+			}},
+		}},
+	}
+
+	got := alertOptFromContent(&api.AlertOptContent{
+		AlertTarget: []api.AlertTargetContent{{
+			Name: "default",
+			Targets: []api.TargetContent{{
+				To:     []string{"notify_xxx"},
+				Status: "critical,error,warning",
+			}},
+		}},
+	}, prior)
+
+	require.Len(t, got.AlertTarget, 1)
+	require.False(t, got.AlertTarget[0].CrontabDuration.IsNull())
+	require.Equal(t, int64(0), got.AlertTarget[0].CrontabDuration.ValueInt64())
+	require.Empty(t, got.AlertTarget[0].CustomDateUUIDs)
+	require.False(t, got.AlertTarget[0].CustomDuration.IsNull())
+	require.Equal(t, int64(0), got.AlertTarget[0].CustomDuration.ValueInt64())
+	require.Len(t, got.AlertTarget[0].Targets, 1)
+	require.Empty(t, got.AlertTarget[0].Targets[0].Tags)
+	require.Empty(t, got.AlertTarget[0].Targets[0].UpgradeTargets)
+}
+
 func TestAlertOptFromContentForDataSourceIncludesZeroValues(t *testing.T) {
 	got := alertOptFromContentForDataSource(&api.AlertOptContent{})
 

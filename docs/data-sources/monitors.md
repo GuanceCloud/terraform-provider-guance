@@ -23,7 +23,7 @@ The `guance_monitors` data source lists Guance monitors/checkers by search and o
 - `search` (String) Monitor search keyword.
 - `status` (String) Monitor status filter, such as 0 or 2.
 - `tags_uuid` (String) Comma-separated monitor tag UUID filter.
-- `type` (String) Monitor type filter, such as trigger or smartMonitor.
+- `type` (String) Checker type filter, such as simpleCheck. Leave empty to list all monitor/checker types.
 
 ### Read-Only
 
@@ -41,7 +41,7 @@ Read-Only:
 - `name` (String) Monitor/checker name.
 - `status` (Number) Monitor status.
 - `tags` (List of String) Monitor tag names.
-- `type` (String) Monitor type.
+- `type` (String) Monitor type, such as trigger or smartMonitor.
 - `uuid` (String) Monitor/checker UUID.
 - `workspace_uuid` (String) Workspace UUID.
 

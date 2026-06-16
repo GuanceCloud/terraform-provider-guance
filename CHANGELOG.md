@@ -23,9 +23,11 @@
 * [guance_alert_policy] Allow checker and security rule bindings to be cleared without drift.
 * [guance_alert_policy] Allow alert target schedules, `df_source`, and duration fields to be cleared.
 * [guance_alert_policy] Detect remote zero-value changes for alert options during refresh.
+* [guance_alert_policy] Preserve configured nested empty values during refresh to avoid follow-up diffs.
 * [guance_monitor] Validate `extend` JSON during create and update instead of silently omitting invalid payloads.
 * [guance_monitor] Stabilize permissions, tags, alert policy bindings, and backend-expanded `extend` payloads.
 * [guance_monitors] Page through all monitor list results.
+* [guance_monitors] Clarify checker type filtering and avoid examples that send monitor resource types to the list API.
 * [guance_mute] Page through all mute list results when reading by UUID.
 * [guance_mute] Stabilize clearable fields, repeated mute windows, declarations, tags, filters, notification targets, and messages.
 * [guance_notify_object] Preserve disabled and empty permission updates.

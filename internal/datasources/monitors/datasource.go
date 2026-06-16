@@ -38,7 +38,7 @@ func (d *monitorsDataSource) Schema(_ context.Context, _ datasource.SchemaReques
 				Optional:    true,
 			},
 			"type": dsschema.StringAttribute{
-				Description: "Monitor type filter, such as trigger or smartMonitor.",
+				Description: "Checker type filter, such as simpleCheck. Leave empty to list all monitor/checker types.",
 				Optional:    true,
 			},
 			"status": dsschema.StringAttribute{
@@ -75,7 +75,7 @@ func (d *monitorsDataSource) Schema(_ context.Context, _ datasource.SchemaReques
 							Computed:    true,
 						},
 						"type": dsschema.StringAttribute{
-							Description: "Monitor type.",
+							Description: "Monitor type, such as trigger or smartMonitor.",
 							Computed:    true,
 						},
 						"status": dsschema.Int64Attribute{

@@ -639,7 +639,7 @@ func alertOptFromContentWithZeroMode(content *api.AlertOptContent, prior *alertO
 		}
 	}
 	if content.AlertTarget != nil {
-		model.AlertTarget = alertTargetsFromContent(content.AlertTarget)
+		model.AlertTarget = alertTargetsFromContent(content.AlertTarget, model.AlertTarget)
 	}
 	if content.AggInterval != nil {
 		model.AggInterval = types.Int64Value(int64(*content.AggInterval))
@@ -664,16 +664,29 @@ func alertOptFromContentWithZeroMode(content *api.AlertOptContent, prior *alertO
 	return model
 }
 
-func alertTargetsFromContent(items []api.AlertTargetContent) []alertTarget {
+func alertTargetsFromContent(items []api.AlertTargetContent, prior []alertTarget) []alertTarget {
 	result := make([]alertTarget, len(items))
 	for i, item := range items {
-		result[i] = alertTarget{
-			Name:            stringValueOrNull(item.Name),
-			Targets:         targetsFromContent(item.Targets),
-			Crontab:         stringValueOrNull(item.Crontab),
-			CustomDateUUIDs: stringsFromContent(item.CustomDateUUIDs),
-			CustomStartTime: stringValueOrNull(item.CustomStartTime),
-			AlertInfo:       alertInfoFromContent(item.AlertInfo),
+		if i < len(prior) {
+			result[i] = prior[i]
+		}
+		if item.Name != "" {
+			result[i].Name = types.StringValue(item.Name)
+		}
+		if item.Targets != nil {
+			result[i].Targets = targetsFromContent(item.Targets, result[i].Targets)
+		}
+		if item.Crontab != "" {
+			result[i].Crontab = types.StringValue(item.Crontab)
+		}
+		if item.CustomDateUUIDs != nil {
+			result[i].CustomDateUUIDs = stringsFromContent(item.CustomDateUUIDs)
+		}
+		if item.CustomStartTime != "" {
+			result[i].CustomStartTime = types.StringValue(item.CustomStartTime)
+		}
+		if item.AlertInfo != nil {
+			result[i].AlertInfo = alertInfoFromContent(item.AlertInfo, result[i].AlertInfo)
 		}
 		if item.CrontabDuration != nil {
 			result[i].CrontabDuration = types.Int64Value(int64(*item.CrontabDuration))
@@ -685,35 +698,53 @@ func alertTargetsFromContent(items []api.AlertTargetContent) []alertTarget {
 	return result
 }
 
-func targetsFromContent(items []api.TargetContent) []target {
+func targetsFromContent(items []api.TargetContent, prior []target) []target {
 	if items == nil {
-		return nil
+		return prior
 	}
 
 	result := make([]target, len(items))
 	for i, item := range items {
-		result[i] = target{
-			To:             stringsFromContent(item.To),
-			Status:         stringValueOrNull(item.Status),
-			DfSource:       stringValueOrNull(item.DfSource),
-			UpgradeTargets: upgradeTargetsFromContent(item.UpgradeTargets),
-			Tags:           item.Tags,
-			FilterString:   stringValueOrNull(item.FilterString),
+		if i < len(prior) {
+			result[i] = prior[i]
+		}
+		if item.To != nil {
+			result[i].To = stringsFromContent(item.To)
+		}
+		if item.Status != "" {
+			result[i].Status = types.StringValue(item.Status)
+		}
+		if item.DfSource != "" {
+			result[i].DfSource = types.StringValue(item.DfSource)
+		}
+		if item.UpgradeTargets != nil {
+			result[i].UpgradeTargets = upgradeTargetsFromContent(item.UpgradeTargets, result[i].UpgradeTargets)
+		}
+		if item.Tags != nil {
+			result[i].Tags = item.Tags
+		}
+		if item.FilterString != "" {
+			result[i].FilterString = types.StringValue(item.FilterString)
 		}
 	}
 	return result
 }
 
-func upgradeTargetsFromContent(items []api.UpgradeTargetContent) []upgradeTarget {
+func upgradeTargetsFromContent(items []api.UpgradeTargetContent, prior []upgradeTarget) []upgradeTarget {
 	if items == nil {
-		return nil
+		return prior
 	}
 
 	result := make([]upgradeTarget, len(items))
 	for i, item := range items {
-		result[i] = upgradeTarget{
-			To:    stringsFromContent(item.To),
-			ToWay: stringsFromContent(item.ToWay),
+		if i < len(prior) {
+			result[i] = prior[i]
+		}
+		if item.To != nil {
+			result[i].To = stringsFromContent(item.To)
+		}
+		if item.ToWay != nil {
+			result[i].ToWay = stringsFromContent(item.ToWay)
 		}
 		if item.Duration != nil {
 			result[i].Duration = types.Int64Value(int64(*item.Duration))
@@ -722,18 +753,27 @@ func upgradeTargetsFromContent(items []api.UpgradeTargetContent) []upgradeTarget
 	return result
 }
 
-func alertInfoFromContent(items []api.AlertInfoContent) []alertInfo {
+func alertInfoFromContent(items []api.AlertInfoContent, prior []alertInfo) []alertInfo {
 	if items == nil {
-		return nil
+		return prior
 	}
 
 	result := make([]alertInfo, len(items))
 	for i, item := range items {
-		result[i] = alertInfo{
-			Name:         stringValueOrNull(item.Name),
-			Targets:      targetsFromContent(item.Targets),
-			FilterString: stringValueOrNull(item.FilterString),
-			MemberInfo:   stringsFromContent(item.MemberInfo),
+		if i < len(prior) {
+			result[i] = prior[i]
+		}
+		if item.Name != "" {
+			result[i].Name = types.StringValue(item.Name)
+		}
+		if item.Targets != nil {
+			result[i].Targets = targetsFromContent(item.Targets, result[i].Targets)
+		}
+		if item.FilterString != "" {
+			result[i].FilterString = types.StringValue(item.FilterString)
+		}
+		if item.MemberInfo != nil {
+			result[i].MemberInfo = stringsFromContent(item.MemberInfo)
 		}
 	}
 	return result
