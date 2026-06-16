@@ -23,5 +23,6 @@ terraform destroy
 
 - `json_script` uses Terraform object syntax and maps to the Forethought OpenAPI `jsonScript` payload.
 - `extend` is a JSON string used by Forethought for issue-related and frontend echo fields.
+- The backend may add frontend echo fields to `extend`; Terraform keeps the configured subset stable while still detecting changes to fields you configured.
 - `alert_policy_uuids` can bind the monitor/checker to alert policies.
 - `secret` should be unique in the workspace when used. Clearing an existing non-empty `secret` with `secret = ""` currently depends on a pending Forethought OpenAPI adjustment; avoid using empty string as a clear operation for now.

@@ -28,13 +28,13 @@ The data source supports as follows:
 
 | Data Source | Description |
 | --- | --- |
-| `guance_alert_policy` | Look up an alert policy by UUID. |
-| `guance_alert_policy_notice_date` | Look up a custom alert policy notification date by UUID. |
+| `guance_alert_policy` | Look up an alert policy by UUID or exact name. |
+| `guance_alert_policy_notice_date` | Look up a custom alert policy notification date by UUID or exact name. |
 | `guance_members` | List workspace members. |
-| `guance_monitor` | Look up a monitor/checker by UUID. |
+| `guance_monitor` | Look up a monitor/checker by UUID or exact name. |
 | `guance_monitors` | List monitor/checker rules with filters. |
-| `guance_mute` | Look up a mute rule by UUID. |
-| `guance_notify_object` | Look up a notification object by UUID. |
+| `guance_mute` | Look up a mute rule by UUID or exact name. |
+| `guance_notify_object` | Look up a notification object by UUID or exact name. |
 | `guance_permissions` | List workspace permissions. |
 
 The region supports as follows:
