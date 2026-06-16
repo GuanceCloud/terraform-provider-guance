@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"net/url"
 
 	"github.com/GuanceCloud/terraform-provider-guance/internal/consts"
@@ -24,14 +25,31 @@ type AlertPolicyNoticeDateListContent struct {
 	Data []AlertPolicyNoticeDateContent `json:"data,omitempty"`
 }
 
+const alertPolicyNoticeDateListPageSize = 100
+
 func (c *Client) ListAlertPolicyNoticeDates(search string, content *AlertPolicyNoticeDateListContent) error {
+	content.Data = nil
+	for pageIndex := 1; ; pageIndex++ {
+		query := alertPolicyNoticeDateListQuery(search, pageIndex)
+		var page AlertPolicyNoticeDateListContent
+		if err := c.get("/notice/date/list?"+query.Encode(), &page); err != nil {
+			return err
+		}
+		content.Data = append(content.Data, page.Data...)
+		if len(page.Data) < alertPolicyNoticeDateListPageSize {
+			return nil
+		}
+	}
+}
+
+func alertPolicyNoticeDateListQuery(search string, pageIndex int) url.Values {
 	query := url.Values{}
-	query.Set("pageIndex", "1")
-	query.Set("pageSize", "100")
+	query.Set("pageIndex", fmt.Sprintf("%d", pageIndex))
+	query.Set("pageSize", fmt.Sprintf("%d", alertPolicyNoticeDateListPageSize))
 	if search != "" {
 		query.Set("search", search)
 	}
-	return c.get("/notice/date/list?"+query.Encode(), content)
+	return query
 }
 
 func init() {

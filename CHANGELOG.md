@@ -32,7 +32,9 @@
 * [guance_mute] Page through all mute list results when reading by UUID.
 * [guance_mute] Page through all mute list results for name-based data source lookups.
 * [guance_mute] Stabilize clearable fields, repeated mute windows, declarations, tags, filters, notification targets, and messages.
+* [guance_alert_policy_notice_date] Page through all notice date list results for name-based data source lookups.
 * [guance_notify_object] Preserve disabled and empty permission updates.
+* [guance_notify_object] Page through all notify object list results for name-based data source lookups.
 
 ### NOTES
 * [guance_monitor] Clearing `secret` with `secret = ""` depends on a pending Forethought OpenAPI fix.

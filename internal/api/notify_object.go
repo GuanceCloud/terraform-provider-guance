@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"net/url"
 
 	"github.com/GuanceCloud/terraform-provider-guance/internal/consts"
@@ -32,14 +33,31 @@ type NotifyObjectListContent struct {
 	Data []NotifyObjectContent `json:"data,omitempty"`
 }
 
+const notifyObjectListPageSize = 100
+
 func (c *Client) ListNotifyObjects(search string, content *NotifyObjectListContent) error {
+	content.Data = nil
+	for pageIndex := 1; ; pageIndex++ {
+		query := notifyObjectListQuery(search, pageIndex)
+		var page NotifyObjectListContent
+		if err := c.get("/notify_object/list?"+query.Encode(), &page); err != nil {
+			return err
+		}
+		content.Data = append(content.Data, page.Data...)
+		if len(page.Data) < notifyObjectListPageSize {
+			return nil
+		}
+	}
+}
+
+func notifyObjectListQuery(search string, pageIndex int) url.Values {
 	query := url.Values{}
-	query.Set("pageIndex", "1")
-	query.Set("pageSize", "100")
+	query.Set("pageIndex", fmt.Sprintf("%d", pageIndex))
+	query.Set("pageSize", fmt.Sprintf("%d", notifyObjectListPageSize))
 	if search != "" {
 		query.Set("search", search)
 	}
-	return c.get("/notify_object/list?"+query.Encode(), content)
+	return query
 }
 
 // UpdateNotifyObject updates a notify object
