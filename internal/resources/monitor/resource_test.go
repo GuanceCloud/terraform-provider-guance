@@ -47,3 +47,35 @@ func TestOptionalStringFromContentClearsEmptyRemoteValues(t *testing.T) {
 	require.True(t, optionalStringFromContent("").IsNull())
 	require.Equal(t, "dashboard_xxx", optionalStringFromContent("dashboard_xxx").ValueString())
 }
+
+func TestApplyExtendFromContentPreservesBackendExpandedValue(t *testing.T) {
+	state := &monitorResourceModel{
+		Extend: types.StringValue(`{"isNeedCreateIssue":false}`),
+	}
+
+	err := applyExtendFromContent(state, map[string]any{
+		"isNeedCreateIssue": false,
+		"querylist": []any{
+			map[string]any{"qtype": "dql"},
+		},
+	})
+
+	require.NoError(t, err)
+	require.Equal(t, `{"isNeedCreateIssue":false}`, state.Extend.ValueString())
+}
+
+func TestApplyExtendFromContentOverwritesConfiguredDrift(t *testing.T) {
+	state := &monitorResourceModel{
+		Extend: types.StringValue(`{"isNeedCreateIssue":false}`),
+	}
+
+	err := applyExtendFromContent(state, map[string]any{
+		"isNeedCreateIssue": true,
+		"querylist": []any{
+			map[string]any{"qtype": "dql"},
+		},
+	})
+
+	require.NoError(t, err)
+	require.Equal(t, `{"isNeedCreateIssue":true,"querylist":[{"qtype":"dql"}]}`, state.Extend.ValueString())
+}

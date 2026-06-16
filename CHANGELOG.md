@@ -28,6 +28,7 @@
 * [guance_alert_policy] Page through all alert policy list results for name and notification object lookups.
 * [guance_monitor] Validate `extend` JSON during create and update instead of silently omitting invalid payloads.
 * [guance_monitor] Detect remote clears for `dashboard_uuid` and `secret` during refresh.
+* [guance_monitor] Detect remote `extend` changes during refresh.
 * [guance_monitor] Stabilize permissions, tags, alert policy bindings, and backend-expanded `extend` payloads.
 * [guance_monitors] Page through all monitor list results.
 * [guance_monitors] Clarify checker type filtering and avoid examples that send monitor resource types to the list API.

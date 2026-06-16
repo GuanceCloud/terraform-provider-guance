@@ -5,6 +5,7 @@ import (
 	_ "embed"
 	"encoding/json"
 	"fmt"
+	"reflect"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -12,6 +13,7 @@ import (
 
 	"github.com/GuanceCloud/terraform-provider-guance/internal/api"
 	"github.com/GuanceCloud/terraform-provider-guance/internal/consts"
+	"github.com/GuanceCloud/terraform-provider-guance/internal/helpers/tfconvert"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
@@ -131,10 +133,12 @@ func (r *monitorResource) Read(ctx context.Context, req resource.ReadRequest, re
 	state.WorkspaceUUID = types.StringValue(content.WorkspaceUUID)
 	state.CreateAt = types.Int64Value(int64(content.CreateAt))
 	state.UpdateAt = types.Int64Value(int64(content.UpdateAt))
-	if content.Extend != nil && (state.Extend.IsNull() || state.Extend.IsUnknown()) {
-		if extendBytes, err := json.Marshal(content.Extend); err == nil {
-			state.Extend = types.StringValue(string(extendBytes))
-		}
+	if err := applyExtendFromContent(&state, content.Extend); err != nil {
+		resp.Diagnostics.AddError(
+			"Error reading monitor",
+			"Could not decode monitor extend, unexpected error: "+err.Error(),
+		)
+		return
 	}
 	if content.AlertPolicyUUIDs != nil {
 		state.AlertPolicyUUIDs = stringsFromContent(content.AlertPolicyUUIDs)
@@ -374,6 +378,47 @@ func optionalStringFromContent(value string) types.String {
 		return types.StringNull()
 	}
 	return types.StringValue(value)
+}
+
+func applyExtendFromContent(state *monitorResourceModel, value any) error {
+	if value == nil {
+		return nil
+	}
+	if extendContainsConfiguredValue(state.Extend, value) {
+		return nil
+	}
+	extend, err := tfconvert.CanonicalJSONFromValue(value)
+	if err != nil {
+		return err
+	}
+	state.Extend = types.StringValue(extend)
+	return nil
+}
+
+func extendContainsConfiguredValue(configured types.String, remote any) bool {
+	if configured.IsNull() || configured.IsUnknown() {
+		return false
+	}
+	var decoded any
+	if err := json.Unmarshal([]byte(configured.ValueString()), &decoded); err != nil {
+		return false
+	}
+	return containsValue(remote, decoded)
+}
+
+func containsValue(remote any, configured any) bool {
+	configuredMap, configuredIsMap := configured.(map[string]any)
+	remoteMap, remoteIsMap := remote.(map[string]any)
+	if configuredIsMap && remoteIsMap {
+		for key, configuredValue := range configuredMap {
+			remoteValue, ok := remoteMap[key]
+			if !ok || !containsValue(remoteValue, configuredValue) {
+				return false
+			}
+		}
+		return true
+	}
+	return reflect.DeepEqual(remote, configured)
 }
 
 func stringsFromContent(values []string) []types.String {
