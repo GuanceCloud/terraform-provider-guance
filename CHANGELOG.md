@@ -1,31 +1,37 @@
-## 0.1.0 (June 15, 2026)
+## 0.1.0 (June 16, 2026)
 
 ### FEATURES
-* [guance_notify_object] Add resource for managing alert notification objects.
-* [guance_alert_policy_notice_date] Add resource for managing custom alert policy notice dates.
-* [guance_alert_policy] Add resource for managing alert routing, aggregation, silence, escalation, permissions, checker bindings, and notification targets.
-* [guance_mute] Add resource for managing alert policy, checker, tag, and custom mute rules.
-* [guance_monitor] Add resource for managing monitor/checker rules with structured Terraform fields.
-* [data-sources] Add `guance_notify_object`, `guance_alert_policy_notice_date`, `guance_alert_policy`, `guance_mute`, `guance_monitor`, and `guance_monitors`.
+* [guance_alert_policy] Add alert routing policy resource support.
+* [guance_alert_policy] Support checker/security rule bindings, notification targets, aggregation, silence, escalation, permissions, and custom schedules.
+* [guance_alert_policy_notice_date] Add custom alert policy notification date resource support.
+* [guance_monitor] Expose the structured monitor/checker resource.
+* [guance_mute] Add alert policy, checker, tag, and custom mute rule resource support.
+* [guance_notify_object] Add alert notification object resource support.
+* [data-sources] Add alert policy, notice date, monitor, monitor list, mute, and notify object data sources.
 
 ### IMPROVEMENTS
-* [docs] Add alert, monitor, and data source examples.
 * [docs] Add generated Terraform Registry documentation for alert and monitor resources.
-* [docs] Add local documentation generation checks with `make docs` and `make check-docs`.
-* [examples] Mark `guance_slo` and `guance_synthetics_test` examples as implementation references because those resources are not registered in this release.
+* [docs] Add generated Terraform Registry documentation for the new data sources.
+* [examples] Add runnable alert and data source examples, and expand monitor examples.
+* [examples] Mark `guance_slo` and `guance_synthetics_test` examples as implementation references.
+* [developer] Add `make docs`, `make check-docs`, `make test`, and `make testacc` development targets.
+* [developer] Upgrade the provider build target to Go 1.26.2.
+* [internal] Add shared Terraform value conversion helpers used by alert and mute resources.
 
 ### BUGFIXES
-* [guance_alert_policy] Preserve `false`, `0`, empty string, and empty-list updates when Forethought OpenAPI treats omitted fields as keeping existing values.
-* [guance_alert_policy] Allow `checker_uuids` and `security_rule_uuids` to be cleared.
-* [guance_alert_policy] Fix drift for alert target schedules, `df_source`, upgrade target durations, and nested alert option durations.
-* [guance_notify_object] Preserve empty permission updates.
-* [guance_mute] Page through all mute list results when reading by UUID instead of stopping after 20 pages.
-* [guance_mute] Stabilize update and read behavior for clearable fields, repeated mute windows, declarations, tags, filters, notification targets, and notification messages.
-* [guance_monitors] Page through all monitor list results instead of returning only the first 100 matches.
+* [guance_alert_policy] Preserve `false`, `0`, empty string, empty-list, and nil-clearing updates.
+* [guance_alert_policy] Allow checker and security rule bindings to be cleared without drift.
+* [guance_alert_policy] Allow alert target schedules, `df_source`, and duration fields to be cleared.
+* [guance_alert_policy] Detect remote zero-value changes for alert options during refresh.
 * [guance_monitor] Validate `extend` JSON during create and update instead of silently omitting invalid payloads.
-* [guance_monitor] Stabilize read/update behavior for permissions, tags, alert policy bindings, and backend-expanded `extend` payloads.
+* [guance_monitor] Stabilize permissions, tags, alert policy bindings, and backend-expanded `extend` payloads.
+* [guance_monitors] Page through all monitor list results.
+* [guance_mute] Page through all mute list results when reading by UUID.
+* [guance_mute] Stabilize clearable fields, repeated mute windows, declarations, tags, filters, notification targets, and messages.
+* [guance_notify_object] Preserve disabled and empty permission updates.
 
 ### NOTES
-* [guance_monitor] Clearing `secret` by changing a non-empty value to `secret = ""` depends on a pending Forethought OpenAPI fix. The current OpenAPI implementation accepts the update request but keeps the old secret value.
+* [guance_monitor] Clearing `secret` with `secret = ""` depends on a pending Forethought OpenAPI fix.
+* [guance_mute] The OpenAPI currently requires non-empty `startTime` and `endTime` values for mute requests.
 
 **Full Changelog**: https://github.com/GuanceCloud/terraform-provider-guance/compare/v0.0.9...v0.1.0
