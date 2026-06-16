@@ -138,7 +138,6 @@ func TestAlertPolicyUpdateBodyPreservesPermissionZeroValues(t *testing.T) {
 		"targets": []map[string]any{{
 			"to":             []string{},
 			"status":         "critical",
-			"df_source":      "",
 			"upgradeTargets": []map[string]any{},
 			"tags":           map[string][]string{},
 			"filterString":   "",
@@ -156,27 +155,29 @@ func TestAlertPolicyUpdateBodyPreservesPermissionZeroValues(t *testing.T) {
 	require.Equal(t, false, alertOpt["aggSendFirst"])
 }
 
-func TestAlertInfoUpdateBodyPreservesEmptyDfSource(t *testing.T) {
-	got := alertInfoUpdateBody([]api.AlertInfo{{
-		Name: "member route",
-		Targets: []api.Target{{
-			To:     []string{"notify_xxx"},
-			Status: "critical",
-		}},
+func TestTargetsUpdateBodyHandlesDfSource(t *testing.T) {
+	got := targetsUpdateBody([]api.Target{{
+		To:       []string{"notify_xxx"},
+		Status:   "critical",
+		DfSource: "security",
+	}, {
+		To:     []string{"notify_yyy"},
+		Status: "error",
 	}})
 
 	require.Equal(t, []map[string]any{{
-		"name": "member route",
-		"targets": []map[string]any{{
-			"to":             []string{"notify_xxx"},
-			"status":         "critical",
-			"df_source":      "",
-			"upgradeTargets": []map[string]any{},
-			"tags":           map[string][]string{},
-			"filterString":   "",
-		}},
-		"filterString": "",
-		"memberInfo":   []string{},
+		"to":             []string{"notify_xxx"},
+		"status":         "critical",
+		"df_source":      "security",
+		"upgradeTargets": []map[string]any{},
+		"tags":           map[string][]string{},
+		"filterString":   "",
+	}, {
+		"to":             []string{"notify_yyy"},
+		"status":         "error",
+		"upgradeTargets": []map[string]any{},
+		"tags":           map[string][]string{},
+		"filterString":   "",
 	}}, got)
 }
 

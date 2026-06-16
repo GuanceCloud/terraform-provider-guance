@@ -21,8 +21,8 @@
 ### BUGFIXES
 * [guance_alert_policy] Preserve `false`, `0`, empty string, empty-list, and nil-clearing updates.
 * [guance_alert_policy] Allow checker and security rule bindings to be cleared without drift.
-* [guance_alert_policy] Allow alert target schedules, `df_source`, and duration fields to be cleared.
-* [guance_alert_policy] Send empty `df_source` values in update requests so security targets can be cleared.
+* [guance_alert_policy] Allow alert target schedules and duration fields to be cleared.
+* [guance_alert_policy] Avoid sending empty `df_source` values because the current OpenAPI rejects empty security source updates.
 * [guance_alert_policy] Detect remote zero-value changes for alert options during refresh.
 * [guance_alert_policy] Preserve configured nested empty values during refresh to avoid follow-up diffs.
 * [guance_alert_policy] Page through all alert policy list results for name and notification object lookups.
@@ -41,6 +41,7 @@
 
 ### NOTES
 * [guance_monitor] Clearing `secret` with `secret = ""` depends on a pending Forethought OpenAPI fix.
+* [guance_alert_policy] Clearing a security target `df_source` depends on a pending Forethought OpenAPI contract clarification.
 * [guance_mute] The OpenAPI currently requires non-empty `startTime` and `endTime` values for mute requests.
 
 **Full Changelog**: https://github.com/GuanceCloud/terraform-provider-guance/compare/v0.0.9...v0.1.0
