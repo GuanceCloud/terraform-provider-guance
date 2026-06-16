@@ -22,6 +22,7 @@
 * [guance_alert_policy] Preserve `false`, `0`, empty string, empty-list, and nil-clearing updates.
 * [guance_alert_policy] Allow checker and security rule bindings to be cleared without drift.
 * [guance_alert_policy] Allow alert target schedules, `df_source`, and duration fields to be cleared.
+* [guance_alert_policy] Send empty `df_source` values in update requests so security targets can be cleared.
 * [guance_alert_policy] Detect remote zero-value changes for alert options during refresh.
 * [guance_alert_policy] Preserve configured nested empty values during refresh to avoid follow-up diffs.
 * [guance_alert_policy] Page through all alert policy list results for name and notification object lookups.

@@ -539,12 +539,10 @@ func targetsUpdateBody(items []api.Target) []map[string]any {
 		body := map[string]any{
 			"to":             emptyStringSliceIfNil(item.To),
 			"status":         item.Status,
+			"df_source":      item.DfSource,
 			"upgradeTargets": upgradeTargetsUpdateBody(item.UpgradeTargets),
 			"tags":           emptyStringListMapIfNil(item.Tags),
 			"filterString":   item.FilterString,
-		}
-		if item.DfSource != "" {
-			body["df_source"] = item.DfSource
 		}
 		result = append(result, body)
 	}
