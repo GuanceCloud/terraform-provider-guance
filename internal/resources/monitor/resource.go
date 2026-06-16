@@ -139,15 +139,11 @@ func (r *monitorResource) Read(ctx context.Context, req resource.ReadRequest, re
 	if content.AlertPolicyUUIDs != nil {
 		state.AlertPolicyUUIDs = stringsFromContent(content.AlertPolicyUUIDs)
 	}
-	if content.DashboardUUID != "" {
-		state.DashboardUUID = types.StringValue(content.DashboardUUID)
-	}
+	state.DashboardUUID = optionalStringFromContent(content.DashboardUUID)
 	if content.Tags != nil {
 		state.Tags = stringsFromContent(content.Tags)
 	}
-	if content.Secret != "" {
-		state.Secret = types.StringValue(content.Secret)
-	}
+	state.Secret = optionalStringFromContent(content.Secret)
 	if content.PermissionSet != nil {
 		state.PermissionSet = stringsFromContent(content.PermissionSet)
 	}
@@ -371,6 +367,13 @@ func emptyStringSliceIfNil(values []string) []string {
 		return []string{}
 	}
 	return values
+}
+
+func optionalStringFromContent(value string) types.String {
+	if value == "" {
+		return types.StringNull()
+	}
+	return types.StringValue(value)
 }
 
 func stringsFromContent(values []string) []types.String {

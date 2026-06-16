@@ -42,3 +42,8 @@ func TestGetMonitorFromPlanRejectsInvalidExtendJSON(t *testing.T) {
 	require.Nil(t, got)
 	require.Error(t, err)
 }
+
+func TestOptionalStringFromContentClearsEmptyRemoteValues(t *testing.T) {
+	require.True(t, optionalStringFromContent("").IsNull())
+	require.Equal(t, "dashboard_xxx", optionalStringFromContent("dashboard_xxx").ValueString())
+}
