@@ -141,9 +141,11 @@ func (c *Client) ListMutesWithOptions(options MuteListOptions, content *MuteList
 	return c.get("/monitor/mute/list?"+query.Encode(), content)
 }
 
+const muteLookupPageSize = 100
+
 func (c *Client) GetMute(uuid string, content *MuteContent) error {
-	for pageIndex := 1; pageIndex <= 20; pageIndex++ {
-		path := fmt.Sprintf("/monitor/mute/list?pageIndex=%d&pageSize=100", pageIndex)
+	for pageIndex := 1; ; pageIndex++ {
+		path := fmt.Sprintf("/monitor/mute/list?pageIndex=%d&pageSize=%d", pageIndex, muteLookupPageSize)
 
 		var list MuteListContent
 		if err := c.get(path, &list); err != nil {
@@ -163,7 +165,7 @@ func (c *Client) GetMute(uuid string, content *MuteContent) error {
 				return nil
 			}
 		}
-		if len(list.Data) < 100 {
+		if len(list.Data) < muteLookupPageSize {
 			break
 		}
 	}
