@@ -64,14 +64,31 @@ type MonitorListOptions struct {
 	CheckerUUID     string
 }
 
+const monitorListPageSize = 100
+
 func (c *Client) ListMonitors(search string, content *MonitorListContent) error {
 	return c.ListMonitorsWithOptions(MonitorListOptions{Search: search}, content)
 }
 
 func (c *Client) ListMonitorsWithOptions(options MonitorListOptions, content *MonitorListContent) error {
+	content.Data = nil
+	for pageIndex := 1; ; pageIndex++ {
+		query := monitorListQuery(options, pageIndex)
+		var page MonitorListContent
+		if err := c.get("/checker/list?"+query.Encode(), &page); err != nil {
+			return err
+		}
+		content.Data = append(content.Data, page.Data...)
+		if len(page.Data) < monitorListPageSize {
+			return nil
+		}
+	}
+}
+
+func monitorListQuery(options MonitorListOptions, pageIndex int) url.Values {
 	query := url.Values{}
-	query.Set("pageIndex", "1")
-	query.Set("pageSize", "100")
+	query.Set("pageIndex", fmt.Sprintf("%d", pageIndex))
+	query.Set("pageSize", fmt.Sprintf("%d", monitorListPageSize))
 	if options.Search != "" {
 		query.Set("search", options.Search)
 	}
@@ -93,7 +110,7 @@ func (c *Client) ListMonitorsWithOptions(options MonitorListOptions, content *Mo
 	if options.CheckerUUID != "" {
 		query.Set("checkerUUID", options.CheckerUUID)
 	}
-	return c.get("/checker/list?"+query.Encode(), content)
+	return query
 }
 
 func (c *Client) DeleteMonitor(key string) error {

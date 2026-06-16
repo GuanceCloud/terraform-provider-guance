@@ -21,6 +21,7 @@
 * [guance_notify_object] Preserve empty permission updates.
 * [guance_mute] Page through all mute list results when reading by UUID instead of stopping after 20 pages.
 * [guance_mute] Stabilize update and read behavior for clearable fields, repeated mute windows, declarations, tags, filters, notification targets, and notification messages.
+* [guance_monitors] Page through all monitor list results instead of returning only the first 100 matches.
 * [guance_monitor] Validate `extend` JSON during create and update instead of silently omitting invalid payloads.
 * [guance_monitor] Stabilize read/update behavior for permissions, tags, alert policy bindings, and backend-expanded `extend` payloads.
 
