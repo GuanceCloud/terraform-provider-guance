@@ -20,6 +20,7 @@
 * [guance_alert_policy] Fix drift for alert target schedules, `df_source`, upgrade target durations, and nested alert option durations.
 * [guance_notify_object] Preserve empty permission updates.
 * [guance_mute] Stabilize update and read behavior for clearable fields, repeated mute windows, declarations, tags, filters, notification targets, and notification messages.
+* [guance_monitor] Validate `extend` JSON during create and update instead of silently omitting invalid payloads.
 * [guance_monitor] Stabilize read/update behavior for permissions, tags, alert policy bindings, and backend-expanded `extend` payloads.
 
 ### NOTES
