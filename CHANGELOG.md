@@ -24,6 +24,7 @@
 * [guance_alert_policy] Allow alert target schedules, `df_source`, and duration fields to be cleared.
 * [guance_alert_policy] Detect remote zero-value changes for alert options during refresh.
 * [guance_alert_policy] Preserve configured nested empty values during refresh to avoid follow-up diffs.
+* [guance_alert_policy] Page through all alert policy list results for name and notification object lookups.
 * [guance_monitor] Validate `extend` JSON during create and update instead of silently omitting invalid payloads.
 * [guance_monitor] Stabilize permissions, tags, alert policy bindings, and backend-expanded `extend` payloads.
 * [guance_monitors] Page through all monitor list results.

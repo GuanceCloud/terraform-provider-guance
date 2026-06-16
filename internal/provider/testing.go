@@ -14,7 +14,7 @@ const (
 	// such as updating the Makefile and running the testing through that tool.
 	Config = `
 terraform {
-	required_version = ">=0.12"
+	required_version = ">= 1.0"
 
 	required_providers {
 		guance = {

@@ -45,6 +45,8 @@ type AlertPolicyListOptions struct {
 	NotifyObjectUUIDs []string
 }
 
+const alertPolicyListPageSize = 100
+
 // AlertOpt represents the alertOpt structure
 type AlertOpt struct {
 	AggType                     string                  `json:"aggType,omitempty"`
@@ -167,9 +169,24 @@ func (c *Client) ListAlertPolicies(search string, content *AlertPolicyListConten
 }
 
 func (c *Client) ListAlertPoliciesWithOptions(options AlertPolicyListOptions, content *AlertPolicyListContent) error {
+	content.Data = nil
+	for pageIndex := 1; ; pageIndex++ {
+		query := alertPolicyListQuery(options, pageIndex)
+		var page AlertPolicyListContent
+		if err := c.get("/alert_policy/list?"+query.Encode(), &page); err != nil {
+			return err
+		}
+		content.Data = append(content.Data, page.Data...)
+		if len(page.Data) < alertPolicyListPageSize {
+			return nil
+		}
+	}
+}
+
+func alertPolicyListQuery(options AlertPolicyListOptions, pageIndex int) url.Values {
 	query := url.Values{}
-	query.Set("pageIndex", "1")
-	query.Set("pageSize", "100")
+	query.Set("pageIndex", fmt.Sprintf("%d", pageIndex))
+	query.Set("pageSize", fmt.Sprintf("%d", alertPolicyListPageSize))
 	if options.Search != "" {
 		query.Set("search", options.Search)
 	}
@@ -177,7 +194,7 @@ func (c *Client) ListAlertPoliciesWithOptions(options AlertPolicyListOptions, co
 	if len(notifyObjectUUIDs) > 0 {
 		query.Set("notifyObjectUUIDs", strings.Join(notifyObjectUUIDs, ","))
 	}
-	return c.get("/alert_policy/list?"+query.Encode(), content)
+	return query
 }
 
 func compactStrings(values []string) []string {

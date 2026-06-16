@@ -13,13 +13,12 @@ description: |-
   Usage
   ```terraform
   We strongly recommend using the required_providers block to set the
-  Guance Cloud Provider source and version being used
+  Guance Cloud Provider source being used
   terraform {
-    required_version = ">=0.12"
+    required_version = ">= 1.0"
   required_providers {
       guance = {
         source = "GuanceCloud/guance"
-        version = "=0.0.9"
       }
     }
   }
@@ -77,14 +76,13 @@ Terraform supports a number of different methods for authenticating to Guance Cl
 
 ```terraform
 # We strongly recommend using the required_providers block to set the
-# Guance Cloud Provider source and version being used
+# Guance Cloud Provider source being used
 terraform {
-  required_version = ">=0.12"
+  required_version = ">= 1.0"
 
   required_providers {
     guance = {
       source = "GuanceCloud/guance"
-      version = "=0.0.9"
     }
   }
 }
