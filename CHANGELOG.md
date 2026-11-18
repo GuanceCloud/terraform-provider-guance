@@ -1,3 +1,10 @@
+## Unreleased
+
+### BUGFIXES
+* [guance_pipeline] Keep `extend.logging_index = ""` in state when the API returns `"loggingIndex": ""`, and clear `extend` from state when the remote extend no longer has any managed key, so that these changes show up in the plan.
+* [guance_pipeline] Keep `extend` keys that the provider does not manage (for example keys written by the console) on update: the live `extend` is read first and merged, because the modify API replaces the whole object.
+* [guance_pipeline] Send `"loggingIndex": ""` when `logging_index` is set to an empty string, and stop sending `"appID": null` and `"measurement": null` when those attributes are not set.
+
 ## 0.1.0 (June 16, 2026)
 
 ### FEATURES
