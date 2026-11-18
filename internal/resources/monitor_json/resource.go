@@ -22,6 +22,7 @@ var (
 	_ resource.Resource                = &monitorJsonResource{}
 	_ resource.ResourceWithConfigure   = &monitorJsonResource{}
 	_ resource.ResourceWithImportState = &monitorJsonResource{}
+	_ resource.ResourceWithModifyPlan  = &monitorJsonResource{}
 )
 
 func NewMonitorJsonResource() resource.Resource {
@@ -147,7 +148,9 @@ func (r *monitorJsonResource) Read(ctx context.Context, req resource.ReadRequest
 
 	checkerJson, err := r.exportMonitorJson(ctx, state.UUID.ValueString())
 	if err == nil {
-		if checkerJson != state.CheckerJsonExport.ValueString() {
+		// The export returns set-like lists (tags, alert policies) in a varying
+		// order; keep the stored value unless the monitor really changed.
+		if !checkerJsonEqual(checkerJson, state.CheckerJsonExport.ValueString()) {
 			// Set the exported checker json
 			state.CheckerJsonExport = types.StringValue(checkerJson)
 			state.CheckerJson = types.StringValue(checkerJson)
