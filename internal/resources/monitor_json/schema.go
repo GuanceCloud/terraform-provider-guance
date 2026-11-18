@@ -23,6 +23,9 @@ var resourceSchema = schema.Schema{
 		"checker_json": schema.StringAttribute{
 			Description: "The checker json configuration for import.",
 			Optional:    true,
+			PlanModifiers: []planmodifier.String{
+				checkerJsonOrderInsensitive(),
+			},
 		},
 		"checker_json_export": schema.StringAttribute{
 			Description: "The exported checker json configuration of resource.",
