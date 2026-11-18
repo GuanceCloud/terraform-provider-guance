@@ -4,6 +4,8 @@
 * [guance_pipeline] Keep `extend.logging_index = ""` in state when the API returns `"loggingIndex": ""`, and clear `extend` from state when the remote extend no longer has any managed key, so that these changes show up in the plan.
 * [guance_pipeline] Keep `extend` keys that the provider does not manage (for example keys written by the console) on update: the live `extend` is read first and merged, because the modify API replaces the whole object.
 * [guance_pipeline] Send `"loggingIndex": ""` when `logging_index` is set to an empty string, and stop sending `"appID": null` and `"measurement": null` when those attributes are not set.
+* [guance_pipeline] On update, send the live `loggingIndex` back when neither the prior state nor the plan has `logging_index`, so that an update to other attributes does not remove a remote `"loggingIndex": ""` that the plan never showed.
+* [guance_pipeline] Keep `extend.app_id = []` and `extend.measurement = []` as empty lists in state when the API leaves those keys out, so that configured empty lists do not produce a diff on every plan.
 * [guance_monitor_json] Ignore the order of tags (`tagInfo`) and alert policies (`alertPolicyNames`) in `checker_json` to prevent spurious updates. Other arrays still compare in order.
 
 ### NOTES
