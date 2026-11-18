@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"sync"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -100,23 +101,46 @@ func TestMergeExtendKeepsUnmanagedKeys(t *testing.T) {
 		},
 	}
 
-	got := mergeExtend(live, &api.PipelineExtend{LoggingIndex: stringPtr("default")})
+	got := mergeExtend(live, &api.PipelineExtend{LoggingIndex: stringPtr("default")}, true)
 	body, err := json.Marshal(got)
 
 	require.NoError(t, err)
 	require.JSONEq(t, `{"ifAiCreate":true,"loggingIndex":"default"}`, string(body))
 
-	got = mergeExtend(live, nil)
+	got = mergeExtend(live, nil, false)
 	body, err = json.Marshal(got)
 
 	require.NoError(t, err)
 	require.JSONEq(t, `{"ifAiCreate":true}`, string(body))
 }
 
+func TestMergeExtendKeepsLiveLoggingIndexOnlyWhenAsked(t *testing.T) {
+	live := &api.PipelineExtend{LoggingIndex: stringPtr("")}
+
+	body, err := json.Marshal(mergeExtend(live, &api.PipelineExtend{}, true))
+	require.NoError(t, err)
+	require.JSONEq(t, `{"loggingIndex":""}`, string(body))
+
+	body, err = json.Marshal(mergeExtend(live, &api.PipelineExtend{}, false))
+	require.NoError(t, err)
+	require.JSONEq(t, `{}`, string(body))
+
+	// a planned loggingIndex always wins
+	body, err = json.Marshal(mergeExtend(live, &api.PipelineExtend{LoggingIndex: stringPtr("default")}, true))
+	require.NoError(t, err)
+	require.JSONEq(t, `{"loggingIndex":"default"}`, string(body))
+}
+
 func TestGetPipelineForUpdateKeepsLiveExtendKeys(t *testing.T) {
+	var (
+		mu          sync.Mutex
+		gotRequests []string
+	)
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		require.Equal(t, http.MethodGet, r.Method)
-		require.Equal(t, "/api/v1/pipeline/pl_xxx/get", r.URL.Path)
+		// record only; the handler runs outside the test goroutine
+		mu.Lock()
+		gotRequests = append(gotRequests, r.Method+" "+r.URL.Path)
+		mu.Unlock()
 
 		_ = json.NewEncoder(w).Encode(map[string]any{
 			"code":    200,
@@ -145,8 +169,12 @@ func TestGetPipelineForUpdateKeepsLiveExtendKeys(t *testing.T) {
 		Extend:  &pipelineExtend{LoggingIndex: types.StringValue("")},
 	}
 
-	item, err := r.getPipelineForUpdate(plan)
+	item, err := r.getPipelineForUpdate(plan, &pipelineResourceModel{Extend: plan.Extend})
 	require.NoError(t, err)
+
+	mu.Lock()
+	require.Equal(t, []string{"GET /api/v1/pipeline/pl_xxx/get"}, gotRequests)
+	mu.Unlock()
 
 	body, err := json.Marshal(item)
 	require.NoError(t, err)
@@ -170,7 +198,7 @@ func TestGetPipelineForUpdateFailsWhenLiveReadFails(t *testing.T) {
 		HTTPClient: server.Client(),
 	}}
 
-	item, err := r.getPipelineForUpdate(&pipelineResourceModel{UUID: types.StringValue("pl_xxx")})
+	item, err := r.getPipelineForUpdate(&pipelineResourceModel{UUID: types.StringValue("pl_xxx")}, nil)
 
 	require.Nil(t, item)
 	require.Error(t, err)
